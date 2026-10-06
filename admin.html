@@ -8,9 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
+        .tab-active { border-bottom: 2px solid #7A9E48; color: #7A9E48; }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-5xl mx-auto">
+<body class="p-4 md:p-8 max-w-6xl mx-auto">
     
     <!-- LOGIN SZEKCIÓ -->
     <div id="loginView" class="max-w-md mx-auto my-20 p-6 bg-[#101912] border border-[#1E2F22] space-y-4">
@@ -25,31 +26,63 @@
 
     <!-- ADMIN IRÁNYÍTÓPULT -->
     <div id="dashboardView" class="hidden space-y-6">
-        <div class="flex justify-between items-center border-b border-[#1E2F22] pb-4">
+        
+        <!-- Fejléc és fülek -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
-                <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // JELENTKEZÉSEK KEZELÉSE</h1>
-                <p class="text-xs text-[#5C735E]">Beérkezett Spórák listája és aktiválás</p>
+                <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt belső hálózati felügyelete</p>
             </div>
-            <button id="logoutBtn" class="text-xs text-red-400 hover:underline">Kilépés</button>
+            
+            <div class="flex items-center space-x-6 text-xs">
+                <button id="tabMembersBtn" class="py-1 font-bold tab-active">Tagok & Jelentkezők</button>
+                <button id="tabEvoBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Evolúciós Kódex (27 Szint)</button>
+                <button id="logoutBtn" class="text-xs text-red-400 hover:underline">Kilépés</button>
+            </div>
         </div>
 
-        <div class="overflow-x-auto border border-[#1E2F22]">
-            <table class="w-full text-left text-xs bg-[#101912]">
-                <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
-                    <tr>
-                        <th class="p-3">Azonosító</th>
-                        <th class="p-3">E-mail</th>
-                        <th class="p-3">Képességek</th>
-                        <th class="p-3">Idő</th>
-                        <th class="p-3">Státusz</th>
-                        <th class="p-3">Művelet</th>
-                    </tr>
-                </thead>
-                <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
-                    <tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Adatok betöltése...</td></tr>
-                </tbody>
-            </table>
+        <!-- 1. FÜL: TAGOK TÁBLÁZAT -->
+        <div id="membersTab" class="space-y-4">
+            <div class="overflow-x-auto border border-[#1E2F22]">
+                <table class="w-full text-left text-xs bg-[#101912]">
+                    <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
+                        <tr>
+                            <th class="p-3">Azonosító</th>
+                            <th class="p-3">E-mail</th>
+                            <th class="p-3">Szint & XP</th>
+                            <th class="p-3">Képességek</th>
+                            <th class="p-3">Státusz</th>
+                            <th class="p-3">Művelet / XP hozzáadás</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
+                        <tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Adatok betöltése...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- 2. FÜL: EVOLÚCIÓS XP TÁBLÁZAT -->
+        <div id="evoTab" class="hidden space-y-4">
+            <div class="text-xs text-[#5C735E] mb-2">A 27 szint hivatalos hierarchiája és a szintlépéshez szükséges tapasztalati pontok (XP).</div>
+            <div class="overflow-x-auto border border-[#1E2F22]">
+                <table class="w-full text-left text-xs bg-[#101912]">
+                    <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
+                        <tr>
+                            <th class="p-3">Kód</th>
+                            <th class="p-3">Megnevezés</th>
+                            <th class="p-3">Fázis / Kategória</th>
+                            <th class="p-3">Szükséges XP</th>
+                            <th class="p-3">Szerepkör leírása</th>
+                        </tr>
+                    </thead>
+                    <tbody id="evoTableBody" class="divide-y divide-[#1E2F22]">
+                        <!-- JS tölti be -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
@@ -71,6 +104,87 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // 27 Szint Adatbázisa
+        const EVOLUTION_RANKS = [
+            { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
+            { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
+            { code: "03", name: "Sejtkezdemény", cat: "Kezdeti állapot", xp: 50, desc: "2-3 teljesített feladat" },
+            { code: "04", name: "Zöld sejt", cat: "Sejtszint", xp: 90, desc: "Aktív, megbízható tag" },
+            { code: "05", name: "Sejtfal", cat: "Sejtszint", xp: 140, desc: "Védelmi / felügyeleti szerepkör" },
+            { code: "06", name: "Sejtmag", cat: "Sejtszint", xp: 200, desc: "Mikro-szervezés" },
+            { code: "07", name: "Sejtközösség", cat: "Sejtszint", xp: 270, desc: "Önálló kiscsoportos aktivitás" },
+            { code: "08", name: "Rügy", cat: "Növekedés", xp: 350, desc: "Kibontakozó akciók kezdeményezője" },
+            { code: "09", name: "Hajtás", cat: "Növekedés", xp: 450, desc: "Önálló akcióvégrehajtó" },
+            { code: "10", name: "Levél", cat: "Növekedés", xp: 560, desc: "Dokumentáló és kommunikáló szint" },
+            { code: "11", name: "Szár", cat: "Növekedés", xp: 680, desc: "Összekötő pont" },
+            { code: "12", name: "Inda", cat: "Növekedés", xp: 820, desc: "Új területek felderítője" },
+            { code: "13", name: "Gyökér", cat: "Gyökérzet", xp: 980, desc: "Megbízható oszlop, küldetést javasolhat" },
+            { code: "14", name: "Gyökérzet", cat: "Gyökérzet", xp: 1160, desc: "Helyi bázis megalapozása" },
+            { code: "15", name: "Fatest", cat: "Gyökérzet", xp: 1360, desc: "Logisztikai támasz" },
+            { code: "16", name: "Törzs", cat: "Gyökérzet", xp: 1580, desc: "Kiemelt háttér-erőforrás" },
+            { code: "17", name: "Ág", cat: "Gyökérzet", xp: 1820, desc: "Helyi alkörzetek felügyelete" },
+            { code: "18", name: "Lomb", cat: "Lombozat", xp: 2080, desc: "Szélesebb közösség összefogása" },
+            { code: "19", name: "Lombkorona", cat: "Lombozat", xp: 2360, desc: "Kisebb sejtek koordinálása" },
+            { code: "20", name: "Erdőszél", cat: "Lombozat", xp: 2660, desc: "Külső zónák felügyelete" },
+            { code: "21", name: "Liget", cat: "Lombozat", xp: 3000, desc: "Több akció összehangolása" },
+            { code: "22", name: "Élőhely", cat: "Ökoszisztéma", xp: 3400, desc: "Komplex zöldprojektek" },
+            { code: "23", name: "Ökoszisztéma", cat: "Ökoszisztéma", xp: 3850, desc: "Városi szintű hatás" },
+            { code: "24", name: "Biodiverzitás", cat: "Ökoszisztéma", xp: 4350, desc: "Fajmentő hálózatfelelős" },
+            { code: "25", name: "Bioszféra", cat: "Ökoszisztéma", xp: 5000, desc: "A legmagasabb elérhető rang" },
+            { code: "26", name: "???", cat: "Ismeretlen", xp: 9999, desc: "„Most már kérdezhetnél. De nem fogsz.”" },
+            { code: "27", name: "A FEJ", cat: "Funkció", xp: 99999, desc: "Nem elérhető szint. Nem jutalom. Funkció." }
+        ];
+
+        // Szint kiszámítása XP alapján
+        function calculateRank(xp) {
+            let currentRank = EVOLUTION_RANKS[0];
+            for (let r of EVOLUTION_RANKS) {
+                if (r.code === "26" || r.code === "27") continue;
+                if (xp >= r.xp) currentRank = r;
+            }
+            return currentRank;
+        }
+
+        // Fülváltás
+        const tabMembersBtn = document.getElementById('tabMembersBtn');
+        const tabEvoBtn = document.getElementById('tabEvoBtn');
+        const membersTab = document.getElementById('membersTab');
+        const evoTab = document.getElementById('evoTab');
+
+        tabMembersBtn.addEventListener('click', () => {
+            tabMembersBtn.classList.add('tab-active', 'text-[#7A9E48]');
+            tabMembersBtn.classList.remove('text-[#5C735E]');
+            tabEvoBtn.classList.remove('tab-active', 'text-[#7A9E48]');
+            tabEvoBtn.classList.add('text-[#5C735E]');
+            membersTab.classList.remove('hidden');
+            evoTab.classList.add('hidden');
+        });
+
+        tabEvoBtn.addEventListener('click', () => {
+            tabEvoBtn.classList.add('tab-active', 'text-[#7A9E48]');
+            tabEvoBtn.classList.remove('text-[#5C735E]');
+            tabMembersBtn.classList.remove('tab-active', 'text-[#7A9E48]');
+            tabMembersBtn.classList.add('text-[#5C735E]');
+            evoTab.classList.remove('hidden');
+            membersTab.classList.add('hidden');
+        });
+
+        // Evolúciós táblázat generálása
+        const evoTbody = document.getElementById('evoTableBody');
+        EVOLUTION_RANKS.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-[#0B130D]";
+            tr.innerHTML = `
+                <td class="p-3 font-mono font-bold text-[#7A9E48]">${r.code}</td>
+                <td class="p-3 font-bold text-white">${r.name}</td>
+                <td class="p-3 text-[#5C735E]">${r.cat}</td>
+                <td class="p-3 font-mono">${r.xp === 9999 ? 'Rejtett' : (r.xp === 99999 ? '-' : r.xp + ' XP')}</td>
+                <td class="p-3 text-[#D5E2D5]">${r.desc}</td>
+            `;
+            evoTbody.appendChild(tr);
+        });
+
+        // Auth figyelő
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('loginView').classList.add('hidden');
@@ -93,6 +207,7 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
+        // Tagok listázása és XP kezelés
         function loadCandidates() {
             const q = query(collection(db, "candidates"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
@@ -100,7 +215,7 @@
                 tbody.innerHTML = '';
 
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Még nincs beérkezett jelentkezés.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Még nincs regisztrált Sejttag.</td></tr>';
                     return;
                 }
 
@@ -110,23 +225,36 @@
                     tr.className = "hover:bg-[#0B130D]";
                     
                     const isPending = data.status === 'pending';
-                    const statusBadge = isPending 
-                        ? '<span class="text-amber-400 font-bold uppercase">VÁRAKOZIK</span>' 
-                        : '<span class="text-emerald-400 font-bold uppercase">JÓVÁHAGYVA</span>';
+                    const xp = data.xp || 0;
+                    const rank = calculateRank(xp);
 
                     tr.innerHTML = `
                         <td class="p-3 font-bold text-[#7A9E48]">${data.candidateId}</td>
                         <td class="p-3 font-mono">${data.email}</td>
-                        <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).join(', ')}</td>
-                        <td class="p-3 text-[11px] text-[#5C735E]">${data.timeframe || '-'}</td>
-                        <td class="p-3">${statusBadge}</td>
                         <td class="p-3">
-                            ${isPending ? `<button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}">Jóváhagyás & Levél</button>` : `<span class="text-[11px] text-[#5C735E]">Aktiválva</span>`}
+                            <span class="font-bold text-white">${rank.code}. ${rank.name}</span>
+                            <div class="text-[10px] text-[#5C735E]">${xp} XP</div>
+                        </td>
+                        <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).join(', ')}</td>
+                        <td class="p-3">
+                            ${isPending ? '<span class="text-amber-400 font-bold uppercase">VÁRAKOZIK</span>' : '<span class="text-emerald-400 font-bold uppercase">AKTÍV</span>'}
+                        </td>
+                        <td class="p-3 flex items-center space-x-2">
+                            ${isPending ? `
+                                <button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" 
+                                    data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}">
+                                    Jóváhagyás
+                                </button>
+                            ` : `
+                                <button class="add-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-2 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-add="10">+10 XP</button>
+                                <button class="add-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-2 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-add="50">+50 XP</button>
+                            `}
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
+                // Jóváhagyás gomb
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const docId = e.target.getAttribute('data-id');
@@ -139,8 +267,25 @@
                         });
 
                         const subject = encodeURIComponent(`A FEJ // BEFOGADVA [${cid}]`);
-                        const body = encodeURIComponent(`A kérelmedet elbíráltuk.\nAzonosítód: ${cid}\nJelenlegi szint: 01. Spóra\n\nEgyszer használatos belépési kulcsod a Zöld Sejthez:\n[IDE MÁSOLD BE AZ 1 ALKALMAS TELEGRAM PRIVÁT LINKET]\n\nFigyelj.\nA Fej`);
+                        const body = encodeURIComponent(`A kérelmedet elbíráltuk.\nAzonosítód: ${cid}\nJelenlegi szint: 01. Spóra\n\nEgyszer használatos belépési kulcsod a Zöld Sejthez:\n[IDE MÁSOLD BE A TELEGRAM 1 ALKALMAS PRIVÁT LINKET]\n\nFigyelj.\nA Fej`);
                         window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+                    });
+                });
+
+                // XP Hozzáadás gombok
+                document.querySelectorAll('.add-xp-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const docId = e.target.getAttribute('data-id');
+                        const currentXp = parseInt(e.target.getAttribute('data-xp')) || 0;
+                        const toAdd = parseInt(e.target.getAttribute('data-add')) || 10;
+                        const newXp = currentXp + toAdd;
+                        const newRank = calculateRank(newXp);
+
+                        await updateDoc(doc(db, "candidates", docId), {
+                            xp: newXp,
+                            levelCode: newRank.code,
+                            levelName: newRank.name
+                        });
                     });
                 });
             });
