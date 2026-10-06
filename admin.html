@@ -5,13 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A FEJ // KOORDINÁCIÓS PANEL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
         .tab-active { border-bottom: 2px solid #7A9E48; color: #7A9E48; }
+        input, select {
+            background-color: #0B130D;
+            border: 1px solid #1E2F22;
+            color: #D5E2D5;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #5A7736;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-6xl mx-auto">
+<body class="p-4 md:p-8 max-w-7xl mx-auto">
     
     <!-- LOGIN SZEKCIÓ -->
     <div id="loginView" class="max-w-md mx-auto my-20 p-6 bg-[#101912] border border-[#1E2F22] space-y-4">
@@ -31,7 +42,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
-                <p class="text-xs text-[#5C735E]">A Zöld Sejt belső hálózati felügyelete</p>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati felügyelete és XP kezelése</p>
             </div>
             
             <div class="flex items-center space-x-6 text-xs">
@@ -51,33 +62,45 @@
                             <th class="p-3">E-mail</th>
                             <th class="p-3">Szint & XP</th>
                             <th class="p-3">Képességek</th>
+                            <th class="p-3">Üzenet A Fejnek</th>
                             <th class="p-3">Státusz</th>
-                            <th class="p-3">Művelet / XP hozzáadás</th>
+                            <th class="p-3">Művelet / XP Módosítás</th>
                         </tr>
                     </thead>
                     <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
-                        <tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Adatok betöltése...</td></tr>
+                        <tr><td colspan="7" class="p-4 text-center text-[#5C735E]">Adatok betöltése...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 2. FÜL: EVOLÚCIÓS XP TÁBLÁZAT -->
+        <!-- 2. FÜL: DINAMIKUS EVOLÚCIÓS XP TÁBLÁZAT -->
         <div id="evoTab" class="hidden space-y-4">
-            <div class="text-xs text-[#5C735E] mb-2">A 27 szint hivatalos hierarchiája és a szintlépéshez szükséges tapasztalati pontok (XP).</div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix</h3>
+                    <p class="text-xs text-[#5C735E]">Itt szerkeszthetsz meglévő szinteket, növelheted az XP határokat vagy adhatsz hozzá új szinteket.</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint hozzáadása</button>
+                    <button id="saveEvoBtn" class="px-4 py-1.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">⚡ Felsugárzás (Mentés)</button>
+                </div>
+            </div>
+
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
                         <tr>
-                            <th class="p-3">Kód</th>
+                            <th class="p-3 w-16">Kód</th>
                             <th class="p-3">Megnevezés</th>
-                            <th class="p-3">Fázis / Kategória</th>
-                            <th class="p-3">Szükséges XP</th>
+                            <th class="p-3">Kategória</th>
+                            <th class="p-3 w-28">Szükséges XP</th>
                             <th class="p-3">Szerepkör leírása</th>
+                            <th class="p-3 w-12 text-center">Törlés</th>
                         </tr>
                     </thead>
                     <tbody id="evoTableBody" class="divide-y divide-[#1E2F22]">
-                        <!-- JS tölti be -->
+                        <!-- JS dinamikusan generálja a szerkeszthető sorokat -->
                     </tbody>
                 </table>
             </div>
@@ -88,7 +111,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
@@ -104,8 +127,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 27 Szint Adatbázisa
-        const EVOLUTION_RANKS = [
+        // Alapértelmezett szintek
+        const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
             { code: "03", name: "Sejtkezdemény", cat: "Kezdeti állapot", xp: 50, desc: "2-3 teljesített feladat" },
@@ -135,17 +158,19 @@
             { code: "27", name: "A FEJ", cat: "Funkció", xp: 99999, desc: "Nem elérhető szint. Nem jutalom. Funkció." }
         ];
 
-        // Szint kiszámítása XP alapján
+        let activeRanks = [...DEFAULT_RANKS];
+
         function calculateRank(xp) {
-            let currentRank = EVOLUTION_RANKS[0];
-            for (let r of EVOLUTION_RANKS) {
+            let currentRank = activeRanks[0] || DEFAULT_RANKS[0];
+            const sorted = [...activeRanks].sort((a, b) => Number(a.xp) - Number(b.xp));
+            for (let r of sorted) {
                 if (r.code === "26" || r.code === "27") continue;
-                if (xp >= r.xp) currentRank = r;
+                if (xp >= Number(r.xp)) currentRank = r;
             }
             return currentRank;
         }
 
-        // Fülváltás
+        // Fülváltások
         const tabMembersBtn = document.getElementById('tabMembersBtn');
         const tabEvoBtn = document.getElementById('tabEvoBtn');
         const membersTab = document.getElementById('membersTab');
@@ -169,26 +194,104 @@
             membersTab.classList.add('hidden');
         });
 
-        // Evolúciós táblázat generálása
-        const evoTbody = document.getElementById('evoTableBody');
-        EVOLUTION_RANKS.forEach(r => {
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-[#0B130D]";
-            tr.innerHTML = `
-                <td class="p-3 font-mono font-bold text-[#7A9E48]">${r.code}</td>
-                <td class="p-3 font-bold text-white">${r.name}</td>
-                <td class="p-3 text-[#5C735E]">${r.cat}</td>
-                <td class="p-3 font-mono">${r.xp === 9999 ? 'Rejtett' : (r.xp === 99999 ? '-' : r.xp + ' XP')}</td>
-                <td class="p-3 text-[#D5E2D5]">${r.desc}</td>
-            `;
-            evoTbody.appendChild(tr);
+        // Evolúció szinkronizálása
+        function syncEvolutionsFromFirestore() {
+            onSnapshot(doc(db, "settings", "evolution"), (snap) => {
+                if (snap.exists() && snap.data().ranks) {
+                    activeRanks = snap.data().ranks;
+                } else {
+                    activeRanks = [...DEFAULT_RANKS];
+                }
+                renderEvoTable();
+            });
+        }
+
+        function renderEvoTable() {
+            const evoTbody = document.getElementById('evoTableBody');
+            evoTbody.innerHTML = '';
+            activeRanks.forEach((r, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-[#0B130D]";
+                tr.innerHTML = `
+                    <td class="p-2 font-mono font-bold text-[#7A9E48]">
+                        <input type="text" class="w-12 text-center" value="${r.code}" data-field="code" data-idx="${idx}">
+                    </td>
+                    <td class="p-2">
+                        <input type="text" class="w-full font-bold text-white" value="${r.name}" data-field="name" data-idx="${idx}">
+                    </td>
+                    <td class="p-2">
+                        <input type="text" class="w-full text-[#5C735E]" value="${r.cat}" data-field="cat" data-idx="${idx}">
+                    </td>
+                    <td class="p-2">
+                        <input type="number" class="w-24 font-mono text-[#7A9E48]" value="${r.xp}" data-field="xp" data-idx="${idx}">
+                    </td>
+                    <td class="p-2">
+                        <input type="text" class="w-full" value="${r.desc}" data-field="desc" data-idx="${idx}">
+                    </td>
+                    <td class="p-2 text-center">
+                        <button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold px-2 py-1" data-idx="${idx}">✕</button>
+                    </td>
+                `;
+                evoTbody.appendChild(tr);
+            });
+
+            evoTbody.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const idx = e.target.getAttribute('data-idx');
+                    const field = e.target.getAttribute('data-field');
+                    activeRanks[idx][field] = field === 'xp' ? Number(e.target.value) : e.target.value;
+                });
+            });
+
+            evoTbody.querySelectorAll('.delete-rank-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = e.target.getAttribute('data-idx');
+                    activeRanks.splice(idx, 1);
+                    renderEvoTable();
+                });
+            });
+        }
+
+        document.getElementById('addLevelBtn').addEventListener('click', () => {
+            const nextNum = activeRanks.length + 1;
+            const formattedCode = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+            const lastXp = activeRanks.length > 0 ? (activeRanks[activeRanks.length - 1].xp || 0) + 500 : 0;
+            
+            activeRanks.push({
+                code: formattedCode,
+                name: `Új Állapot ${formattedCode}`,
+                cat: "Fejlődés",
+                xp: lastXp,
+                desc: "Küldetéssel elérhető szint"
+            });
+            renderEvoTable();
         });
 
-        // Auth figyelő
+        document.getElementById('saveEvoBtn').addEventListener('click', async () => {
+            const saveBtn = document.getElementById('saveEvoBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerText = "FELSUGÁRZÁS...";
+
+            try {
+                await setDoc(doc(db, "settings", "evolution"), {
+                    ranks: activeRanks,
+                    updatedAt: new Date().toISOString()
+                });
+                alert("⚡ Az evolúciós szintek elmentve és felsugározva a Firestore-ba!");
+            } catch (err) {
+                console.error("Mentési hiba:", err);
+                alert("Hiba: " + err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "⚡ Felsugárzás (Mentés)";
+            }
+        });
+
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');
+                syncEvolutionsFromFirestore();
                 loadCandidates();
             } else {
                 document.getElementById('loginView').classList.remove('hidden');
@@ -207,7 +310,6 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-        // Tagok listázása és XP kezelés
         function loadCandidates() {
             const q = query(collection(db, "candidates"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
@@ -215,7 +317,7 @@
                 tbody.innerHTML = '';
 
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Még nincs regisztrált Sejttag.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-[#5C735E]">Még nincs regisztrált Sejttag.</td></tr>';
                     return;
                 }
 
@@ -233,28 +335,30 @@
                         <td class="p-3 font-mono">${data.email}</td>
                         <td class="p-3">
                             <span class="font-bold text-white">${rank.code}. ${rank.name}</span>
-                            <div class="text-[10px] text-[#5C735E]">${xp} XP</div>
+                            <div class="text-[10px] text-[#5C735E]">${xp} XP (${rank.cat})</div>
                         </td>
                         <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).join(', ')}</td>
+                        <td class="p-3 text-[11px] text-white italic max-w-xs truncate">${data.notesToFej || '-'}</td>
                         <td class="p-3">
                             ${isPending ? '<span class="text-amber-400 font-bold uppercase">VÁRAKOZIK</span>' : '<span class="text-emerald-400 font-bold uppercase">AKTÍV</span>'}
                         </td>
-                        <td class="p-3 flex items-center space-x-2">
+                        <td class="p-3 flex items-center space-x-1">
                             ${isPending ? `
                                 <button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" 
                                     data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}">
                                     Jóváhagyás
                                 </button>
                             ` : `
-                                <button class="add-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-2 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-add="10">+10 XP</button>
-                                <button class="add-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-2 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-add="50">+50 XP</button>
+                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="10">+10</button>
+                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="50">+50</button>
+                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="-10">-10</button>
+                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="-50">-50</button>
                             `}
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                // Jóváhagyás gomb
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const docId = e.target.getAttribute('data-id');
@@ -267,18 +371,20 @@
                         });
 
                         const subject = encodeURIComponent(`A FEJ // BEFOGADVA [${cid}]`);
-                        const body = encodeURIComponent(`A kérelmedet elbíráltuk.\nAzonosítód: ${cid}\nJelenlegi szint: 01. Spóra\n\nEgyszer használatos belépési kulcsod a Zöld Sejthez:\n[IDE MÁSOLD BE A TELEGRAM 1 ALKALMAS PRIVÁT LINKET]\n\nFigyelj.\nA Fej`);
+                        const body = encodeURIComponent(`A kérelmedet elbíráltuk.\nAzonosítód: ${cid}\nJelenlegi szint: 01. Spóra\n\nEgyszer használatos belépési kulcsod a Zöld Sejthez:\n[IDE MÁSOLD BE A TELEGRAM PRIVÁT LINKET]\n\nBelső profilod elkészítése és követése:\nhttps://zoldsejt.github.io/zoldsejt/profil.html\n\nFigyelj.\nA Fej`);
                         window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
                     });
                 });
 
-                // XP Hozzáadás gombok
-                document.querySelectorAll('.add-xp-btn').forEach(btn => {
+                // XP Hozzáadás és LEVONÁS kezelő
+                document.querySelectorAll('.mod-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const docId = e.target.getAttribute('data-id');
                         const currentXp = parseInt(e.target.getAttribute('data-xp')) || 0;
-                        const toAdd = parseInt(e.target.getAttribute('data-add')) || 10;
-                        const newXp = currentXp + toAdd;
+                        const diff = parseInt(e.target.getAttribute('data-diff')) || 0;
+                        
+                        // 0 alá nem engedi csökkenteni az XP-t
+                        const newXp = Math.max(0, currentXp + diff);
                         const newRank = calculateRank(newXp);
 
                         await updateDoc(doc(db, "candidates", docId), {
