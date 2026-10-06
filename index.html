@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZÖLD SEJT // BELÉPÉSI PONT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sejt: {
+                            bg: '#090F0A',
+                            surface: '#101912',
+                            border: '#1E2F22',
+                            olive: '#5A7736',
+                            oliveLight: '#7A9E48',
+                            teal: '#1F6B6A',
+                            text: '#D5E2D5',
+                            muted: '#5C735E'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #090F0A;
+            color: #D5E2D5;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .scanlines {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+        input[type="checkbox"] {
+            accent-color: #5A7736;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8 relative selection:bg-sejt-olive selection:text-white">
+    <div class="fixed inset-0 scanlines z-50"></div>
+
+    <header class="max-w-2xl mx-auto w-full flex justify-between items-center py-4 border-b border-sejt-border text-xs tracking-widest text-sejt-muted">
+        <div class="flex items-center space-x-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-sejt-olive animate-pulse"></span>
+            <span>PROTOKOLL: ZS-001</span>
+        </div>
+        <div>KECSKEMÉT</div>
+    </header>
+
+    <main class="max-w-2xl mx-auto w-full my-auto py-10">
+        
+        <!-- 1. FÁZIS: ŰRLAP -->
+        <div id="entrySection" class="space-y-8">
+            <div class="space-y-3">
+                <div class="text-xs uppercase tracking-widest text-sejt-olive font-semibold">// HÁLÓZATI CSATLAKOZÁS</div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase">ZÖLD SEJT</h1>
+                <p class="text-sm text-sejt-muted leading-relaxed">
+                    Egy sejt vagyunk. Nem tudod, kik alkotják. Nem tudod, ki vezeti. Csak azt tudod, hogy valaki figyel — és néha tesz is valamit.
+                </p>
+            </div>
+
+            <form id="applyForm" class="space-y-6 bg-sejt-surface border border-sejt-border p-6 rounded-none">
+                
+                <div class="space-y-2">
+                    <label class="block text-xs uppercase tracking-wider text-sejt-muted">Kapcsolattartási pont (E-mail)*</label>
+                    <input type="email" id="email" required placeholder="sejt@proton.me" 
+                        class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-sm text-white focus:outline-none focus:border-sejt-olive">
+                    <p class="text-[11px] text-sejt-muted">A hálózat nem kér nevet. Az e-mail kizárólag a belépési kulcs átadására szolgál.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-xs uppercase tracking-wider text-sejt-muted">Miben tudsz hozzátenni? (Legalább egyet válassz ki)*</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                        <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
+                            <input type="checkbox" name="skill" value="5_perc"> <span>Van 5 percem</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
+                            <input type="checkbox" name="skill" value="novenyek"> <span>Növények</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
+                            <input type="checkbox" name="skill" value="szallitas"> <span>Szállítás</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
+                            <input type="checkbox" name="skill" value="barkacsolas"> <span>Barkácsolás</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
+                            <input type="checkbox" name="skill" value="foto_video"> <span>Fotó / Videó</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
+                            <input type="checkbox" name="skill" value="gepek"> <span>Gépek / Eszköz</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs uppercase tracking-wider text-sejt-muted">Rendelkezésre álló idő</label>
+                    <select id="timeframe" class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive">
+                        <option value="5_perc">Alkalmanként 5 perc (mikro-küldetések)</option>
+                        <option value="fel_ora">Fél óra</option>
+                        <option value="egesz_nap">Néha egy teljes akció</option>
+                        <option value="helyzetfuggo">Attól függ, mit kell tenni</option>
+                    </select>
+                </div>
+
+                <div class="p-3 bg-[#0B130D] border-l-2 border-sejt-olive space-y-2">
+                    <label class="flex items-start space-x-2 text-xs cursor-pointer">
+                        <input type="checkbox" id="termsCheck" required class="mt-0.5">
+                        <span class="text-sejt-text leading-tight">
+                            Elfogadom, hogy a Zöld Sejt küldetései <b>nem politikai akciók</b>, nem irányulnak mások tulajdonának károsítására vagy engedély nélküli átalakítására.
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" id="submitBtn" 
+                    class="w-full py-3 bg-sejt-olive hover:bg-sejt-oliveLight text-white text-xs uppercase tracking-widest font-semibold transition flex items-center justify-center space-x-2">
+                    <span>BELÉPÉSI KÉRELEM KÜLDÉSE</span>
+                    <span class="text-xs">→</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. FÁZIS: VÁRAKOZÁS (A FEJ DÖNT) -->
+        <div id="resultSection" class="hidden space-y-6 bg-sejt-surface border border-sejt-border p-6 md:p-8">
+            <div class="flex items-center space-x-3 text-sejt-olive text-xs font-semibold tracking-widest uppercase">
+                <span class="inline-block w-2 h-2 bg-sejt-olive rounded-full"></span>
+                <span>A FEJ // DÖNTÉS FOLYAMATBAN</span>
+            </div>
+
+            <div class="space-y-2 border-b border-sejt-border pb-4">
+                <p class="text-xs text-sejt-muted uppercase">Generált azonosító:</p>
+                <div id="generatedId" class="text-2xl font-bold tracking-wider text-sejt-oliveLight">---</div>
+                <p class="text-[11px] text-sejt-muted">Kezdeti állapot: 01. Spóra</p>
+            </div>
+
+            <div class="space-y-4 text-xs text-sejt-text leading-relaxed">
+                <p>A jelentkezésed megérkezett a koordinációs rendszerbe.</p>
+                <p class="text-sejt-muted">
+                    A Sejt nem enged be automatikusan mindenkit. Nem azért, mert fontosnak képzeljük magunkat, hanem mert minden tag felelősséggel tartozik a többiek munkájáért.
+                </p>
+                <div class="p-3 bg-[#0B130D] border border-sejt-border text-sejt-muted font-mono">
+                    ÁLLAPOT: <span class="text-amber-500 font-bold">VÁRAKOZIK A JÓVÁHAGYÁSRA</span><br>
+                    KÖVETKEZŐ LÉPÉS: Jóváhagyás után a megadott e-mailre érkezik az egyszer használatos belépési kulcs.
+                </div>
+            </div>
+
+            <div class="pt-2 text-[11px] text-sejt-muted italic">
+                „A Fej nem azért van, hogy mindent megcsináljon. Azért van, hogy megtalálja azt, aki meg tudja csinálni.”
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="max-w-2xl mx-auto w-full text-center py-4 text-[10px] text-sejt-muted tracking-widest uppercase">
+        A FEJ FIGYEL // TITKOSÍTOTT BELÉPÉSI PONT
+    </footer>
+
+    <script>
+        // Kizárólag Spóra számozással generál azonosítót
+        function generateSporaId() {
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            return `Spóra_${randomNum}`;
+        }
+
+        const form = document.getElementById('applyForm');
+        const entrySection = document.getElementById('entrySection');
+        const resultSection = document.getElementById('resultSection');
+        const generatedIdElem = document.getElementById('generatedId');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const checkedSkills = Array.from(document.querySelectorAll('input[name="skill"]:checked')).map(cb => cb.value);
+            if (checkedSkills.length === 0) {
+                alert("Válassz ki legalább egy területet, amiben segíteni tudsz!");
+                return;
+            }
+
+            const candidateId = generateSporaId();
+
+            // Adat objektum (ezt küldi majd a backendre)
+            const applicationData = {
+                candidateId: candidateId,
+                email: document.getElementById('email').value,
+                skills: checkedSkills,
+                timeframe: document.getElementById('timeframe').value,
+                status: 'pending',
+                levelCode: '01',
+                levelName: 'Spóra',
+                createdAt: new Date().toISOString()
+            };
+
+            console.log("Jelentkezés elküldve:", applicationData);
+
+            // Várakozási állapot megjelenítése
+            generatedIdElem.textContent = candidateId;
+            entrySection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
