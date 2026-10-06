@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A FEJ // KOORDINÁCIÓS PANEL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="p-4 md:p-8 max-w-5xl mx-auto">
+    
+    <!-- LOGIN SZEKCIÓ -->
+    <div id="loginView" class="max-w-md mx-auto my-20 p-6 bg-[#101912] border border-[#1E2F22] space-y-4">
+        <div class="text-xs uppercase tracking-widest text-[#7A9E48] font-bold text-center">// HÁTTÉR RENDSZER</div>
+        <h1 class="text-lg font-bold text-white uppercase tracking-wider text-center">A FEJ // AZONOSÍTÁS</h1>
+        <form id="loginForm" class="space-y-3">
+            <input type="email" id="adminEmail" placeholder="admin e-mail cím" required class="w-full bg-[#0B130D] border border-[#1E2F22] p-2 text-sm text-white focus:outline-none focus:border-[#5A7736]">
+            <input type="password" id="adminPass" placeholder="Jelszó" required class="w-full bg-[#0B130D] border border-[#1E2F22] p-2 text-sm text-white focus:outline-none focus:border-[#5A7736]">
+            <button type="submit" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">Belépés</button>
+        </form>
+    </div>
+
+    <!-- ADMIN IRÁNYÍTÓPULT -->
+    <div id="dashboardView" class="hidden space-y-6">
+        <div class="flex justify-between items-center border-b border-[#1E2F22] pb-4">
+            <div>
+                <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // JELENTKEZÉSEK KEZELÉSE</h1>
+                <p class="text-xs text-[#5C735E]">Beérkezett Spórák listája és aktiválás</p>
+            </div>
+            <button id="logoutBtn" class="text-xs text-red-400 hover:underline">Kilépés</button>
+        </div>
+
+        <div class="overflow-x-auto border border-[#1E2F22]">
+            <table class="w-full text-left text-xs bg-[#101912]">
+                <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
+                    <tr>
+                        <th class="p-3">Azonosító</th>
+                        <th class="p-3">E-mail</th>
+                        <th class="p-3">Képességek</th>
+                        <th class="p-3">Idő</th>
+                        <th class="p-3">Státusz</th>
+                        <th class="p-3">Művelet</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
+                    <tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Adatok betöltése...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
+            authDomain: "zoldsejt-af8a9.firebaseapp.com",
+            projectId: "zoldsejt-af8a9",
+            storageBucket: "zoldsejt-af8a9.firebasestorage.app",
+            messagingSenderId: "1015412060114",
+            appId: "1:1015412060114:web:46e077274ae4ce607b220b",
+            measurementId: "G-1QBRT003J7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('dashboardView').classList.remove('hidden');
+                loadCandidates();
+            } else {
+                document.getElementById('loginView').classList.remove('hidden');
+                document.getElementById('dashboardView').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPass').value);
+            } catch (err) {
+                alert("Sikertelen belépés: " + err.message);
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+        function loadCandidates() {
+            const q = query(collection(db, "candidates"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const tbody = document.getElementById('candidatesTable');
+                tbody.innerHTML = '';
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Még nincs beérkezett jelentkezés.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-[#0B130D]";
+                    
+                    const isPending = data.status === 'pending';
+                    const statusBadge = isPending 
+                        ? '<span class="text-amber-400 font-bold uppercase">VÁRAKOZIK</span>' 
+                        : '<span class="text-emerald-400 font-bold uppercase">JÓVÁHAGYVA</span>';
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-[#7A9E48]">${data.candidateId}</td>
+                        <td class="p-3 font-mono">${data.email}</td>
+                        <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).join(', ')}</td>
+                        <td class="p-3 text-[11px] text-[#5C735E]">${data.timeframe || '-'}</td>
+                        <td class="p-3">${statusBadge}</td>
+                        <td class="p-3">
+                            ${isPending ? `<button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}">Jóváhagyás & Levél</button>` : `<span class="text-[11px] text-[#5C735E]">Aktiválva</span>`}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.querySelectorAll('.approve-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const docId = e.target.getAttribute('data-id');
+                        const email = e.target.getAttribute('data-email');
+                        const cid = e.target.getAttribute('data-cid');
+                        
+                        await updateDoc(doc(db, "candidates", docId), {
+                            status: 'approved',
+                            approvedAt: new Date().toISOString()
+                        });
+
+                        const subject = encodeURIComponent(`A FEJ // BEFOGADVA [${cid}]`);
+                        const body = encodeURIComponent(`A kérelmedet elbíráltuk.\nAzonosítód: ${cid}\nJelenlegi szint: 01. Spóra\n\nEgyszer használatos belépési kulcsod a Zöld Sejthez:\n[IDE MÁSOLD BE AZ 1 ALKALMAS TELEGRAM PRIVÁT LINKET]\n\nFigyelj.\nA Fej`);
+                        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+                    });
+                });
+            });
+        }
+    </script>
+</body>
+</html>
