@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZÖLD SEJT // BELÉPÉSI PONT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
             theme: {
@@ -25,27 +22,19 @@
                             muted: '#5C735E'
                         }
                     },
-                    fontFamily: {
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    }
+                    fontFamily: { mono: ['"JetBrains Mono"', 'monospace'] }
                 }
             }
         }
     </script>
     <style>
-        body {
-            background-color: #090F0A;
-            color: #D5E2D5;
-            font-family: 'JetBrains Mono', monospace;
-        }
+        body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
         .scanlines {
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
         }
-        input[type="checkbox"] {
-            accent-color: #5A7736;
-        }
+        input[type="checkbox"] { accent-color: #5A7736; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-8 relative selection:bg-sejt-olive selection:text-white">
@@ -60,8 +49,6 @@
     </header>
 
     <main class="max-w-2xl mx-auto w-full my-auto py-10">
-        
-        <!-- 1. FÁZIS: ŰRLAP -->
         <div id="entrySection" class="space-y-8">
             <div class="space-y-3">
                 <div class="text-xs uppercase tracking-widest text-sejt-olive font-semibold">// HÁLÓZATI CSATLAKOZÁS</div>
@@ -71,8 +58,7 @@
                 </p>
             </div>
 
-            <form id="applyForm" class="space-y-6 bg-sejt-surface border border-sejt-border p-6 rounded-none">
-                
+            <form id="applyForm" class="space-y-6 bg-sejt-surface border border-sejt-border p-6">
                 <div class="space-y-2">
                     <label class="block text-xs uppercase tracking-wider text-sejt-muted">Kapcsolattartási pont (E-mail)*</label>
                     <input type="email" id="email" required placeholder="sejt@proton.me" 
@@ -81,7 +67,7 @@
                 </div>
 
                 <div class="space-y-3">
-                    <label class="block text-xs uppercase tracking-wider text-sejt-muted">Miben tudsz hozzátenni? (Legalább egyet válassz ki)*</label>
+                    <label class="block text-xs uppercase tracking-wider text-sejt-muted">Miben tudsz hozzátenni? (Legalább egyet válassz)*</label>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
                             <input type="checkbox" name="skill" value="5_perc"> <span>Van 5 percem</span>
@@ -124,14 +110,12 @@
                 </div>
 
                 <button type="submit" id="submitBtn" 
-                    class="w-full py-3 bg-sejt-olive hover:bg-sejt-oliveLight text-white text-xs uppercase tracking-widest font-semibold transition flex items-center justify-center space-x-2">
-                    <span>BELÉPÉSI KÉRELEM KÜLDÉSE</span>
-                    <span class="text-xs">→</span>
+                    class="w-full py-3 bg-sejt-olive hover:bg-sejt-oliveLight text-white text-xs uppercase tracking-widest font-semibold transition">
+                    BELÉPÉSI KÉRELEM KÜLDÉSE →
                 </button>
             </form>
         </div>
 
-        <!-- 2. FÁZIS: VÁRAKOZÁS (A FEJ DÖNT) -->
         <div id="resultSection" class="hidden space-y-6 bg-sejt-surface border border-sejt-border p-6 md:p-8">
             <div class="flex items-center space-x-3 text-sejt-olive text-xs font-semibold tracking-widest uppercase">
                 <span class="inline-block w-2 h-2 bg-sejt-olive rounded-full"></span>
@@ -154,59 +138,74 @@
                     KÖVETKEZŐ LÉPÉS: Jóváhagyás után a megadott e-mailre érkezik az egyszer használatos belépési kulcs.
                 </div>
             </div>
-
-            <div class="pt-2 text-[11px] text-sejt-muted italic">
-                „A Fej nem azért van, hogy mindent megcsináljon. Azért van, hogy megtalálja azt, aki meg tudja csinálni.”
-            </div>
         </div>
-
     </main>
 
     <footer class="max-w-2xl mx-auto w-full text-center py-4 text-[10px] text-sejt-muted tracking-widest uppercase">
         A FEJ FIGYEL // TITKOSÍTOTT BELÉPÉSI PONT
     </footer>
 
-    <script>
-        // Kizárólag Spóra számozással generál azonosítót
+    <!-- Firebase SDK v10 (ES Module) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
+  authDomain: "zoldsejt-af8a9.firebaseapp.com",
+  projectId: "zoldsejt-af8a9",
+  storageBucket: "zoldsejt-af8a9.firebasestorage.app",
+  messagingSenderId: "1015412060114",
+  appId: "1:1015412060114:web:46e077274ae4ce607b220b",
+  measurementId: "G-1QBRT003J7"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         function generateSporaId() {
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            return `Spóra_${randomNum}`;
+            return `Spóra_${Math.floor(1000 + Math.random() * 9000)}`;
         }
 
         const form = document.getElementById('applyForm');
-        const entrySection = document.getElementById('entrySection');
-        const resultSection = document.getElementById('resultSection');
-        const generatedIdElem = document.getElementById('generatedId');
+        const submitBtn = document.getElementById('submitBtn');
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const checkedSkills = Array.from(document.querySelectorAll('input[name="skill"]:checked')).map(cb => cb.value);
             if (checkedSkills.length === 0) {
-                alert("Válassz ki legalább egy területet, amiben segíteni tudsz!");
+                alert("Válassz ki legalább egy területet!");
                 return;
             }
 
-            const candidateId = generateSporaId();
+            submitBtn.disabled = true;
+            submitBtn.innerText = "RÖGZÍTÉS FOLYAMATBAN...";
 
-            // Adat objektum (ezt küldi majd a backendre)
-            const applicationData = {
+            const candidateId = generateSporaId();
+            const payload = {
                 candidateId: candidateId,
-                email: document.getElementById('email').value,
+                email: document.getElementById('email').value.trim(),
                 skills: checkedSkills,
                 timeframe: document.getElementById('timeframe').value,
                 status: 'pending',
                 levelCode: '01',
                 levelName: 'Spóra',
+                xp: 0,
                 createdAt: new Date().toISOString()
             };
 
-            console.log("Jelentkezés elküldve:", applicationData);
-
-            // Várakozási állapot megjelenítése
-            generatedIdElem.textContent = candidateId;
-            entrySection.classList.add('hidden');
-            resultSection.classList.remove('hidden');
+            try {
+                await addDoc(collection(db, "candidates"), payload);
+                document.getElementById('generatedId').textContent = candidateId;
+                document.getElementById('entrySection').classList.add('hidden');
+                document.getElementById('resultSection').classList.remove('hidden');
+            } catch (err) {
+                console.error("Firebase hiba:", err);
+                alert("Hiba történt a csatlakozási kérelem küldésekor. Próbáld újra.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "BELÉPÉSI KÉRELEM KÜLDÉSE →";
+            }
         });
     </script>
 </body>
