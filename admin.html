@@ -65,7 +65,7 @@
             
             <!-- Függőben lévő XP kérelmek -->
             <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
-                <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3 >
+                <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
                 <div id="claimsList" class="space-y-2"></div>
             </div>
 
@@ -173,12 +173,12 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: EVOLÚCIÓS XP TÁBLÁZAT -->
+        <!-- 4. FÜL: EVOLÚCIÓS XP TÁBLÁZAT (Létszám kijelzéssel) -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
-                    <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix</h3>
-                    <p class="text-xs text-[#5C735E]">Húzd a <b>☰</b> jelet az átrendezéshez.</p>
+                    <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix & Hálózati Létszám</h3>
+                    <p class="text-xs text-[#5C735E]">Láthatod, hogy az aktív Sejttagok közül hányan tartanak az egyes szinteken.</p>
                 </div>
                 <div class="flex space-x-2">
                     <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint</button>
@@ -195,10 +195,11 @@
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
                         <tr>
                             <th class="p-3 w-8 text-center">☰</th>
-                            <th class="p-3 w-16">Kód</th>
+                            <th class="p-3 w-14 text-center">Kód</th>
                             <th class="p-3">Megnevezés</th>
                             <th class="p-3">Kategória</th>
-                            <th class="p-3 w-28">Szükséges XP</th>
+                            <th class="p-3 w-24">Szükséges XP</th>
+                            <th class="p-3 w-20 text-center text-[#7A9E48]">Létszám</th>
                             <th class="p-3">Leírás</th>
                             <th class="p-3 w-12 text-center">Törlés</th>
                         </tr>
@@ -208,7 +209,7 @@
             </div>
         </div>
 
-        <!-- 5. FÜL: BEÁLLÍTÁSOK (Telegram & Brevo E-mail API) -->
+        <!-- 5. FÜL: BEÁLLÍTÁSOK -->
         <div id="settingsTab" class="hidden space-y-6">
             <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-5">
                 <div>
@@ -216,7 +217,6 @@
                     <p class="text-xs text-[#5C735E] mt-1">Az API kulcsok a védett Firestore adatbázisodban és a böngésződben tárolódnak.</p>
                 </div>
 
-                <!-- Telegram -->
                 <div class="space-y-2 border-b border-[#1E2F22] pb-4">
                     <div class="text-xs font-bold text-white uppercase">1. Telegram Bot</div>
                     <div>
@@ -229,9 +229,8 @@
                     </div>
                 </div>
 
-                <!-- Brevo E-mail -->
                 <div class="space-y-2">
-                    <div class="text-xs font-bold text-white uppercase">2. Brevo E-mail API (Automata levélküldéshez)</div>
+                    <div class="text-xs font-bold text-white uppercase">2. Brevo E-mail API</div>
                     <div>
                         <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Brevo API Key (xkeysib-...)</label>
                         <input type="password" id="cfgBrevoKey" placeholder="xkeysib-..." class="w-full font-mono">
@@ -275,6 +274,8 @@
         let BREVO_API_KEY = localStorage.getItem("BREVO_API_KEY") || "";
         let BREVO_SENDER = localStorage.getItem("BREVO_SENDER") || "zoldsejt@gmail.com";
 
+        let candidatesCache = [];
+
         async function loadIntegrationSettings() {
             try {
                 const snap = await getDoc(doc(db, "settings", "integrations"));
@@ -315,10 +316,9 @@
             alert("✓ Integrációs beállítások sikeresen elmentve!");
         });
 
-        // Brevo Automata E-mail Küldő API
         async function sendApprovalEmailViaBrevo(toEmail, toName, candidateId, inviteLink) {
             if (!BREVO_API_KEY) {
-                alert("Nincs beállítva Brevo API kulcs a Beállítások fülön! Kérjük állítsd be a háttérbeli küldéshez.");
+                alert("Nincs beállítva Brevo API kulcs a Beállítások fülön!");
                 return false;
             }
 
@@ -362,11 +362,9 @@
                         htmlContent: htmlContent
                     })
                 });
-
-                const resData = await response.json();
                 return response.ok;
             } catch (err) {
-                console.error("Brevo küldési hiba:", err);
+                console.error(err);
                 return false;
             }
         }
@@ -520,10 +518,22 @@
             checkXpOrder();
         }
 
+        // TÁBLÁZAT KIRAJZOLÁSA ÉLŐ LÉTSZÁM SZÁMÍTÁSSAL
         function renderEvoTable() {
             const evoTbody = document.getElementById('evoTableBody');
             evoTbody.innerHTML = '';
+
+            // Létszámok kiszámítása az aktív tagokból
+            const rankCounts = {};
+            candidatesCache.forEach(c => {
+                if (c.status === "approved") {
+                    const r = calculateRank(c.xp || 0);
+                    rankCounts[r.code] = (rankCounts[r.code] || 0) + 1;
+                }
+            });
+
             activeRanks.forEach((r, idx) => {
+                const count = rankCounts[r.code] || 0;
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-[#0B130D] transition";
                 tr.draggable = true;
@@ -534,7 +544,10 @@
                     <td class="p-2 font-mono font-bold text-[#7A9E48] text-center">${r.code}</td>
                     <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${r.name}" data-field="name" data-idx="${idx}"></td>
                     <td class="p-2"><input type="text" class="w-full text-[#5C735E]" value="${r.cat}" data-field="cat" data-idx="${idx}"></td>
-                    <td class="p-2"><input type="number" class="w-24 font-mono text-[#7A9E48]" value="${r.xp}" data-field="xp" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${r.xp}" data-field="xp" data-idx="${idx}"></td>
+                    <td class="p-2 text-center font-mono">
+                        ${count > 0 ? `<span class="px-2 py-0.5 bg-[#1E2F22] text-[#7A9E48] font-bold text-xs">${count} fő</span>` : `<span class="text-[#5C735E] text-xs">0</span>`}
+                    </td>
                     <td class="p-2"><input type="text" class="w-full" value="${r.desc}" data-field="desc" data-idx="${idx}"></td>
                     <td class="p-2 text-center"><button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button></td>
                 `;
@@ -755,7 +768,7 @@
                         <div class="space-x-2">
                             <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" 
                                 data-id="${d.id}" data-cid="${c.candidateId}" data-xp="${c.xp}">
-                                Jóváhagyás (+XP hozzáadása)
+                                Jóváhagyás (+XP)
                             </button>
                             <button class="reject-claim-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">
                                 Elutasítás
@@ -842,6 +855,12 @@
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
                 tbody.innerHTML = '';
+                
+                candidatesCache = [];
+                snapshot.forEach(docSnap => candidatesCache.push(docSnap.data()));
+
+                renderEvoTable(); // Létszámok újraszámolása
+
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const tr = document.createElement('tr');
@@ -886,7 +905,6 @@
                     tbody.appendChild(tr);
                 });
 
-                // AUTOMATA JÓVÁHAGYÁS + TELEGRAM LINK + BREVO E-MAIL
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const docId = e.target.dataset.id;
@@ -897,30 +915,26 @@
                         btn.disabled = true;
                         btn.innerText = "FOLYAMATBAN...";
 
-                        // 1. Telegram 1 alkalmas link kérése a Bottól
                         const tgInviteLink = await createTelegramOneTimeInvite();
-
-                        // 2. Automata E-mail küldése Brevo API-val
                         const mailSent = await sendApprovalEmailViaBrevo(email, name, cid, tgInviteLink);
 
                         if (mailSent) {
-                            // 3. Státusz frissítése Firestore-ban
                             await updateDoc(doc(db, "candidates", docId), {
                                 status: 'approved',
                                 approvedAt: new Date().toISOString()
                             });
-                            alert(`✓ ${cid} sikeresen jóváhagyva!\nAz értesítő e-mailt a Brevo automatikusan kiküldte a tagnak a háttérben.`);
+                            alert(`✓ ${cid} jóváhagyva! Levél elküldve a tagnak.`);
                         } else {
                             btn.disabled = false;
                             btn.innerText = "Jóváhagyás";
-                            alert("A levél küldése sikertelen volt. Ellenőrizd a Brevo API kulcsot a Beállítások fülön!");
+                            alert("A levélküldés sikertelen volt. Ellenőrizd a Brevo beállításokat!");
                         }
                     });
                 });
 
                 document.querySelectorAll('.revoke-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if (confirm("Biztosan felfüggeszted ennek a tagnak a hozzáférését?")) {
+                        if (confirm("Biztosan felfüggeszted ezt a tagot?")) {
                             await updateDoc(doc(db, "candidates", e.target.dataset.id), {
                                 status: 'suspended',
                                 suspendedAt: new Date().toISOString()
