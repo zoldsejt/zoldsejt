@@ -22,7 +22,8 @@
         }
         .drag-handle { cursor: grab; user-select: none; }
         .drag-handle:active { cursor: grabbing; }
-        .dragging { opacity: 0.4; background: #1E2F22; }
+        .dragging { opacity: 0.3; background: #1E2F22; }
+        .drop-target { border-top: 2px dashed #7A9E48 !important; }
     </style>
 </head>
 <body class="p-4 md:p-8 max-w-7xl mx-auto">
@@ -46,12 +47,12 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
-                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati, küldetés- és evolúciós vezérlése</p>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati és operatív felügyelete</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-4 text-xs">
-                <button id="tabMembersBtn" class="py-1 font-bold tab-active">Tagok & Jelentkezők</button>
-                <button id="tabMissionsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Küldetések</button>
+                <button id="tabMembersBtn" class="py-1 font-bold tab-active">Tagok & Igénylések</button>
+                <button id="tabMissionsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Küldetések & Infók</button>
                 <button id="tabToolsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Eszköztár</button>
                 <button id="tabEvoBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Evolúciós Kódex</button>
                 <button id="tabSettingsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">⚙️ Beállítások</button>
@@ -59,8 +60,16 @@
             </div>
         </div>
 
-        <!-- 1. FÜL: TAGOK TÁBLÁZAT -->
-        <div id="membersTab" class="space-y-4">
+        <!-- 1. FÜL: TAGOK ÉS XP IGÉNYLÉSEK -->
+        <div id="membersTab" class="space-y-6">
+            
+            <!-- Függőben lévő XP kérelmek („Ott voltam”) -->
+            <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
+                <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
+                <div id="claimsList" class="space-y-2"></div>
+            </div>
+
+            <!-- Fő taglista -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -71,7 +80,7 @@
                             <th class="p-3">Képességek</th>
                             <th class="p-3">Üzenet A Fejnek</th>
                             <th class="p-3">Státusz</th>
-                            <th class="p-3">Művelet / XP</th>
+                            <th class="p-3">Művelet / XP Kezelés</th>
                         </tr>
                     </thead>
                     <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
@@ -81,8 +90,24 @@
             </div>
         </div>
 
-        <!-- 2. FÜL: KÜLDETÉSEK -->
+        <!-- 2. FÜL: KÜLDETÉSEK & INFÓK -->
         <div id="missionsTab" class="hidden space-y-6">
+            
+            <!-- Szabad Telegram Poszt Író (Hírös Hírnök) -->
+            <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">📢 Hírös Hírnök // Szabad Telegram Közlemény</h3>
+                    <span class="text-[10px] text-[#5C735E]">Közvetlen csatornaposzt küldetési keret nélkül</span>
+                </div>
+                <textarea id="freeBroadcastText" rows="2" placeholder="Írd be a közlendőt a csatornára (pl. 'A Fej látta a hétvégi munkát. A koordináció folytatódik.')..." class="w-full"></textarea>
+                <div class="flex justify-end">
+                    <button id="sendBroadcastBtn" class="px-4 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase tracking-wider transition">
+                        Üzenet Kiküldése a Csatornára →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Új Küldetés Űrlap -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <h3 class="text-sm font-bold text-white uppercase">// Új Küldetés Kiírása</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -99,7 +124,7 @@
                     </select>
                     <input type="text" id="mSkills" placeholder="Szükséges képesség" class="sm:col-span-2 w-full">
                 </div>
-                <textarea id="mDesc" rows="2" placeholder="Operatív utasítás és részletek..." class="w-full"></textarea>
+                <textarea id="mDesc" rows="2" placeholder="Operatív utasítás és leírás..." class="w-full"></textarea>
                 <div class="flex justify-end">
                     <button id="publishMissionBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
                         ⚡ Publikálás Telegramra & Firestore-ba
@@ -107,6 +132,7 @@
                 </div>
             </div>
 
+            <!-- Küldetések Listája -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -115,6 +141,7 @@
                             <th class="p-3">Cím & Kategória</th>
                             <th class="p-3">XP</th>
                             <th class="p-3">Leírás</th>
+                            <th class="p-3">Résztvevők</th>
                             <th class="p-3">Státusz</th>
                             <th class="p-3 text-center">Művelet</th>
                         </tr>
@@ -127,7 +154,7 @@
         <!-- 3. FÜL: ESZKÖZTÁR -->
         <div id="toolsTab" class="hidden space-y-6">
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
-                <h3 class="text-sm font-bold text-white uppercase">// Új Eszköz Hozzáadása</h3>
+                <h3 class="text-sm font-bold text-white uppercase">// Új Eszköz Rögzítése</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <input type="text" id="toolName" placeholder="Eszköz neve" class="w-full font-bold">
                     <input type="text" id="toolLocation" placeholder="Körzet / Helyszín" class="w-full">
@@ -151,12 +178,12 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: DINAMIKUS EVOLÚCIÓS XP (Drag-and-Drop ☰) -->
+        <!-- 4. FÜL: DINAMIKUS EVOLÚCIÓS XP (Vizuális Drag-and-Drop vonallal) -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
                     <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix</h3>
-                    <p class="text-xs text-[#5C735E]">Húzd a <b>☰</b> jelet a szintek átrendezéséhez.</p>
+                    <p class="text-xs text-[#5C735E]">Húzd a <b>☰</b> jelet a szintek átrendezéséhez. A zöld vonal mutatja a beszúrás helyét.</p>
                 </div>
                 <div class="flex space-x-2">
                     <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint</button>
@@ -186,25 +213,25 @@
             </div>
         </div>
 
-        <!-- 5. FÜL: BEÁLLÍTÁSOK (Biztonságos Telegram konfiguráció) -->
+        <!-- 5. FÜL: BEÁLLÍTÁSOK -->
         <div id="settingsTab" class="hidden space-y-6">
             <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-4">
                 <div>
                     <h3 class="text-sm font-bold text-[#7A9E48] uppercase tracking-wider">// Telegram Integráció Beállításai</h3>
-                    <p class="text-xs text-[#5C735E] mt-1">Ezek az adatok a védett Firestore adatbázisodban és a böngésződben tárolódnak, így nem szivárognak ki a GitHubra.</p>
+                    <p class="text-xs text-[#5C735E] mt-1">Az adatok a titkosított Firestore adatbázisodban tárolódnak.</p>
                 </div>
 
                 <div class="space-y-3">
                     <div>
                         <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Bot Token</label>
-                        <input type="password" id="cfgBotToken" placeholder="Írd be az új BotFather tokent..." class="w-full font-mono">
+                        <input type="password" id="cfgBotToken" placeholder="BotFather Token..." class="w-full font-mono">
                     </div>
                     <div>
-                        <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Chat / Csatorna ID</label>
+                        <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Csatorna ID</label>
                         <input type="text" id="cfgChatId" placeholder="-1003946373632" class="w-full font-mono">
                     </div>
                     <button id="saveSettingsBtn" class="w-full py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
-                        Beállítások Biztonságos Mentése
+                        Beállítások Mentése
                     </button>
                 </div>
             </div>
@@ -216,7 +243,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
@@ -252,27 +279,19 @@
         document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
             TG_BOT_TOKEN = document.getElementById('cfgBotToken').value.trim();
             TG_CHAT_ID = document.getElementById('cfgChatId').value.trim();
-
             localStorage.setItem("TG_BOT_TOKEN", TG_BOT_TOKEN);
             localStorage.setItem("TG_CHAT_ID", TG_CHAT_ID);
 
-            try {
-                await setDoc(doc(db, "settings", "integrations"), {
-                    botToken: TG_BOT_TOKEN,
-                    chatId: TG_CHAT_ID,
-                    updatedAt: new Date().toISOString()
-                });
-                alert("✓ Telegram beállítások sikeresen elmentve!");
-            } catch (err) {
-                alert("Hiba: " + err.message);
-            }
+            await setDoc(doc(db, "settings", "integrations"), {
+                botToken: TG_BOT_TOKEN,
+                chatId: TG_CHAT_ID,
+                updatedAt: new Date().toISOString()
+            });
+            alert("✓ Telegram beállítások elmentve!");
         });
 
         async function createTelegramOneTimeInvite() {
-            if (!TG_BOT_TOKEN) {
-                alert("Add meg a Telegram Bot Tokent a Beállítások fülön!");
-                return "https://t.me/zoldsejt";
-            }
+            if (!TG_BOT_TOKEN) return "https://t.me/zoldsejt";
             try {
                 const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/createChatInviteLink`, {
                     method: 'POST',
@@ -285,26 +304,52 @@
                 });
                 const data = await res.json();
                 if (data.ok) return data.result.invite_link;
-                throw new Error(data.description);
             } catch (e) {
                 console.error(e);
-                return "https://t.me/zoldsejt";
+            }
+            return "https://t.me/zoldsejt";
+        }
+
+        // Posztolás Telegramra
+        async function postToTelegram(text) {
+            if (!TG_BOT_TOKEN) return null;
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text, parse_mode: 'HTML' })
+                });
+                const d = await res.json();
+                return d.ok ? d.result.message_id : null;
+            } catch (e) {
+                console.warn(e);
+                return null;
             }
         }
 
-        async function postMissionToTelegram(code, title, category, xp, desc) {
-            if (!TG_BOT_TOKEN) return;
-            const msg = `🌱 <b>A FEJ // KÜLDETÉS ${code}</b>\n\n<b>${title.toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${desc}\n\n<i>A Fej figyel.</i>`;
+        // Telegram poszt törlése
+        async function deleteTelegramPost(messageId) {
+            if (!TG_BOT_TOKEN || !messageId) return;
             try {
-                await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/deleteMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: 'HTML' })
+                    body: JSON.stringify({ chat_id: TG_CHAT_ID, message_id: messageId })
                 });
             } catch (e) {
                 console.warn(e);
             }
         }
+
+        // Szabad Közlemény kiküldése
+        document.getElementById('sendBroadcastBtn').addEventListener('click', async () => {
+            const text = document.getElementById('freeBroadcastText').value.trim();
+            if (!text) return alert("Írj be üzenetet!");
+            const formatted = `📢 <b>HÍRÖS HÍRNÖK // KÖZLEMÉNY</b>\n\n${text}`;
+            await postToTelegram(formatted);
+            alert("✓ Közlemény sikeresen kiküldve a Telegram csatornára!");
+            document.getElementById('freeBroadcastText').value = '';
+        });
 
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
@@ -376,6 +421,7 @@
         tabs.evo.btn.addEventListener('click', () => switchTab('evo'));
         tabs.settings.btn.addEventListener('click', () => switchTab('settings'));
 
+        // DRAG & DROP VIZUÁLIS VONALLAL
         function checkXpOrder() {
             let isBroken = false;
             for (let i = 0; i < activeRanks.length - 1; i++) {
@@ -427,10 +473,13 @@
                 });
                 tr.addEventListener('dragover', (e) => {
                     e.preventDefault();
+                    tr.classList.add('drop-target');
                     e.dataTransfer.dropEffect = 'move';
                 });
+                tr.addEventListener('dragleave', () => tr.classList.remove('drop-target'));
                 tr.addEventListener('drop', (e) => {
                     e.preventDefault();
+                    tr.classList.remove('drop-target');
                     const targetIdx = Number(tr.dataset.index);
                     if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
                         const movedItem = activeRanks.splice(dragSrcIdx, 1)[0];
@@ -438,7 +487,10 @@
                         renumberRanks();
                     }
                 });
-                tr.addEventListener('dragend', () => tr.classList.remove('dragging'));
+                tr.addEventListener('dragend', () => {
+                    tr.classList.remove('dragging');
+                    evoTbody.querySelectorAll('tr').forEach(r => r.classList.remove('drop-target'));
+                });
             });
 
             evoTbody.querySelectorAll('input').forEach(input => {
@@ -471,21 +523,11 @@
         });
 
         document.getElementById('saveEvoBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('saveEvoBtn');
-            btn.disabled = true;
-            btn.innerText = "FELSUGÁRZÁS...";
-            try {
-                await setDoc(doc(db, "settings", "evolution"), { ranks: activeRanks, updatedAt: new Date().toISOString() });
-                alert("⚡ Szintek sikeresen elmentve és felsugározva a hálózatba!");
-            } catch (err) {
-                alert("Hiba: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "⚡ Felsugárzás (Mentés)";
-            }
+            await setDoc(doc(db, "settings", "evolution"), { ranks: activeRanks, updatedAt: new Date().toISOString() });
+            alert("⚡ Szintek elmentve!");
         });
 
-        // KÜLDETÉSEK
+        // KÜLDETÉSEK PUBLIKÁLÁSA
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
@@ -494,25 +536,25 @@
             const skills = document.getElementById('mSkills').value.trim();
             const desc = document.getElementById('mDesc').value.trim();
 
-            if (!code || !title || !desc) {
-                alert("Add meg a küldetés kódját, címét és leírását!");
-                return;
-            }
+            if (!code || !title || !desc) return alert("Töltsd ki az adatokat!");
 
             const btn = document.getElementById('publishMissionBtn');
             btn.disabled = true;
             btn.innerText = "PUBLIKÁLÁS...";
 
             try {
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${code}</b>\n\n<b>${title.toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${desc}`;
+                const tgMsgId = await postToTelegram(tgMsg);
+
                 await addDoc(collection(db, "missions"), {
                     code, title, xp, category, skills, desc,
                     status: "open",
+                    tgMessageId: tgMsgId || null,
+                    attendees: [],
                     createdAt: new Date().toISOString()
                 });
 
-                await postMissionToTelegram(code, title, category, xp, desc);
-
-                alert("✓ Küldetés publikálva a Telegramra és a weboldalra!");
+                alert("✓ Küldetés publikálva!");
                 document.getElementById('mCode').value = '';
                 document.getElementById('mTitle').value = '';
                 document.getElementById('mDesc').value = '';
@@ -529,7 +571,7 @@
                 const tbody = document.getElementById('missionsTableBody');
                 tbody.innerHTML = '';
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Nincs aktív küldetés.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-[#5C735E]">Nincs aktív küldetés.</td></tr>';
                     return;
                 }
                 snap.forEach(d => {
@@ -543,12 +585,14 @@
                             <div class="text-[10px] text-[#5C735E]">${m.category} | ${m.skills || 'Mindenki'}</div>
                         </td>
                         <td class="p-3 font-mono text-[#7A9E48]">+${m.xp} XP</td>
-                        <td class="p-3 text-[11px] max-w-sm">${m.desc}</td>
+                        <td class="p-3 text-[11px] max-w-xs truncate">${m.desc}</td>
+                        <td class="p-3 font-mono text-[11px] text-sejt-muted">${(m.attendees || []).length} fő</td>
                         <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
-                        <td class="p-3 text-center">
+                        <td class="p-3 text-center space-x-2">
                             <button class="toggle-m-btn text-xs hover:underline text-[#7A9E48]" data-id="${d.id}" data-status="${m.status}">
                                 ${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}
                             </button>
+                            <button class="delete-m-btn text-xs text-red-400 hover:underline" data-id="${d.id}" data-tgid="${m.tgMessageId || ''}">Törlés</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -558,6 +602,16 @@
                     btn.addEventListener('click', async (e) => {
                         const newStatus = e.target.dataset.status === 'open' ? 'closed' : 'open';
                         await updateDoc(doc(db, "missions", e.target.dataset.id), { status: newStatus });
+                    });
+                });
+
+                tbody.querySelectorAll('.delete-m-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm("Biztosan törlöd ezt a küldetést? (A Telegram poszt is törlésre kerül)")) {
+                            const tgId = e.target.dataset.tgid;
+                            if (tgId) await deleteTelegramPost(tgId);
+                            await deleteDoc(doc(db, "missions", e.target.dataset.id));
+                        }
                     });
                 });
             });
@@ -570,12 +624,8 @@
             if (!name) return alert("Add meg az eszköz nevét!");
 
             await addDoc(collection(db, "tools"), {
-                name, location,
-                holder: "A Fej",
-                status: "available",
-                createdAt: new Date().toISOString()
+                name, location, holder: "A Fej", status: "available", createdAt: new Date().toISOString()
             });
-
             document.getElementById('toolName').value = '';
             document.getElementById('toolLocation').value = '';
         });
@@ -584,35 +634,94 @@
             onSnapshot(collection(db, "tools"), (snap) => {
                 const tbody = document.getElementById('toolsTableBody');
                 tbody.innerHTML = '';
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-[#5C735E]">Nincs eszköz rögzítve.</td></tr>';
-                    return;
-                }
                 snap.forEach(d => {
                     const t = d.data();
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-[#0B130D]";
                     tr.innerHTML = `
                         <td class="p-3 font-bold text-white">${t.name}</td>
                         <td class="p-3 text-[#5C735E]">${t.location || 'Központ'}</td>
                         <td class="p-3 font-mono">${t.holder}</td>
                         <td class="p-3"><span class="px-2 py-0.5 ${t.status === 'available' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-amber-950 text-amber-400'} uppercase font-bold">${t.status === 'available' ? 'ELÉRHETŐ' : 'HASZNÁLATBAN'}</span></td>
-                        <td class="p-3 text-center">
-                            <button class="toggle-tool-btn text-xs text-red-400 hover:underline" data-id="${d.id}">Törlés</button>
-                        </td>
+                        <td class="p-3 text-center"><button class="del-tool-btn text-xs text-red-400 hover:underline" data-id="${d.id}">Törlés</button></td>
                     `;
                     tbody.appendChild(tr);
                 });
-
-                tbody.querySelectorAll('.toggle-tool-btn').forEach(btn => {
+                tbody.querySelectorAll('.del-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if (confirm("Törlöd ezt az eszközt?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
+                        if (confirm("Törlöd?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
                     });
                 });
             });
         }
 
-        // BIZTONSÁGOS AUTH ELLENŐRZÉS (Csak zoldsejt@gmail.com maradhat bent)
+        // XP IGÉNYLÉSEK FIGYELÉSE („OTT VOLTAM”)
+        function loadXpClaims() {
+            onSnapshot(query(collection(db, "xp_claims"), where("status", "==", "pending")), (snap) => {
+                const sec = document.getElementById('claimsSection');
+                const list = document.getElementById('claimsList');
+                if (snap.empty) {
+                    sec.classList.add('hidden');
+                    return;
+                }
+                sec.classList.remove('hidden');
+                list.innerHTML = '';
+                snap.forEach(d => {
+                    const c = d.data();
+                    const div = document.createElement('div');
+                    div.className = "p-2 bg-[#0B130D] border border-[#1E2F22] flex justify-between items-center text-xs";
+                    div.innerHTML = `
+                        <div>
+                            <span class="font-bold text-[#7A9E48] font-mono">${c.candidateId}</span> 
+                            igényelt <span class="text-white font-bold">+${c.xp} XP</span>-t a(z) 
+                            <span class="text-white">${c.missionTitle}</span> (${c.missionCode}) küldetésért.
+                        </div>
+                        <div class="space-x-2">
+                            <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" 
+                                data-id="${d.id}" data-cid="${c.candidateId}" data-xp="${c.xp}">
+                                Jóváhagyás (+XP hozzáadása)
+                            </button>
+                            <button class="reject-claim-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">
+                                Elutasítás
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+                list.querySelectorAll('.accept-claim-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const claimId = e.target.dataset.id;
+                        const cid = e.target.dataset.cid;
+                        const xpToAdd = parseInt(e.target.dataset.xp) || 0;
+
+                        // Keresés a tag dokumentumára
+                        const q = query(collection(db, "candidates"), where("candidateId", "==", cid));
+                        const snap = await getDocs(q);
+                        if (!snap.empty) {
+                            const cDoc = snap.docs[0];
+                            const currentXp = cDoc.data().xp || 0;
+                            const newXp = currentXp + xpToAdd;
+                            const newRank = calculateRank(newXp);
+
+                            await updateDoc(doc(db, "candidates", cDoc.id), {
+                                xp: newXp,
+                                levelCode: newRank.code,
+                                levelName: newRank.name
+                            });
+                        }
+                        await deleteDoc(doc(db, "xp_claims", claimId));
+                    });
+                });
+
+                list.querySelectorAll('.reject-claim-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        await deleteDoc(doc(db, "xp_claims", e.target.dataset.id));
+                    });
+                });
+            });
+        }
+
+        // AUTH & TAGOK
         onAuthStateChanged(auth, user => {
             if (user) {
                 if (user.email !== "zoldsejt@gmail.com") {
@@ -634,6 +743,7 @@
                 loadCandidates();
                 loadMissions();
                 loadTools();
+                loadXpClaims();
             } else {
                 document.getElementById('loginView').classList.remove('hidden');
                 document.getElementById('dashboardView').classList.add('hidden');
@@ -656,17 +766,13 @@
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
                 tbody.innerHTML = '';
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-[#5C735E]">Nincs regisztrált tag.</td></tr>';
-                    return;
-                }
-
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-[#0B130D]";
                     
                     const isPending = data.status === 'pending';
+                    const isApproved = data.status === 'approved';
                     const xp = data.xp || 0;
                     const rank = calculateRank(xp);
 
@@ -683,7 +789,9 @@
                         <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).join(', ')}</td>
                         <td class="p-3 text-[11px] text-white italic max-w-xs truncate">${data.notesToFej || '-'}</td>
                         <td class="p-3">
-                            ${isPending ? '<span class="text-amber-400 font-bold uppercase">VÁRAKOZIK</span>' : '<span class="text-emerald-400 font-bold uppercase">AKTÍV</span>'}
+                            <span class="px-2 py-0.5 font-bold uppercase ${isPending ? 'text-amber-400 bg-amber-950/40' : (isApproved ? 'text-emerald-400 bg-emerald-950/40' : 'text-red-400 bg-red-950/40')}">
+                                ${data.status}
+                            </span>
                         </td>
                         <td class="p-3 flex items-center space-x-1">
                             ${isPending ? `
@@ -695,7 +803,7 @@
                                 <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="10">+10</button>
                                 <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="50">+50</button>
                                 <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="-10">-10</button>
-                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="-50">-50</button>
+                                <button class="revoke-btn text-[10px] text-red-400 hover:underline px-1" data-id="${docSnap.id}">Felfüggesztés</button>
                             `}
                         </td>
                     `;
@@ -723,6 +831,18 @@
                         const body = encodeURIComponent(`Üdvözlünk, ${name}!\n\nA belépési kérelmedet jóváhagytuk.\nAzonosítód: ${cid}\nKezdő szinted: 01. Spóra\n\nEgyszer használatos zárt Telegram csatlakozási kulcsod:\n${tgInviteLink}\n\nBelső profilod és küldetéskövetés:\nhttps://zoldsejt.github.io/zoldsejt/profil.html\n\nFigyelj.\nA Fej`);
                         
                         window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+                    });
+                });
+
+                // Felfüggesztés gomb
+                document.querySelectorAll('.revoke-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm("Biztosan felfüggeszted ennek a tagnak a hozzáférését?")) {
+                            await updateDoc(doc(db, "candidates", e.target.dataset.id), {
+                                status: 'suspended',
+                                suspendedAt: new Date().toISOString()
+                            });
+                        }
                     });
                 });
 
