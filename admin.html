@@ -36,6 +36,7 @@
             <input type="password" id="adminPass" placeholder="Jelszó" required class="w-full bg-[#0B130D] border border-[#1E2F22] p-2 text-sm text-white focus:outline-none focus:border-[#5A7736]">
             <button type="submit" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">Belépés</button>
         </form>
+        <div id="loginErrorMsg" class="text-xs text-red-400 font-mono text-center min-h-[16px]"></div>
     </div>
 
     <!-- ADMIN IRÁNYÍTÓPULT -->
@@ -98,7 +99,7 @@
                     </select>
                     <input type="text" id="mSkills" placeholder="Szükséges képesség" class="sm:col-span-2 w-full">
                 </div>
-                <textarea id="mDesc" rows="2" placeholder="Operatív utasítás..." class="w-full"></textarea>
+                <textarea id="mDesc" rows="2" placeholder="Operatív utasítás és részletek..." class="w-full"></textarea>
                 <div class="flex justify-end">
                     <button id="publishMissionBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
                         ⚡ Publikálás Telegramra & Firestore-ba
@@ -185,18 +186,18 @@
             </div>
         </div>
 
-        <!-- 5. FÜL: BEÁLLÍTÁSOK (Telegram Bot Kulcs Biztonságos Kezelése) -->
+        <!-- 5. FÜL: BEÁLLÍTÁSOK (Biztonságos Telegram konfiguráció) -->
         <div id="settingsTab" class="hidden space-y-6">
             <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-4">
                 <div>
                     <h3 class="text-sm font-bold text-[#7A9E48] uppercase tracking-wider">// Telegram Integráció Beállításai</h3>
-                    <p class="text-xs text-[#5C735E] mt-1">Ezek az adatok a titkosított Firestore adatbázisodban és a böngésződben tárolódnak, így nem kerülnek ki a nyilvános GitHubra.</p>
+                    <p class="text-xs text-[#5C735E] mt-1">Ezek az adatok a védett Firestore adatbázisodban és a böngésződben tárolódnak, így nem szivárognak ki a GitHubra.</p>
                 </div>
 
                 <div class="space-y-3">
                     <div>
                         <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Bot Token</label>
-                        <input type="password" id="cfgBotToken" placeholder="Pl.: 8919908631:AAHgTYIKve1qwg..." class="w-full font-mono">
+                        <input type="password" id="cfgBotToken" placeholder="Írd be az új BotFather tokent..." class="w-full font-mono">
                     </div>
                     <div>
                         <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Chat / Csatorna ID</label>
@@ -231,7 +232,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Dinamikusan betöltött Telegram beállítások (Nem a GitHub kódból!)
         let TG_BOT_TOKEN = localStorage.getItem("TG_BOT_TOKEN") || "";
         let TG_CHAT_ID = localStorage.getItem("TG_CHAT_ID") || "-1003946373632";
 
@@ -262,16 +262,15 @@
                     chatId: TG_CHAT_ID,
                     updatedAt: new Date().toISOString()
                 });
-                alert("✓ Telegram beállítások sikeresen elmentve a biztonságos tárhelyre!");
+                alert("✓ Telegram beállítások sikeresen elmentve!");
             } catch (err) {
                 alert("Hiba: " + err.message);
             }
         });
 
-        // Telegram 1 alkalmas link generálás
         async function createTelegramOneTimeInvite() {
             if (!TG_BOT_TOKEN) {
-                alert("Kérjük, add meg a Telegram Bot Tokent a Beállítások fülön!");
+                alert("Add meg a Telegram Bot Tokent a Beállítások fülön!");
                 return "https://t.me/zoldsejt";
             }
             try {
@@ -307,7 +306,6 @@
             }
         }
 
-        // Alapértelmezett szintek
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -614,9 +612,15 @@
             });
         }
 
-        // AUTH & TAGOK BETÖLTÉSE
+        // BIZTONSÁGOS AUTH ELLENŐRZÉS (Csak zoldsejt@gmail.com maradhat bent)
         onAuthStateChanged(auth, user => {
             if (user) {
+                if (user.email !== "zoldsejt@gmail.com") {
+                    document.getElementById('loginErrorMsg').textContent = "Hozzáférés megtagadva. Csak A FEJ jogosult a belépésre.";
+                    signOut(auth);
+                    return;
+                }
+
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');
                 
@@ -638,10 +642,11 @@
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            document.getElementById('loginErrorMsg').textContent = "";
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPass').value);
+                await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value.trim(), document.getElementById('adminPass').value);
             } catch (err) {
-                alert("Sikertelen belépés: " + err.message);
+                document.getElementById('loginErrorMsg').textContent = "Sikertelen azonosítás: " + err.message;
             }
         });
 

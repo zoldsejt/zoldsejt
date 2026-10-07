@@ -31,7 +31,7 @@
     <style>
         body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
         .scanlines {
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
         }
@@ -95,8 +95,6 @@
 
         <!-- 1. FÜL: PROFIL ÉS KÉPESSÉGEK -->
         <div id="viewProfile" class="space-y-6">
-            
-            <!-- Fő kártya -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2 bg-sejt-surface border border-sejt-border p-6 space-y-4">
                     <div class="flex justify-between items-start">
@@ -133,7 +131,6 @@
                 </div>
             </div>
 
-            <!-- Képességek Módosítása -->
             <div class="bg-sejt-surface border border-sejt-border p-6 space-y-4">
                 <div>
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Képességek & Rendelkezésre Állás Módosítása</h3>
@@ -182,9 +179,7 @@
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">// Hálózati Küldetések</h3>
                 <p class="text-xs text-sejt-muted">Az alábbi küldetéseket A Fej írta ki a hálózat számára.</p>
             </div>
-            <div id="missionsListContainer" class="space-y-3">
-                <!-- JS tölti be a küldetéskártyákat -->
-            </div>
+            <div id="missionsListContainer" class="space-y-3"></div>
         </div>
 
         <!-- 3. FÜL: ESZKÖZTÁR -->
@@ -228,7 +223,7 @@
             </div>
         </div>
 
-        <!-- Önmegsemmisítés gomb sáv -->
+        <!-- Önmegsemmisítés sáv -->
         <div class="p-4 bg-[#140B0B] border border-[#3A1818] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
                 <div class="text-xs font-bold text-red-400 uppercase">Biztonsági Vészhelyzet // Adattörlés</div>
@@ -241,7 +236,7 @@
 
     </main>
 
-    <!-- Lábléc & Adatkezelés -->
+    <!-- Lábléc -->
     <footer class="max-w-4xl mx-auto w-full text-center py-4 border-t border-sejt-border text-[10px] text-sejt-muted tracking-widest uppercase flex flex-col sm:flex-row justify-between items-center gap-2">
         <div>A FEJ FIGYEL // BELSŐ KÖR</div>
         <button id="privacyModalBtn" class="text-sejt-muted hover:text-white underline lowercase tracking-normal">adatkezelési tájékoztató</button>
@@ -265,7 +260,7 @@
         </div>
     </div>
 
-    <!-- DRÁMAI 60 MP-ES ÖNMEGSEMMISÍTŐ MODAL -->
+    <!-- 60 MP-ES ÖNMEGSEMMISÍTŐ MODAL -->
     <div id="selfDestructModal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 font-mono">
         <div class="bg-[#180B0B] border-2 border-red-600 max-w-lg w-full p-6 space-y-6 text-center text-red-200">
             <div class="text-red-500 font-bold tracking-widest text-sm animate-pulse">⚠️ PROTOKOLL: ZÉRÓ NYOM ⚠️</div>
@@ -286,7 +281,7 @@
             </div>
 
             <div class="flex gap-3 justify-center pt-2">
-                <button id="cancelDestructBtn" class="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs uppercase font-bold transition">Mégse / Megszakítás</button>
+                <button id="cancelDestructBtn" class="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs uppercase font-bold transition">Mégse</button>
                 <button id="confirmDestructBtn" class="px-5 py-2.5 bg-red-700 hover:bg-red-600 text-white text-xs uppercase font-bold tracking-wider transition">VÉGLEGES MEGSEMMISÍTÉS</button>
             </div>
         </div>
@@ -337,7 +332,6 @@
             return { current, next };
         }
 
-        // Fülváltások a profilban
         const pTabs = {
             profile: { btn: document.getElementById('pTabProfile'), view: document.getElementById('viewProfile') },
             missions: { btn: document.getElementById('pTabMissions'), view: document.getElementById('viewMissions') },
@@ -364,9 +358,17 @@
         pTabs.tools.btn.addEventListener('click', () => switchPTab('tools'));
         pTabs.leaderboard.btn.addEventListener('click', () => switchPTab('leaderboard'));
 
-        // Auth figyelés
+        // Auth figyelés (JAVÍTVA: Nem léptet ki más fiókot a háttérben!)
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Ha a bejelentkezett felhasználó az admin maga:
+                if (user.email === "zoldsejt@gmail.com") {
+                    document.getElementById('authSection').classList.remove('hidden');
+                    document.getElementById('profileDashboard').classList.add('hidden');
+                    document.getElementById('authMsg').innerHTML = "<span class='text-emerald-400'>Adminisztrátorként vagy bejelentkezve. A koordinációs panelt az <a href='admin.html' class='underline font-bold'>admin.html</a> oldalon éred el.</span>";
+                    return;
+                }
+
                 await fetchRanks();
                 loadUserData(user.email);
             } else {
@@ -380,8 +382,7 @@
             const snap = await getDocs(q);
 
             if (snap.empty) {
-                document.getElementById('authMsg').textContent = "Ehhez az e-mailhez nem található regisztráció.";
-                signOut(auth);
+                document.getElementById('authMsg').textContent = "Ehhez az e-mailhez nem található jóváhagyott regisztráció.";
                 return;
             }
 
@@ -390,8 +391,7 @@
             currentCandidateDocId = cDoc.id;
 
             if (data.status !== "approved") {
-                document.getElementById('authMsg').innerHTML = "<span class='text-amber-400'>A kérelmed még bírálat alatt áll.</span>";
-                signOut(auth);
+                document.getElementById('authMsg').innerHTML = "<span class='text-amber-400'>A kérelmed még elbírálás alatt áll A Fej által.</span>";
                 return;
             }
 
@@ -429,7 +429,6 @@
             loadLeaderboard();
         }
 
-        // Küldetések betöltése a tag felületén
         function loadMissions() {
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const container = document.getElementById('missionsListContainer');
@@ -461,7 +460,6 @@
             });
         }
 
-        // Eszközök betöltése
         function loadTools() {
             onSnapshot(collection(db, "tools"), (snap) => {
                 const tbody = document.getElementById('memberToolsBody');
@@ -504,7 +502,6 @@
             });
         }
 
-        // Bejelentkezés & Első Jelszó
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -527,7 +524,6 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-        // Profil frissítés mentése
         document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentCandidateDocId) return;
@@ -541,7 +537,7 @@
             alert("✓ A Sejt-profilod frissítve lett a hálózatban!");
         });
 
-        // DRÁMAI 60 MP-ES ÖNMEGSEMMISÍTŐ MODAL LOGIKA
+        // 60 MP-es visszaszámláló
         const destructModal = document.getElementById('selfDestructModal');
         const countdownTimer = document.getElementById('countdownTimer');
         let timerInterval = null;
@@ -594,7 +590,6 @@
             }
         }
 
-        // Adatkezelési modal
         const privacyModal = document.getElementById('privacyModal');
         document.getElementById('privacyModalBtn').addEventListener('click', () => privacyModal.classList.remove('hidden'));
         document.getElementById('closePrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
