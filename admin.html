@@ -52,7 +52,8 @@
                 <button id="tabMembersBtn" class="py-1 font-bold tab-active">Tagok & Jelentkezők</button>
                 <button id="tabMissionsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Küldetések</button>
                 <button id="tabToolsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Eszköztár</button>
-                <button id="tabEvoBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Evolúciós Kódex (27 Szint)</button>
+                <button id="tabEvoBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Evolúciós Kódex</button>
+                <button id="tabSettingsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">⚙️ Beállítások</button>
                 <button id="logoutBtn" class="text-xs text-red-400 hover:underline">Kilépés</button>
             </div>
         </div>
@@ -69,7 +70,7 @@
                             <th class="p-3">Képességek</th>
                             <th class="p-3">Üzenet A Fejnek</th>
                             <th class="p-3">Státusz</th>
-                            <th class="p-3">Művelet / XP Módosítás</th>
+                            <th class="p-3">Művelet / XP</th>
                         </tr>
                     </thead>
                     <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
@@ -79,14 +80,13 @@
             </div>
         </div>
 
-        <!-- 2. FÜL: KÜLDETÉSEK KEZELÉSE -->
+        <!-- 2. FÜL: KÜLDETÉSEK -->
         <div id="missionsTab" class="hidden space-y-6">
-            <!-- Új Küldetés Űrlap -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <h3 class="text-sm font-bold text-white uppercase">// Új Küldetés Kiírása</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" id="mCode" placeholder="Küldetéskód (pl. 001)" class="w-full font-mono">
-                    <input type="text" id="mTitle" placeholder="Küldetés címe (pl. Öt perc)" class="sm:col-span-2 w-full font-bold">
+                    <input type="text" id="mCode" placeholder="Kód (pl. 001)" class="w-full font-mono">
+                    <input type="text" id="mTitle" placeholder="Küldetés címe" class="sm:col-span-2 w-full font-bold">
                     <input type="number" id="mXp" placeholder="Jutalom XP (pl. 20)" class="w-full font-mono">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -96,9 +96,9 @@
                         <option value="sejt_akcio">Sejt-Akció (Csoportos)</option>
                         <option value="fej_kuldetes">Fej-Küldetés (Kiemelt)</option>
                     </select>
-                    <input type="text" id="mSkills" placeholder="Szükséges képesség (pl. Növények, Fuvar)" class="sm:col-span-2 w-full">
+                    <input type="text" id="mSkills" placeholder="Szükséges képesség" class="sm:col-span-2 w-full">
                 </div>
-                <textarea id="mDesc" rows="2" placeholder="Küldetés operatív utasítása és részletei..." class="w-full"></textarea>
+                <textarea id="mDesc" rows="2" placeholder="Operatív utasítás..." class="w-full"></textarea>
                 <div class="flex justify-end">
                     <button id="publishMissionBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
                         ⚡ Publikálás Telegramra & Firestore-ba
@@ -106,7 +106,6 @@
                 </div>
             </div>
 
-            <!-- Küldetések Listája -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -119,23 +118,19 @@
                             <th class="p-3 text-center">Művelet</th>
                         </tr>
                     </thead>
-                    <tbody id="missionsTableBody" class="divide-y divide-[#1E2F22]">
-                        <tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Nincs rögzített küldetés.</td></tr>
-                    </tbody>
+                    <tbody id="missionsTableBody" class="divide-y divide-[#1E2F22]"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 3. FÜL: ESZKÖZTÁR KEZELÉSE -->
+        <!-- 3. FÜL: ESZKÖZTÁR -->
         <div id="toolsTab" class="hidden space-y-6">
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
-                <h3 class="text-sm font-bold text-white uppercase">// Új Eszköz Hozzáadása („A Fej Megoldja”)</h3>
+                <h3 class="text-sm font-bold text-white uppercase">// Új Eszköz Hozzáadása</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <input type="text" id="toolName" placeholder="Eszköz neve (pl. Fűnyíró, Teleszkópos ágvágó)" class="w-full font-bold">
-                    <input type="text" id="toolLocation" placeholder="Tárolási körzet / Helyszín" class="w-full">
-                    <button id="addToolBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
-                        + Eszköz Rögzítése
-                    </button>
+                    <input type="text" id="toolName" placeholder="Eszköz neve" class="w-full font-bold">
+                    <input type="text" id="toolLocation" placeholder="Körzet / Helyszín" class="w-full">
+                    <button id="addToolBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">+ Rögzítés</button>
                 </div>
             </div>
 
@@ -145,24 +140,22 @@
                         <tr>
                             <th class="p-3">Eszköz Megnevezése</th>
                             <th class="p-3">Helyszín</th>
-                            <th class="p-3">Jelenlegi Birtokos</th>
+                            <th class="p-3">Birtokos</th>
                             <th class="p-3">Állapot</th>
                             <th class="p-3 text-center">Művelet</th>
                         </tr>
                     </thead>
-                    <tbody id="toolsTableBody" class="divide-y divide-[#1E2F22]">
-                        <tr><td colspan="5" class="p-4 text-center text-[#5C735E]">Nincs eszköz a nyilvántartásban.</td></tr>
-                    </tbody>
+                    <tbody id="toolsTableBody" class="divide-y divide-[#1E2F22]"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 4. FÜL: DINAMIKUS EVOLÚCIÓS XP TÁBLÁZAT (Drag-and-Drop ☰) -->
+        <!-- 4. FÜL: DINAMIKUS EVOLÚCIÓS XP (Drag-and-Drop ☰) -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
                     <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix</h3>
-                    <p class="text-xs text-[#5C735E]">Fogd meg a <b>☰</b> jelet a szintek átrendezéséhez. A számozás automatikusan igazodik!</p>
+                    <p class="text-xs text-[#5C735E]">Húzd a <b>☰</b> jelet a szintek átrendezéséhez.</p>
                 </div>
                 <div class="flex space-x-2">
                     <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint</button>
@@ -171,7 +164,7 @@
             </div>
 
             <div id="xpWarning" class="hidden p-3 bg-amber-900/30 border border-amber-600 text-amber-300 text-xs font-mono">
-                ⚠️ FIGYELEM: Az átrendezés miatt az XP értékek nem növekvő sorrendben vannak! Kérjük, írd át az XP-ket a helyes progresszióhoz mentés előtt.
+                ⚠️ FIGYELEM: Az XP értékek sorrendje felborult! Írd át az XP-ket növekvő sorrendre mentés előtt.
             </div>
 
             <div class="overflow-x-auto border border-[#1E2F22]">
@@ -183,19 +176,42 @@
                             <th class="p-3">Megnevezés</th>
                             <th class="p-3">Kategória</th>
                             <th class="p-3 w-28">Szükséges XP</th>
-                            <th class="p-3">Szerepkör leírása</th>
+                            <th class="p-3">Leírás</th>
                             <th class="p-3 w-12 text-center">Törlés</th>
                         </tr>
                     </thead>
-                    <tbody id="evoTableBody" class="divide-y divide-[#1E2F22]">
-                        <!-- JS dinamikusan generálja a sorokat -->
-                    </tbody>
+                    <tbody id="evoTableBody" class="divide-y divide-[#1E2F22]"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- 5. FÜL: BEÁLLÍTÁSOK (Telegram Bot Kulcs Biztonságos Kezelése) -->
+        <div id="settingsTab" class="hidden space-y-6">
+            <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-4">
+                <div>
+                    <h3 class="text-sm font-bold text-[#7A9E48] uppercase tracking-wider">// Telegram Integráció Beállításai</h3>
+                    <p class="text-xs text-[#5C735E] mt-1">Ezek az adatok a titkosított Firestore adatbázisodban és a böngésződben tárolódnak, így nem kerülnek ki a nyilvános GitHubra.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Bot Token</label>
+                        <input type="password" id="cfgBotToken" placeholder="Pl.: 8919908631:AAHgTYIKve1qwg..." class="w-full font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] uppercase text-[#5C735E] mb-1">Telegram Chat / Csatorna ID</label>
+                        <input type="text" id="cfgChatId" placeholder="-1003946373632" class="w-full font-mono">
+                    </div>
+                    <button id="saveSettingsBtn" class="w-full py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
+                        Beállítások Biztonságos Mentése
+                    </button>
+                </div>
             </div>
         </div>
 
     </div>
 
+    <!-- Firebase SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
@@ -211,16 +227,53 @@
             measurementId: "G-1QBRT003J7"
         };
 
-        // A te Telegram Botod konfigurációja
-        const TG_BOT_TOKEN = "8919908631:AAHgTYIKve1qwgwrCMKUfcsrN-s2D1yZbpM";
-        const TG_CHAT_ID = "-1003946373632";
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 1. Egyszer használatos Telegram meghívó generálása a bottal
+        // Dinamikusan betöltött Telegram beállítások (Nem a GitHub kódból!)
+        let TG_BOT_TOKEN = localStorage.getItem("TG_BOT_TOKEN") || "";
+        let TG_CHAT_ID = localStorage.getItem("TG_CHAT_ID") || "-1003946373632";
+
+        async function loadTelegramSettings() {
+            try {
+                const snap = await getDoc(doc(db, "settings", "integrations"));
+                if (snap.exists() && snap.data().botToken) {
+                    TG_BOT_TOKEN = snap.data().botToken;
+                    TG_CHAT_ID = snap.data().chatId || TG_CHAT_ID;
+                }
+                document.getElementById('cfgBotToken').value = TG_BOT_TOKEN;
+                document.getElementById('cfgChatId').value = TG_CHAT_ID;
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+            TG_BOT_TOKEN = document.getElementById('cfgBotToken').value.trim();
+            TG_CHAT_ID = document.getElementById('cfgChatId').value.trim();
+
+            localStorage.setItem("TG_BOT_TOKEN", TG_BOT_TOKEN);
+            localStorage.setItem("TG_CHAT_ID", TG_CHAT_ID);
+
+            try {
+                await setDoc(doc(db, "settings", "integrations"), {
+                    botToken: TG_BOT_TOKEN,
+                    chatId: TG_CHAT_ID,
+                    updatedAt: new Date().toISOString()
+                });
+                alert("✓ Telegram beállítások sikeresen elmentve a biztonságos tárhelyre!");
+            } catch (err) {
+                alert("Hiba: " + err.message);
+            }
+        });
+
+        // Telegram 1 alkalmas link generálás
         async function createTelegramOneTimeInvite() {
+            if (!TG_BOT_TOKEN) {
+                alert("Kérjük, add meg a Telegram Bot Tokent a Beállítások fülön!");
+                return "https://t.me/zoldsejt";
+            }
             try {
                 const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/createChatInviteLink`, {
                     method: 'POST',
@@ -228,37 +281,33 @@
                     body: JSON.stringify({
                         chat_id: TG_CHAT_ID,
                         member_limit: 1,
-                        expire_date: Math.floor(Date.now() / 1000) + 259200 // 3 nap
+                        expire_date: Math.floor(Date.now() / 1000) + 259200
                     })
                 });
                 const data = await res.json();
                 if (data.ok) return data.result.invite_link;
                 throw new Error(data.description);
             } catch (e) {
-                console.error("Telegram invite generálási hiba:", e);
-                return "https://t.me/zoldsejt"; // Fallback
+                console.error(e);
+                return "https://t.me/zoldsejt";
             }
         }
 
-        // 2. Küldetés kiposztolása a Telegram csatornára
         async function postMissionToTelegram(code, title, category, xp, desc) {
+            if (!TG_BOT_TOKEN) return;
             const msg = `🌱 <b>A FEJ // KÜLDETÉS ${code}</b>\n\n<b>${title.toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${desc}\n\n<i>A Fej figyel.</i>`;
             try {
                 await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: TG_CHAT_ID,
-                        text: msg,
-                        parse_mode: 'HTML'
-                    })
+                    body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: 'HTML' })
                 });
             } catch (e) {
-                console.warn("Telegram posztolási hiba:", e);
+                console.warn(e);
             }
         }
 
-        // Alapértelmezett 27 szint
+        // Alapértelmezett szintek
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -301,12 +350,12 @@
             return currentRank;
         }
 
-        // Fülek kezelése
         const tabs = {
             members: { btn: document.getElementById('tabMembersBtn'), view: document.getElementById('membersTab') },
             missions: { btn: document.getElementById('tabMissionsBtn'), view: document.getElementById('missionsTab') },
             tools: { btn: document.getElementById('tabToolsBtn'), view: document.getElementById('toolsTab') },
-            evo: { btn: document.getElementById('tabEvoBtn'), view: document.getElementById('evoTab') }
+            evo: { btn: document.getElementById('tabEvoBtn'), view: document.getElementById('evoTab') },
+            settings: { btn: document.getElementById('tabSettingsBtn'), view: document.getElementById('settingsTab') }
         };
 
         function switchTab(activeKey) {
@@ -327,8 +376,8 @@
         tabs.missions.btn.addEventListener('click', () => switchTab('missions'));
         tabs.tools.btn.addEventListener('click', () => switchTab('tools'));
         tabs.evo.btn.addEventListener('click', () => switchTab('evo'));
+        tabs.settings.btn.addEventListener('click', () => switchTab('settings'));
 
-        // DRAG & DROP ÉS SZINTKEZELÉS
         function checkXpOrder() {
             let isBroken = false;
             for (let i = 0; i < activeRanks.length - 1; i++) {
@@ -371,7 +420,6 @@
                 evoTbody.appendChild(tr);
             });
 
-            // Drag and Drop események
             let dragSrcIdx = null;
             evoTbody.querySelectorAll('tr').forEach(tr => {
                 tr.addEventListener('dragstart', (e) => {
@@ -439,7 +487,7 @@
             }
         });
 
-        // KÜLDETÉSEK KEZELÉSE
+        // KÜLDETÉSEK
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
@@ -458,22 +506,20 @@
             btn.innerText = "PUBLIKÁLÁS...";
 
             try {
-                // 1. Mentés Firestore-ba
                 await addDoc(collection(db, "missions"), {
                     code, title, xp, category, skills, desc,
                     status: "open",
                     createdAt: new Date().toISOString()
                 });
 
-                // 2. Automata Telegram poszt
                 await postMissionToTelegram(code, title, category, xp, desc);
 
-                alert("✓ Küldetés sikeresen publikálva a Telegramra és a weboldalra!");
+                alert("✓ Küldetés publikálva a Telegramra és a weboldalra!");
                 document.getElementById('mCode').value = '';
                 document.getElementById('mTitle').value = '';
                 document.getElementById('mDesc').value = '';
             } catch (e) {
-                alert("Hiba a publikáláskor: " + e.message);
+                alert("Hiba: " + e.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "⚡ Publikálás Telegramra & Firestore-ba";
@@ -519,7 +565,7 @@
             });
         }
 
-        // ESZKÖZTÁR KEZELÉSE
+        // ESZKÖZTÁR
         document.getElementById('addToolBtn').addEventListener('click', async () => {
             const name = document.getElementById('toolName').value.trim();
             const location = document.getElementById('toolLocation').value.trim();
@@ -574,7 +620,8 @@
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');
                 
-                // Evolúció szinkron
+                loadTelegramSettings();
+
                 onSnapshot(doc(db, "settings", "evolution"), (snap) => {
                     if (snap.exists() && snap.data().ranks) activeRanks = snap.data().ranks;
                     renderEvoTable();
@@ -650,7 +697,6 @@
                     tbody.appendChild(tr);
                 });
 
-                // Jóváhagyás (Telegram bot linkgenerálással)
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const docId = e.target.dataset.id;
@@ -675,7 +721,6 @@
                     });
                 });
 
-                // XP Módosítás (+/-)
                 document.querySelectorAll('.mod-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const docId = e.target.dataset.id;
