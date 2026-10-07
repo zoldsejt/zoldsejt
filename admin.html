@@ -91,6 +91,8 @@
 
         <!-- 2. FÜL: KÜLDETÉSEK & INFÓK -->
         <div id="missionsTab" class="hidden space-y-6">
+            
+            <!-- Szabad Telegram Poszt Író -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">📢 Hírös Hírnök // Szabad Telegram Közlemény</h3>
@@ -104,6 +106,7 @@
                 </div>
             </div>
 
+            <!-- Új Küldetés Űrlap -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <h3 class="text-sm font-bold text-white uppercase">// Új Küldetés Kiírása</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -128,6 +131,7 @@
                 </div>
             </div>
 
+            <!-- Küldetések Listája (Részletes Résztvevőkkel) -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -136,9 +140,9 @@
                             <th class="p-3">Cím & Kategória</th>
                             <th class="p-3">XP</th>
                             <th class="p-3">Leírás</th>
-                            <th class="p-3">Résztvevők</th>
+                            <th class="p-3 min-w-[180px]">Jelentkezett Sejttagok</th>
                             <th class="p-3">Státusz</th>
-                            <th class="p-3 text-center">Művelet</th>
+                            <th class="p-3 text-center min-w-[140px]">Művelet</th>
                         </tr>
                     </thead>
                     <tbody id="missionsTableBody" class="divide-y divide-[#1E2F22]"></tbody>
@@ -173,7 +177,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: EVOLÚCIÓS XP TÁBLÁZAT (Létszám kijelzéssel) -->
+        <!-- 4. FÜL: EVOLÚCIÓS XP TÁBLÁZAT -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
@@ -247,6 +251,46 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- KÜLDETÉS MÓDOSÍTÁSI MODAL -->
+    <div id="editMissionModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#101912] border border-[#1E2F22] max-w-lg w-full p-6 space-y-4 text-xs">
+            <div class="flex justify-between items-center border-b border-[#1E2F22] pb-2">
+                <h3 class="font-bold text-white uppercase">Küldetés Módosítása</h3>
+                <button id="closeEditModalBtn" class="text-[#5C735E] hover:text-white font-bold text-sm">✕</button>
+            </div>
+            <input type="hidden" id="editMissionDocId">
+            <input type="hidden" id="editMissionTgId">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Küldetés Címe</label>
+                    <input type="text" id="editMTitle" class="w-full font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Kategória</label>
+                        <select id="editMCat" class="w-full">
+                            <option value="5_perc">5 Perces Küldetés</option>
+                            <option value="30_perc">30 Perces Küldetés</option>
+                            <option value="sejt_akcio">Sejt-Akció</option>
+                            <option value="fej_kuldetes">Fej-Küldetés</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">XP Jutalom</label>
+                        <input type="number" id="editMXp" class="w-full font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Leírás & Utasítás</label>
+                    <textarea id="editMDesc" rows="3" class="w-full"></textarea>
+                </div>
+            </div>
+            <button id="saveEditMissionBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold uppercase tracking-wider transition">
+                Módosítások Mentése
+            </button>
+        </div>
     </div>
 
     <!-- Firebase SDK v10 -->
@@ -518,12 +562,10 @@
             checkXpOrder();
         }
 
-        // TÁBLÁZAT KIRAJZOLÁSA ÉLŐ LÉTSZÁM SZÁMÍTÁSSAL
         function renderEvoTable() {
             const evoTbody = document.getElementById('evoTableBody');
             evoTbody.innerHTML = '';
 
-            // Létszámok kiszámítása az aktív tagokból
             const rankCounts = {};
             candidatesCache.forEach(c => {
                 if (c.status === "approved") {
@@ -617,7 +659,7 @@
             alert("⚡ Szintek elmentve!");
         });
 
-        // KÜLDETÉSEK
+        // KÜLDETÉSEK PUBLIKÁLÁSA
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
@@ -656,6 +698,7 @@
             }
         });
 
+        // KÜLDETÉSEK LISTÁZÁSA (AZONOSÍTÓKKAL ÉS MÓDOSÍTÁS GOMBBAL)
         function loadMissions() {
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const tbody = document.getElementById('missionsTableBody');
@@ -668,6 +711,13 @@
                     const m = d.data();
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-[#0B130D]";
+
+                    // Jelentkezett tagok azonosítóinak listázása
+                    const attendees = m.attendees || [];
+                    const attendeesHtml = attendees.length > 0
+                        ? attendees.map(id => `<span class="inline-block px-1.5 py-0.5 bg-[#0B130D] border border-sejt-border text-[#7A9E48] font-mono text-[10px] m-0.5">${id}</span>`).join('')
+                        : '<span class="text-[#5C735E] italic text-[11px]">Nincs még jelentkező</span>';
+
                     tr.innerHTML = `
                         <td class="p-3 font-mono font-bold text-[#7A9E48]">${m.code}</td>
                         <td class="p-3">
@@ -676,16 +726,34 @@
                         </td>
                         <td class="p-3 font-mono text-[#7A9E48]">+${m.xp} XP</td>
                         <td class="p-3 text-[11px] max-w-xs truncate">${m.desc}</td>
-                        <td class="p-3 font-mono text-[11px] text-sejt-muted">${(m.attendees || []).length} fő</td>
+                        <td class="p-3 max-w-xs">
+                            <div class="flex flex-wrap items-center gap-1">${attendeesHtml}</div>
+                            <div class="text-[9px] text-[#5C735E] mt-1">Összesen: ${attendees.length} fő</div>
+                        </td>
                         <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
-                        <td class="p-3 text-center space-x-2">
-                            <button class="toggle-m-btn text-xs hover:underline text-[#7A9E48]" data-id="${d.id}" data-status="${m.status}">
+                        <td class="p-3 text-center space-x-1">
+                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${d.id}" data-title="${m.title}" data-desc="${m.desc}" data-xp="${m.xp}" data-cat="${m.category}">Módosítás</button>
+                            <span class="text-[#1E2F22]">|</span>
+                            <button class="toggle-m-btn text-[11px] text-[#5C735E] hover:underline" data-id="${d.id}" data-status="${m.status}">
                                 ${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}
                             </button>
-                            <button class="delete-m-btn text-xs text-red-400 hover:underline" data-id="${d.id}" data-tgid="${m.tgMessageId || ''}">Törlés</button>
+                            <span class="text-[#1E2F22]">|</span>
+                            <button class="delete-m-btn text-[11px] text-red-400 hover:underline" data-id="${d.id}" data-tgid="${m.tgMessageId || ''}">Törlés</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
+                });
+
+                tbody.querySelectorAll('.edit-m-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const b = e.target;
+                        document.getElementById('editMissionDocId').value = b.dataset.id;
+                        document.getElementById('editMTitle').value = b.dataset.title;
+                        document.getElementById('editMDesc').value = b.dataset.desc;
+                        document.getElementById('editMXp').value = b.dataset.xp;
+                        document.getElementById('editMCat').value = b.dataset.cat;
+                        document.getElementById('editMissionModal').classList.remove('hidden');
+                    });
                 });
 
                 tbody.querySelectorAll('.toggle-m-btn').forEach(btn => {
@@ -706,6 +774,25 @@
                 });
             });
         }
+
+        // Küldetés Módosítás Mentése
+        document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
+            const docId = document.getElementById('editMissionDocId').value;
+            const title = document.getElementById('editMTitle').value.trim();
+            const desc = document.getElementById('editMDesc').value.trim();
+            const xp = parseInt(document.getElementById('editMXp').value) || 20;
+            const category = document.getElementById('editMCat').value;
+
+            if (!title || !desc) return alert("Minden mezőt tölts ki!");
+
+            await updateDoc(doc(db, "missions", docId), { title, desc, xp, category, updatedAt: new Date().toISOString() });
+            document.getElementById('editMissionModal').classList.add('hidden');
+            alert("✓ Küldetés sikeresen módosítva!");
+        });
+
+        document.getElementById('closeEditModalBtn').addEventListener('click', () => {
+            document.getElementById('editMissionModal').classList.add('hidden');
+        });
 
         // ESZKÖZTÁR
         document.getElementById('addToolBtn').addEventListener('click', async () => {
@@ -859,7 +946,7 @@
                 candidatesCache = [];
                 snapshot.forEach(docSnap => candidatesCache.push(docSnap.data()));
 
-                renderEvoTable(); // Létszámok újraszámolása
+                renderEvoTable();
 
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
