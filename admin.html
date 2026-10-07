@@ -9,17 +9,20 @@
     <style>
         body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
         .tab-active { border-bottom: 2px solid #7A9E48; color: #7A9E48; }
-        input, select {
+        input, select, textarea {
             background-color: #0B130D;
             border: 1px solid #1E2F22;
             color: #D5E2D5;
             padding: 4px 8px;
             font-size: 11px;
         }
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #5A7736;
         }
+        .drag-handle { cursor: grab; user-select: none; }
+        .drag-handle:active { cursor: grabbing; }
+        .dragging { opacity: 0.4; background: #1E2F22; }
     </style>
 </head>
 <body class="p-4 md:p-8 max-w-7xl mx-auto">
@@ -38,15 +41,17 @@
     <!-- ADMIN IRÁNYÍTÓPULT -->
     <div id="dashboardView" class="hidden space-y-6">
         
-        <!-- Fejléc és fülek -->
+        <!-- Fejléc és navigáció -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
-                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati felügyelete és XP kezelése</p>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati, küldetés- és evolúciós vezérlése</p>
             </div>
             
-            <div class="flex items-center space-x-6 text-xs">
+            <div class="flex flex-wrap items-center gap-4 text-xs">
                 <button id="tabMembersBtn" class="py-1 font-bold tab-active">Tagok & Jelentkezők</button>
+                <button id="tabMissionsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Küldetések</button>
+                <button id="tabToolsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Eszköztár</button>
                 <button id="tabEvoBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Evolúciós Kódex (27 Szint)</button>
                 <button id="logoutBtn" class="text-xs text-red-400 hover:underline">Kilépés</button>
             </div>
@@ -59,7 +64,7 @@
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
                         <tr>
                             <th class="p-3">Azonosító</th>
-                            <th class="p-3">E-mail</th>
+                            <th class="p-3">Név & E-mail</th>
                             <th class="p-3">Szint & XP</th>
                             <th class="p-3">Képességek</th>
                             <th class="p-3">Üzenet A Fejnek</th>
@@ -74,16 +79,63 @@
             </div>
         </div>
 
-        <!-- 2. FÜL: DINAMIKUS EVOLÚCIÓS XP TÁBLÁZAT -->
-        <div id="evoTab" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
-                <div>
-                    <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix</h3>
-                    <p class="text-xs text-[#5C735E]">Itt szerkeszthetsz meglévő szinteket, növelheted az XP határokat vagy adhatsz hozzá új szinteket.</p>
+        <!-- 2. FÜL: KÜLDETÉSEK KEZELÉSE -->
+        <div id="missionsTab" class="hidden space-y-6">
+            <!-- Új Küldetés Űrlap -->
+            <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
+                <h3 class="text-sm font-bold text-white uppercase">// Új Küldetés Kiírása</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <input type="text" id="mCode" placeholder="Küldetéskód (pl. 001)" class="w-full font-mono">
+                    <input type="text" id="mTitle" placeholder="Küldetés címe (pl. Öt perc)" class="sm:col-span-2 w-full font-bold">
+                    <input type="number" id="mXp" placeholder="Jutalom XP (pl. 20)" class="w-full font-mono">
                 </div>
-                <div class="flex space-x-2">
-                    <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint hozzáadása</button>
-                    <button id="saveEvoBtn" class="px-4 py-1.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">⚡ Felsugárzás (Mentés)</button>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <select id="mCategory" class="w-full">
+                        <option value="5_perc">5 Perces Küldetés</option>
+                        <option value="30_perc">30 Perces Küldetés</option>
+                        <option value="sejt_akcio">Sejt-Akció (Csoportos)</option>
+                        <option value="fej_kuldetes">Fej-Küldetés (Kiemelt)</option>
+                    </select>
+                    <input type="text" id="mSkills" placeholder="Szükséges képesség (pl. Növények, Fuvar)" class="sm:col-span-2 w-full">
+                </div>
+                <textarea id="mDesc" rows="2" placeholder="Küldetés operatív utasítása és részletei..." class="w-full"></textarea>
+                <div class="flex justify-end">
+                    <button id="publishMissionBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
+                        ⚡ Publikálás Telegramra & Firestore-ba
+                    </button>
+                </div>
+            </div>
+
+            <!-- Küldetések Listája -->
+            <div class="overflow-x-auto border border-[#1E2F22]">
+                <table class="w-full text-left text-xs bg-[#101912]">
+                    <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
+                        <tr>
+                            <th class="p-3">Kód</th>
+                            <th class="p-3">Cím & Kategória</th>
+                            <th class="p-3">XP</th>
+                            <th class="p-3">Leírás</th>
+                            <th class="p-3">Státusz</th>
+                            <th class="p-3 text-center">Művelet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="missionsTableBody" class="divide-y divide-[#1E2F22]">
+                        <tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Nincs rögzített küldetés.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. FÜL: ESZKÖZTÁR KEZELÉSE -->
+        <div id="toolsTab" class="hidden space-y-6">
+            <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
+                <h3 class="text-sm font-bold text-white uppercase">// Új Eszköz Hozzáadása („A Fej Megoldja”)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="text" id="toolName" placeholder="Eszköz neve (pl. Fűnyíró, Teleszkópos ágvágó)" class="w-full font-bold">
+                    <input type="text" id="toolLocation" placeholder="Tárolási körzet / Helyszín" class="w-full">
+                    <button id="addToolBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
+                        + Eszköz Rögzítése
+                    </button>
                 </div>
             </div>
 
@@ -91,6 +143,42 @@
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
                         <tr>
+                            <th class="p-3">Eszköz Megnevezése</th>
+                            <th class="p-3">Helyszín</th>
+                            <th class="p-3">Jelenlegi Birtokos</th>
+                            <th class="p-3">Állapot</th>
+                            <th class="p-3 text-center">Művelet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="toolsTableBody" class="divide-y divide-[#1E2F22]">
+                        <tr><td colspan="5" class="p-4 text-center text-[#5C735E]">Nincs eszköz a nyilvántartásban.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 4. FÜL: DINAMIKUS EVOLÚCIÓS XP TÁBLÁZAT (Drag-and-Drop ☰) -->
+        <div id="evoTab" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix</h3>
+                    <p class="text-xs text-[#5C735E]">Fogd meg a <b>☰</b> jelet a szintek átrendezéséhez. A számozás automatikusan igazodik!</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint</button>
+                    <button id="saveEvoBtn" class="px-4 py-1.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">⚡ Felsugárzás (Mentés)</button>
+                </div>
+            </div>
+
+            <div id="xpWarning" class="hidden p-3 bg-amber-900/30 border border-amber-600 text-amber-300 text-xs font-mono">
+                ⚠️ FIGYELEM: Az átrendezés miatt az XP értékek nem növekvő sorrendben vannak! Kérjük, írd át az XP-ket a helyes progresszióhoz mentés előtt.
+            </div>
+
+            <div class="overflow-x-auto border border-[#1E2F22]">
+                <table class="w-full text-left text-xs bg-[#101912]">
+                    <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
+                        <tr>
+                            <th class="p-3 w-8 text-center">☰</th>
                             <th class="p-3 w-16">Kód</th>
                             <th class="p-3">Megnevezés</th>
                             <th class="p-3">Kategória</th>
@@ -100,7 +188,7 @@
                         </tr>
                     </thead>
                     <tbody id="evoTableBody" class="divide-y divide-[#1E2F22]">
-                        <!-- JS dinamikusan generálja a szerkeszthető sorokat -->
+                        <!-- JS dinamikusan generálja a sorokat -->
                     </tbody>
                 </table>
             </div>
@@ -111,7 +199,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
@@ -123,11 +211,54 @@
             measurementId: "G-1QBRT003J7"
         };
 
+        // A te Telegram Botod konfigurációja
+        const TG_BOT_TOKEN = "8919908631:AAHgTYIKve1qwgwrCMKUfcsrN-s2D1yZbpM";
+        const TG_CHAT_ID = "-1003946373632";
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Alapértelmezett szintek
+        // 1. Egyszer használatos Telegram meghívó generálása a bottal
+        async function createTelegramOneTimeInvite() {
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/createChatInviteLink`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TG_CHAT_ID,
+                        member_limit: 1,
+                        expire_date: Math.floor(Date.now() / 1000) + 259200 // 3 nap
+                    })
+                });
+                const data = await res.json();
+                if (data.ok) return data.result.invite_link;
+                throw new Error(data.description);
+            } catch (e) {
+                console.error("Telegram invite generálási hiba:", e);
+                return "https://t.me/zoldsejt"; // Fallback
+            }
+        }
+
+        // 2. Küldetés kiposztolása a Telegram csatornára
+        async function postMissionToTelegram(code, title, category, xp, desc) {
+            const msg = `🌱 <b>A FEJ // KÜLDETÉS ${code}</b>\n\n<b>${title.toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${desc}\n\n<i>A Fej figyel.</i>`;
+            try {
+                await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TG_CHAT_ID,
+                        text: msg,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (e) {
+                console.warn("Telegram posztolási hiba:", e);
+            }
+        }
+
+        // Alapértelmezett 27 szint
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -170,40 +301,53 @@
             return currentRank;
         }
 
-        // Fülváltások
-        const tabMembersBtn = document.getElementById('tabMembersBtn');
-        const tabEvoBtn = document.getElementById('tabEvoBtn');
-        const membersTab = document.getElementById('membersTab');
-        const evoTab = document.getElementById('evoTab');
+        // Fülek kezelése
+        const tabs = {
+            members: { btn: document.getElementById('tabMembersBtn'), view: document.getElementById('membersTab') },
+            missions: { btn: document.getElementById('tabMissionsBtn'), view: document.getElementById('missionsTab') },
+            tools: { btn: document.getElementById('tabToolsBtn'), view: document.getElementById('toolsTab') },
+            evo: { btn: document.getElementById('tabEvoBtn'), view: document.getElementById('evoTab') }
+        };
 
-        tabMembersBtn.addEventListener('click', () => {
-            tabMembersBtn.classList.add('tab-active', 'text-[#7A9E48]');
-            tabMembersBtn.classList.remove('text-[#5C735E]');
-            tabEvoBtn.classList.remove('tab-active', 'text-[#7A9E48]');
-            tabEvoBtn.classList.add('text-[#5C735E]');
-            membersTab.classList.remove('hidden');
-            evoTab.classList.add('hidden');
-        });
-
-        tabEvoBtn.addEventListener('click', () => {
-            tabEvoBtn.classList.add('tab-active', 'text-[#7A9E48]');
-            tabEvoBtn.classList.remove('text-[#5C735E]');
-            tabMembersBtn.classList.remove('tab-active', 'text-[#7A9E48]');
-            tabMembersBtn.classList.add('text-[#5C735E]');
-            evoTab.classList.remove('hidden');
-            membersTab.classList.add('hidden');
-        });
-
-        // Evolúció szinkronizálása
-        function syncEvolutionsFromFirestore() {
-            onSnapshot(doc(db, "settings", "evolution"), (snap) => {
-                if (snap.exists() && snap.data().ranks) {
-                    activeRanks = snap.data().ranks;
+        function switchTab(activeKey) {
+            Object.keys(tabs).forEach(k => {
+                if (k === activeKey) {
+                    tabs[k].btn.classList.add('tab-active', 'text-[#7A9E48]');
+                    tabs[k].btn.classList.remove('text-[#5C735E]');
+                    tabs[k].view.classList.remove('hidden');
                 } else {
-                    activeRanks = [...DEFAULT_RANKS];
+                    tabs[k].btn.classList.remove('tab-active', 'text-[#7A9E48]');
+                    tabs[k].btn.classList.add('text-[#5C735E]');
+                    tabs[k].view.classList.add('hidden');
                 }
-                renderEvoTable();
             });
+        }
+
+        tabs.members.btn.addEventListener('click', () => switchTab('members'));
+        tabs.missions.btn.addEventListener('click', () => switchTab('missions'));
+        tabs.tools.btn.addEventListener('click', () => switchTab('tools'));
+        tabs.evo.btn.addEventListener('click', () => switchTab('evo'));
+
+        // DRAG & DROP ÉS SZINTKEZELÉS
+        function checkXpOrder() {
+            let isBroken = false;
+            for (let i = 0; i < activeRanks.length - 1; i++) {
+                if (activeRanks[i].code === "26" || activeRanks[i].code === "27") continue;
+                if (Number(activeRanks[i].xp) > Number(activeRanks[i+1].xp)) {
+                    isBroken = true;
+                    break;
+                }
+            }
+            document.getElementById('xpWarning').classList.toggle('hidden', !isBroken);
+        }
+
+        function renumberRanks() {
+            activeRanks.forEach((r, idx) => {
+                const num = idx + 1;
+                r.code = num < 10 ? `0${num}` : `${num}`;
+            });
+            renderEvoTable();
+            checkXpOrder();
         }
 
         function renderEvoTable() {
@@ -211,28 +355,44 @@
             evoTbody.innerHTML = '';
             activeRanks.forEach((r, idx) => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-[#0B130D]";
+                tr.className = "hover:bg-[#0B130D] transition";
+                tr.draggable = true;
+                tr.dataset.index = idx;
+
                 tr.innerHTML = `
-                    <td class="p-2 font-mono font-bold text-[#7A9E48]">
-                        <input type="text" class="w-12 text-center" value="${r.code}" data-field="code" data-idx="${idx}">
-                    </td>
-                    <td class="p-2">
-                        <input type="text" class="w-full font-bold text-white" value="${r.name}" data-field="name" data-idx="${idx}">
-                    </td>
-                    <td class="p-2">
-                        <input type="text" class="w-full text-[#5C735E]" value="${r.cat}" data-field="cat" data-idx="${idx}">
-                    </td>
-                    <td class="p-2">
-                        <input type="number" class="w-24 font-mono text-[#7A9E48]" value="${r.xp}" data-field="xp" data-idx="${idx}">
-                    </td>
-                    <td class="p-2">
-                        <input type="text" class="w-full" value="${r.desc}" data-field="desc" data-idx="${idx}">
-                    </td>
-                    <td class="p-2 text-center">
-                        <button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold px-2 py-1" data-idx="${idx}">✕</button>
-                    </td>
+                    <td class="p-2 text-center drag-handle text-[#5C735E] hover:text-[#7A9E48] text-base">☰</td>
+                    <td class="p-2 font-mono font-bold text-[#7A9E48] text-center">${r.code}</td>
+                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${r.name}" data-field="name" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="text" class="w-full text-[#5C735E]" value="${r.cat}" data-field="cat" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="number" class="w-24 font-mono text-[#7A9E48]" value="${r.xp}" data-field="xp" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="text" class="w-full" value="${r.desc}" data-field="desc" data-idx="${idx}"></td>
+                    <td class="p-2 text-center"><button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button></td>
                 `;
                 evoTbody.appendChild(tr);
+            });
+
+            // Drag and Drop események
+            let dragSrcIdx = null;
+            evoTbody.querySelectorAll('tr').forEach(tr => {
+                tr.addEventListener('dragstart', (e) => {
+                    dragSrcIdx = Number(tr.dataset.index);
+                    tr.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                tr.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+                tr.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const targetIdx = Number(tr.dataset.index);
+                    if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
+                        const movedItem = activeRanks.splice(dragSrcIdx, 1)[0];
+                        activeRanks.splice(targetIdx, 0, movedItem);
+                        renumberRanks();
+                    }
+                });
+                tr.addEventListener('dragend', () => tr.classList.remove('dragging'));
             });
 
             evoTbody.querySelectorAll('input').forEach(input => {
@@ -240,59 +400,189 @@
                     const idx = e.target.getAttribute('data-idx');
                     const field = e.target.getAttribute('data-field');
                     activeRanks[idx][field] = field === 'xp' ? Number(e.target.value) : e.target.value;
+                    checkXpOrder();
                 });
             });
 
             evoTbody.querySelectorAll('.delete-rank-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const idx = e.target.getAttribute('data-idx');
-                    activeRanks.splice(idx, 1);
-                    renderEvoTable();
+                    activeRanks.splice(Number(e.target.dataset.idx), 1);
+                    renumberRanks();
                 });
             });
         }
 
         document.getElementById('addLevelBtn').addEventListener('click', () => {
             const nextNum = activeRanks.length + 1;
-            const formattedCode = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-            const lastXp = activeRanks.length > 0 ? (activeRanks[activeRanks.length - 1].xp || 0) + 500 : 0;
-            
             activeRanks.push({
-                code: formattedCode,
-                name: `Új Állapot ${formattedCode}`,
+                code: nextNum < 10 ? `0${nextNum}` : `${nextNum}`,
+                name: `Új Szint ${nextNum}`,
                 cat: "Fejlődés",
-                xp: lastXp,
-                desc: "Küldetéssel elérhető szint"
+                xp: (activeRanks[activeRanks.length - 1]?.xp || 0) + 500,
+                desc: "Küldetéssel elérhető állapot"
             });
-            renderEvoTable();
+            renumberRanks();
         });
 
         document.getElementById('saveEvoBtn').addEventListener('click', async () => {
-            const saveBtn = document.getElementById('saveEvoBtn');
-            saveBtn.disabled = true;
-            saveBtn.innerText = "FELSUGÁRZÁS...";
-
+            const btn = document.getElementById('saveEvoBtn');
+            btn.disabled = true;
+            btn.innerText = "FELSUGÁRZÁS...";
             try {
-                await setDoc(doc(db, "settings", "evolution"), {
-                    ranks: activeRanks,
-                    updatedAt: new Date().toISOString()
-                });
-                alert("⚡ Az evolúciós szintek elmentve és felsugározva a Firestore-ba!");
+                await setDoc(doc(db, "settings", "evolution"), { ranks: activeRanks, updatedAt: new Date().toISOString() });
+                alert("⚡ Szintek sikeresen elmentve és felsugározva a hálózatba!");
             } catch (err) {
-                console.error("Mentési hiba:", err);
                 alert("Hiba: " + err.message);
             } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerText = "⚡ Felsugárzás (Mentés)";
+                btn.disabled = false;
+                btn.innerText = "⚡ Felsugárzás (Mentés)";
             }
         });
 
+        // KÜLDETÉSEK KEZELÉSE
+        document.getElementById('publishMissionBtn').addEventListener('click', async () => {
+            const code = document.getElementById('mCode').value.trim();
+            const title = document.getElementById('mTitle').value.trim();
+            const xp = parseInt(document.getElementById('mXp').value) || 20;
+            const category = document.getElementById('mCategory').value;
+            const skills = document.getElementById('mSkills').value.trim();
+            const desc = document.getElementById('mDesc').value.trim();
+
+            if (!code || !title || !desc) {
+                alert("Add meg a küldetés kódját, címét és leírását!");
+                return;
+            }
+
+            const btn = document.getElementById('publishMissionBtn');
+            btn.disabled = true;
+            btn.innerText = "PUBLIKÁLÁS...";
+
+            try {
+                // 1. Mentés Firestore-ba
+                await addDoc(collection(db, "missions"), {
+                    code, title, xp, category, skills, desc,
+                    status: "open",
+                    createdAt: new Date().toISOString()
+                });
+
+                // 2. Automata Telegram poszt
+                await postMissionToTelegram(code, title, category, xp, desc);
+
+                alert("✓ Küldetés sikeresen publikálva a Telegramra és a weboldalra!");
+                document.getElementById('mCode').value = '';
+                document.getElementById('mTitle').value = '';
+                document.getElementById('mDesc').value = '';
+            } catch (e) {
+                alert("Hiba a publikáláskor: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "⚡ Publikálás Telegramra & Firestore-ba";
+            }
+        });
+
+        function loadMissions() {
+            onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
+                const tbody = document.getElementById('missionsTableBody');
+                tbody.innerHTML = '';
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#5C735E]">Nincs aktív küldetés.</td></tr>';
+                    return;
+                }
+                snap.forEach(d => {
+                    const m = d.data();
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-[#0B130D]";
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono font-bold text-[#7A9E48]">${m.code}</td>
+                        <td class="p-3">
+                            <span class="font-bold text-white">${m.title}</span>
+                            <div class="text-[10px] text-[#5C735E]">${m.category} | ${m.skills || 'Mindenki'}</div>
+                        </td>
+                        <td class="p-3 font-mono text-[#7A9E48]">+${m.xp} XP</td>
+                        <td class="p-3 text-[11px] max-w-sm">${m.desc}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
+                        <td class="p-3 text-center">
+                            <button class="toggle-m-btn text-xs hover:underline text-[#7A9E48]" data-id="${d.id}" data-status="${m.status}">
+                                ${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                tbody.querySelectorAll('.toggle-m-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const newStatus = e.target.dataset.status === 'open' ? 'closed' : 'open';
+                        await updateDoc(doc(db, "missions", e.target.dataset.id), { status: newStatus });
+                    });
+                });
+            });
+        }
+
+        // ESZKÖZTÁR KEZELÉSE
+        document.getElementById('addToolBtn').addEventListener('click', async () => {
+            const name = document.getElementById('toolName').value.trim();
+            const location = document.getElementById('toolLocation').value.trim();
+            if (!name) return alert("Add meg az eszköz nevét!");
+
+            await addDoc(collection(db, "tools"), {
+                name, location,
+                holder: "A Fej",
+                status: "available",
+                createdAt: new Date().toISOString()
+            });
+
+            document.getElementById('toolName').value = '';
+            document.getElementById('toolLocation').value = '';
+        });
+
+        function loadTools() {
+            onSnapshot(collection(db, "tools"), (snap) => {
+                const tbody = document.getElementById('toolsTableBody');
+                tbody.innerHTML = '';
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-[#5C735E]">Nincs eszköz rögzítve.</td></tr>';
+                    return;
+                }
+                snap.forEach(d => {
+                    const t = d.data();
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-[#0B130D]";
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-white">${t.name}</td>
+                        <td class="p-3 text-[#5C735E]">${t.location || 'Központ'}</td>
+                        <td class="p-3 font-mono">${t.holder}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 ${t.status === 'available' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-amber-950 text-amber-400'} uppercase font-bold">${t.status === 'available' ? 'ELÉRHETŐ' : 'HASZNÁLATBAN'}</span></td>
+                        <td class="p-3 text-center">
+                            <button class="toggle-tool-btn text-xs text-red-400 hover:underline" data-id="${d.id}">Törlés</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                tbody.querySelectorAll('.toggle-tool-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm("Törlöd ezt az eszközt?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
+                    });
+                });
+            });
+        }
+
+        // AUTH & TAGOK BETÖLTÉSE
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');
-                syncEvolutionsFromFirestore();
+                
+                // Evolúció szinkron
+                onSnapshot(doc(db, "settings", "evolution"), (snap) => {
+                    if (snap.exists() && snap.data().ranks) activeRanks = snap.data().ranks;
+                    renderEvoTable();
+                });
+
                 loadCandidates();
+                loadMissions();
+                loadTools();
             } else {
                 document.getElementById('loginView').classList.remove('hidden');
                 document.getElementById('dashboardView').classList.add('hidden');
@@ -311,13 +601,11 @@
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
         function loadCandidates() {
-            const q = query(collection(db, "candidates"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
+            onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
                 tbody.innerHTML = '';
-
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-[#5C735E]">Még nincs regisztrált Sejttag.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-[#5C735E]">Nincs regisztrált tag.</td></tr>';
                     return;
                 }
 
@@ -332,7 +620,10 @@
 
                     tr.innerHTML = `
                         <td class="p-3 font-bold text-[#7A9E48]">${data.candidateId}</td>
-                        <td class="p-3 font-mono">${data.email}</td>
+                        <td class="p-3">
+                            <span class="font-bold text-white">${data.fullName || 'Névtelen'}</span>
+                            <div class="text-[10px] text-[#5C735E] font-mono">${data.email}</div>
+                        </td>
                         <td class="p-3">
                             <span class="font-bold text-white">${rank.code}. ${rank.name}</span>
                             <div class="text-[10px] text-[#5C735E]">${xp} XP (${rank.cat})</div>
@@ -345,7 +636,7 @@
                         <td class="p-3 flex items-center space-x-1">
                             ${isPending ? `
                                 <button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" 
-                                    data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}">
+                                    data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}" data-name="${data.fullName || ''}">
                                     Jóváhagyás
                                 </button>
                             ` : `
@@ -359,31 +650,37 @@
                     tbody.appendChild(tr);
                 });
 
+                // Jóváhagyás (Telegram bot linkgenerálással)
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const docId = e.target.getAttribute('data-id');
-                        const email = e.target.getAttribute('data-email');
-                        const cid = e.target.getAttribute('data-cid');
+                        const docId = e.target.dataset.id;
+                        const email = e.target.dataset.email;
+                        const cid = e.target.dataset.cid;
+                        const name = e.target.dataset.name;
                         
+                        btn.disabled = true;
+                        btn.innerText = "LINK GENERÁLÁS...";
+
+                        const tgInviteLink = await createTelegramOneTimeInvite();
+
                         await updateDoc(doc(db, "candidates", docId), {
                             status: 'approved',
                             approvedAt: new Date().toISOString()
                         });
 
                         const subject = encodeURIComponent(`A FEJ // BEFOGADVA [${cid}]`);
-                        const body = encodeURIComponent(`A kérelmedet elbíráltuk.\nAzonosítód: ${cid}\nJelenlegi szint: 01. Spóra\n\nEgyszer használatos belépési kulcsod a Zöld Sejthez:\n[IDE MÁSOLD BE A TELEGRAM PRIVÁT LINKET]\n\nBelső profilod elkészítése és követése:\nhttps://zoldsejt.github.io/zoldsejt/profil.html\n\nFigyelj.\nA Fej`);
+                        const body = encodeURIComponent(`Üdvözlünk, ${name}!\n\nA belépési kérelmedet jóváhagytuk.\nAzonosítód: ${cid}\nKezdő szinted: 01. Spóra\n\nEgyszer használatos zárt Telegram csatlakozási kulcsod:\n${tgInviteLink}\n\nBelső profilod és küldetéskövetés:\nhttps://zoldsejt.github.io/zoldsejt/profil.html\n\nFigyelj.\nA Fej`);
+                        
                         window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
                     });
                 });
 
-                // XP Hozzáadás és LEVONÁS kezelő
+                // XP Módosítás (+/-)
                 document.querySelectorAll('.mod-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const docId = e.target.getAttribute('data-id');
-                        const currentXp = parseInt(e.target.getAttribute('data-xp')) || 0;
-                        const diff = parseInt(e.target.getAttribute('data-diff')) || 0;
-                        
-                        // 0 alá nem engedi csökkenteni az XP-t
+                        const docId = e.target.dataset.id;
+                        const currentXp = parseInt(e.target.dataset.xp) || 0;
+                        const diff = parseInt(e.target.dataset.diff) || 0;
                         const newXp = Math.max(0, currentXp + diff);
                         const newRank = calculateRank(newXp);
 

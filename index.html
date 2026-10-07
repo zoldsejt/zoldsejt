@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZÖLD SEJT // BELÉPÉSI PONT</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script>
@@ -44,7 +41,6 @@
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-8 relative selection:bg-sejt-olive selection:text-white">
     <div class="fixed inset-0 scanlines z-40"></div>
 
-    <!-- Fejléc -->
     <header class="max-w-2xl mx-auto w-full flex justify-between items-center py-4 border-b border-sejt-border text-xs tracking-widest text-sejt-muted">
         <div class="flex items-center space-x-2">
             <span class="inline-block w-2 h-2 rounded-full bg-sejt-olive animate-pulse"></span>
@@ -53,7 +49,6 @@
         <div>KECSKEMÉT</div>
     </header>
 
-    <!-- Fő tartalom -->
     <main class="max-w-2xl mx-auto w-full my-auto py-8">
         
         <!-- 1. FÁZIS: ŰRLAP -->
@@ -66,18 +61,25 @@
                 </p>
             </div>
 
-            <form id="applyForm" class="space-y-5 bg-sejt-surface border border-sejt-border p-6">
+            <form id="applyForm" class="space-y-4 bg-sejt-surface border border-sejt-border p-6">
                 
+                <!-- Teljes Név (Szűréshez) -->
+                <div class="space-y-1">
+                    <label class="block text-xs uppercase tracking-wider text-sejt-muted">Teljes név (Belső hitelesítéshez)*</label>
+                    <input type="text" id="fullName" required placeholder="Kovács János" 
+                        class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-sm text-white focus:outline-none focus:border-sejt-olive">
+                    <p class="text-[10px] text-sejt-muted">A nevedet más Sejttagok soha nem látják. Kizárólag A Fej látja a beléptetési bírálat során.</p>
+                </div>
+
                 <!-- E-mail -->
-                <div class="space-y-2">
+                <div class="space-y-1">
                     <label class="block text-xs uppercase tracking-wider text-sejt-muted">Kapcsolattartási pont (E-mail)*</label>
                     <input type="email" id="email" required placeholder="sejt@proton.me" 
                         class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-sm text-white focus:outline-none focus:border-sejt-olive">
-                    <p class="text-[11px] text-sejt-muted">A hálózat nem kér nevet. Az e-mail kizárólag a belépési kulcs átadására szolgál.</p>
                 </div>
 
                 <!-- Képességek -->
-                <div class="space-y-3">
+                <div class="space-y-2 pt-2">
                     <label class="block text-xs uppercase tracking-wider text-sejt-muted">Miben tudsz hozzátenni? (Legalább egyet válassz ki)*</label>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
@@ -93,13 +95,13 @@
                             <input type="checkbox" name="skill" value="szallitas"> <span>Szállítás / Fuvar</span>
                         </label>
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
-                            <input type="checkbox" name="skill" value="barkacsolas"> <span>Barkácsolás / Javítás</span>
+                            <input type="checkbox" name="skill" value="barkacsolas"> <span>Barkácsolás / Mester</span>
                         </label>
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
                             <input type="checkbox" name="skill" value="foto_video"> <span>Fotó / Videó</span>
                         </label>
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
-                            <input type="checkbox" name="skill" value="gepek"> <span>Gépek / Fűnyíró stb.</span>
+                            <input type="checkbox" name="skill" value="gepek"> <span>Gépek / Fűnyíró</span>
                         </label>
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer hover:border-sejt-muted">
                             <input type="checkbox" name="skill" value="grafika"> <span>Grafika / Alkotás</span>
@@ -111,7 +113,7 @@
                 </div>
 
                 <!-- Időkeret -->
-                <div class="space-y-2">
+                <div class="space-y-1">
                     <label class="block text-xs uppercase tracking-wider text-sejt-muted">Rendelkezésre álló idő</label>
                     <select id="timeframe" class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive">
                         <option value="5_perc">Alkalmanként 5 perc (mikro-küldetések)</option>
@@ -121,14 +123,14 @@
                     </select>
                 </div>
 
-                <!-- Opcionális üzenet / felajánlás -->
-                <div class="space-y-2">
+                <!-- Opcionális üzenet -->
+                <div class="space-y-1">
                     <label class="block text-xs uppercase tracking-wider text-sejt-muted">Üzenet vagy konkrét felajánlás A Fejnek (opcionális)</label>
                     <textarea id="notesToFej" rows="2" placeholder="Pl.: Van egy utánfutóm / magas ágvágóm / nyomtatni tudok matricát..." 
                         class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive"></textarea>
                 </div>
 
-                <!-- Szűrő / Szabályzati nyilatkozat -->
+                <!-- Nyilatkozat -->
                 <div class="p-3 bg-[#0B130D] border-l-2 border-sejt-olive space-y-2">
                     <label class="flex items-start space-x-2 text-xs cursor-pointer">
                         <input type="checkbox" id="termsCheck" required class="mt-0.5">
@@ -138,7 +140,6 @@
                     </label>
                 </div>
 
-                <!-- Beküldés -->
                 <button type="submit" id="submitBtn" 
                     class="w-full py-3 bg-sejt-olive hover:bg-sejt-oliveLight text-white text-xs uppercase tracking-widest font-semibold transition flex items-center justify-center space-x-2">
                     <span>BELÉPÉSI KÉRELEM KÜLDÉSE</span>
@@ -155,7 +156,7 @@
             </div>
 
             <div class="space-y-2 border-b border-sejt-border pb-4">
-                <p class="text-xs text-sejt-muted uppercase">Hálózati azonosítód:</p>
+                <p class="text-xs text-sejt-muted uppercase">Hálózati törzsszámod:</p>
                 <div id="generatedId" class="text-2xl font-bold tracking-wider text-sejt-oliveLight font-mono">---</div>
                 <p class="text-[11px] text-sejt-muted">Kezdeti állapot: <span class="text-white font-bold">01. Spóra</span> (0 XP)</p>
             </div>
@@ -192,10 +193,11 @@
                 <button id="closePrivacyBtn" class="text-sejt-muted hover:text-white font-bold text-sm">✕</button>
             </div>
             <div class="space-y-3 text-sejt-muted leading-relaxed max-h-80 overflow-y-auto">
-                <p><b>1. Kezelt adatok köre:</b> A rendszer kizárólag a megadott e-mail címet, a választott képességeket és a csatlakozás időpontját tárolja. Személyes nevet, telefonszámot, lakcímet nem kérünk és nem tárolunk.</p>
+                <p><b>1. Kezelt adatok köre:</b> A rendszer a megadott nevet (belső szűréshez és visszaélések megelőzéséhez), az e-mail címet, a választott képességeket és a csatlakozás időpontját tárolja. A nevedet más Sejttagok nem láthatják.</p>
                 <p><b>2. Az adatkezelés célja:</b> A belépési jogosultság elbírálása, a hozzáférési kulcsok és a küldetések eljuttatása.</p>
-                <p><b>3. Tárolási idő és biztonság:</b> Az adatokat a Google Firebase biztonságos, titkosított szerverein tároljuk. Harmadik félnek nem adjuk át.</p>
-                <p><b>4. Adattörléshez való jog:</b> A belső profilban elérhető az azonnali adattörlés („Önmegsemmisítés”), vagy kérhető a koordinátortól az adatok végleges megsemmisítése.</p>
+                <p><b>3. Jogalap:</b> Az érintett önkéntes hozzájárulása a regisztrációkor.</p>
+                <p><b>4. Tárolási idő és biztonság:</b> Az adatokat a Google Firebase titkosított szerverein tároljuk. Harmadik félnek nem adjuk át.</p>
+                <p><b>5. Adattörléshez való jog:</b> A belső profilban elérhető az azonnali adattörlés („Önmegsemmisítés”), vagy kérhető a koordinátortól az adatok végleges megsemmisítése. <b>Ez esetben az adatok visszaállítására nincs mód.</b></p>
             </div>
             <button id="okPrivacyBtn" class="w-full py-2 bg-sejt-olive hover:bg-sejt-oliveLight text-white font-bold uppercase text-[11px] tracking-wider transition">Értem</button>
         </div>
@@ -206,7 +208,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // A te Firebase konfigurációd
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
             authDomain: "zoldsejt-af8a9.firebaseapp.com",
@@ -220,7 +221,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // SEJT_XXXXX egyedi azonosító generátor
         function generateSejtId() {
             const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
             let code = "";
@@ -251,6 +251,7 @@
             const candidateId = generateSejtId();
             const payload = {
                 candidateId: candidateId,
+                fullName: document.getElementById('fullName').value.trim(),
                 email: document.getElementById('email').value.trim(),
                 skills: checkedSkills,
                 timeframe: document.getElementById('timeframe').value,
@@ -275,7 +276,6 @@
             }
         });
 
-        // Adatkezelési modal kezelése
         const privacyModal = document.getElementById('privacyModal');
         document.getElementById('privacyModalBtn').addEventListener('click', () => privacyModal.classList.remove('hidden'));
         document.getElementById('closePrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
