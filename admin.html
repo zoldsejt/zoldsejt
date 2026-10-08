@@ -45,7 +45,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
-                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati és operatív felügyelete</p>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt szerveroldalilag védett operatív felügyelete</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-4 text-xs">
@@ -88,7 +88,7 @@
                 </table>
             </div>
 
-            <!-- Archivált jelentkezések gomb & doboz -->
+            <!-- Archivált jelentkezések -->
             <div class="pt-2">
                 <button id="toggleArchiveBtn" class="text-[11px] text-[#5C735E] hover:text-[#7A9E48] underline flex items-center space-x-1">
                     <span>📁 Archivált jelentkezések megtekintése (Irattár)</span>
@@ -115,7 +115,6 @@
         <!-- 2. FÜL: KÜLDETÉSEK & INFÓK -->
         <div id="missionsTab" class="hidden space-y-6">
             
-            <!-- Szabad Telegram Poszt Író -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">📢 Hírös Hírnök // Szabad Telegram Közlemény</h3>
@@ -138,7 +137,6 @@
                     <input type="number" id="mXp" placeholder="Jutalom XP (pl. 20)" class="w-full font-mono">
                 </div>
                 
-                <!-- Képességek Kiválasztása Checkboxokkal -->
                 <div class="space-y-2">
                     <label class="block text-[11px] text-[#5C735E] uppercase">Szükséges képességek a küldetéshez:</label>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
@@ -192,10 +190,9 @@
             </div>
         </div>
 
-        <!-- 3. FÜL: ESZKÖZTÁR & IGÉNYLÉSEK -->
+        <!-- 3. FÜL: ESZKÖZTÁR -->
         <div id="toolsTab" class="hidden space-y-6">
             
-            <!-- Függőben lévő Eszközigénylések -->
             <div id="toolRequestsSection" class="hidden bg-[#101912] border border-emerald-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">// Beérkezett Eszközigénylések</h3>
                 <div id="toolRequestsList" class="space-y-2"></div>
@@ -226,7 +223,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: EVOLÚCIÓS XP TÁBLÁZAT -->
+        <!-- 4. FÜL: EVOLÚCIÓS XP -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
@@ -262,41 +259,27 @@
             </div>
         </div>
 
-        <!-- 5. FÜL: BEÁLLÍTÁSOK -->
+        <!-- 5. FÜL: BEÁLLÍTÁSOK (Cloudflare Worker kapcsolat) -->
         <div id="settingsTab" class="hidden space-y-6">
             <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-5">
                 <div>
-                    <h3 class="text-sm font-bold text-[#7A9E48] uppercase tracking-wider">// Integrációs Beállítások</h3>
-                    <p class="text-xs text-[#5C735E] mt-1">Az API kulcsok a védett Firestore adatbázisodban tárolódnak.</p>
+                    <h3 class="text-sm font-bold text-[#7A9E48] uppercase tracking-wider">// Cloudflare Worker Csatlakozás</h3>
+                    <p class="text-xs text-[#5C735E] mt-1">Az API kulcsokat a Worker kezeli, a böngésző nem tárolja azokat.</p>
                 </div>
 
-                <div class="space-y-2 border-b border-[#1E2F22] pb-4">
-                    <div class="text-xs font-bold text-white uppercase">1. Telegram Bot (Hírös Hírnök)</div>
+                <div class="space-y-3">
                     <div>
-                        <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Bot Token</label>
-                        <input type="password" id="cfgBotToken" placeholder="BotFather Token..." class="w-full font-mono">
+                        <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Cloudflare Worker URL</label>
+                        <input type="url" id="cfgWorkerUrl" placeholder="https://zoldsejt-api.<te-neved>.workers.dev" class="w-full font-mono">
                     </div>
                     <div>
-                        <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Csatorna ID</label>
-                        <input type="text" id="cfgChatId" placeholder="-1003946373632" class="w-full font-mono">
+                        <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Admin Titkos Kulcs (ADMIN_SECRET_KEY)</label>
+                        <input type="password" id="cfgAdminSecret" placeholder="A Cloudflare-ben megadott jelszó..." class="w-full font-mono">
                     </div>
+                    <button id="saveWorkerSettingsBtn" class="w-full py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
+                        Csatlakozási Adatok Mentése
+                    </button>
                 </div>
-
-                <div class="space-y-2">
-                    <div class="text-xs font-bold text-white uppercase">2. Brevo E-mail API</div>
-                    <div>
-                        <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Brevo API Key</label>
-                        <input type="password" id="cfgBrevoKey" placeholder="xkeysib-..." class="w-full font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Hitelesített Feladó</label>
-                        <input type="email" id="cfgBrevoSender" placeholder="zoldsejt@gmail.com" class="w-full font-mono">
-                    </div>
-                </div>
-
-                <button id="saveSettingsBtn" class="w-full py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
-                    Beállítások Biztonságos Mentése
-                </button>
             </div>
         </div>
 
@@ -363,198 +346,78 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let TG_BOT_TOKEN = localStorage.getItem("TG_BOT_TOKEN") || "";
-        let TG_CHAT_ID = localStorage.getItem("TG_CHAT_ID") || "-1003946373632";
-        let BREVO_API_KEY = localStorage.getItem("BREVO_API_KEY") || "";
-        let BREVO_SENDER = localStorage.getItem("BREVO_SENDER") || "zoldsejt@gmail.com";
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
+        let WORKER_URL = "";
+        let ADMIN_SECRET = "";
         let candidatesCache = [];
 
-        async function loadIntegrationSettings() {
+        // Worker beállítások betöltése a memóriába
+        async function loadWorkerSettings() {
             try {
-                const snap = await getDoc(doc(db, "settings", "integrations"));
+                const snap = await getDoc(doc(db, "settings", "worker"));
                 if (snap.exists()) {
-                    const d = snap.data();
-                    TG_BOT_TOKEN = d.botToken || TG_BOT_TOKEN;
-                    TG_CHAT_ID = d.chatId || TG_CHAT_ID;
-                    BREVO_API_KEY = d.brevoKey || BREVO_API_KEY;
-                    BREVO_SENDER = d.brevoSender || BREVO_SENDER;
+                    WORKER_URL = snap.data().workerUrl || "";
+                    ADMIN_SECRET = snap.data().adminSecret || "";
                 }
-                document.getElementById('cfgBotToken').value = TG_BOT_TOKEN;
-                document.getElementById('cfgChatId').value = TG_CHAT_ID;
-                document.getElementById('cfgBrevoKey').value = BREVO_API_KEY;
-                document.getElementById('cfgBrevoSender').value = BREVO_SENDER;
-            } catch (e) {
-                console.warn(e);
+                document.getElementById('cfgWorkerUrl').value = WORKER_URL;
+                document.getElementById('cfgAdminSecret').value = ADMIN_SECRET;
+            } catch (e) { console.warn(e); }
+        }
+
+        document.getElementById('saveWorkerSettingsBtn').addEventListener('click', async () => {
+            WORKER_URL = document.getElementById('cfgWorkerUrl').value.trim().replace(/\/$/, "");
+            ADMIN_SECRET = document.getElementById('cfgAdminSecret').value.trim();
+
+            await setDoc(doc(db, "settings", "worker"), {
+                workerUrl: WORKER_URL,
+                adminSecret: ADMIN_SECRET,
+                updatedAt: new Date().toISOString()
+            });
+            alert("✓ Worker csatlakozási adatok elmentve a Firestore-ba!");
+        });
+
+        // Biztonságos backend hívás segédfüggvény
+        async function callBackend(endpoint, payload) {
+            if (!WORKER_URL || !ADMIN_SECRET) {
+                alert("Kérjük, add meg a Worker URL-t és az Admin Titkos Kulcsot a Beállítások fülön!");
+                return null;
+            }
+            try {
+                const res = await fetch(`${WORKER_URL}${endpoint}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${ADMIN_SECRET}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                return await res.json();
+            } catch (err) {
+                console.error("Backend hiba:", err);
+                return null;
             }
         }
 
-        document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-            TG_BOT_TOKEN = document.getElementById('cfgBotToken').value.trim();
-            TG_CHAT_ID = document.getElementById('cfgChatId').value.trim();
-            BREVO_API_KEY = document.getElementById('cfgBrevoKey').value.trim();
-            BREVO_SENDER = document.getElementById('cfgBrevoSender').value.trim();
-
-            localStorage.setItem("TG_BOT_TOKEN", TG_BOT_TOKEN);
-            localStorage.setItem("TG_CHAT_ID", TG_CHAT_ID);
-            localStorage.setItem("BREVO_API_KEY", BREVO_API_KEY);
-            localStorage.setItem("BREVO_SENDER", BREVO_SENDER);
-
-            await setDoc(doc(db, "settings", "integrations"), {
-                botToken: TG_BOT_TOKEN,
-                chatId: TG_CHAT_ID,
-                brevoKey: BREVO_API_KEY,
-                brevoSender: BREVO_SENDER,
-                updatedAt: new Date().toISOString()
-            });
-            alert("✓ Integrációs beállítások sikeresen elmentve!");
-        });
-
-        // Brevo E-mail
-        async function sendApprovalEmailViaBrevo(toEmail, toName, candidateId, inviteLink, connectToken) {
-            if (!BREVO_API_KEY) return false;
-            const htmlContent = `
-                <div style="background-color: #090F0A; color: #D5E2D5; font-family: monospace; padding: 24px; border: 1px solid #1E2F22; max-width: 600px; margin: 0 auto;">
-                    <div style="color: #7A9E48; font-size: 11px; letter-spacing: 2px;">// HÁLÓZATI ÉRTESÍTŐ</div>
-                    <h2 style="color: #FFFFFF; text-transform: uppercase;">A FEJ // BEFOGADVA</h2>
-                    <p>Üdvözlünk, <b>${toName}</b>!</p>
-                    <p>A belépési kérelmedet jóváhagytuk.</p>
-                    <div style="background-color: #101912; border: 1px solid #1E2F22; padding: 14px; margin: 16px 0;">
-                        <div style="font-size: 11px; color: #5C735E;">TÖRZSSZÁM:</div>
-                        <div style="font-size: 18px; font-weight: bold; color: #7A9E48;">${candidateId}</div>
-                    </div>
-                    <p><b>1. Zárt Telegram csatlakozási kulcs:</b></p>
-                    <p><a href="${inviteLink}" style="display: inline-block; background-color: #5A7736; color: #ffffff; text-decoration: none; padding: 10px 16px; font-weight: bold;">Csatlakozás a Csatornához →</a></p>
-                    <p style="margin-top: 20px;"><b>2. Belső profilod:</b></p>
-                    <p><a href="https://zoldsejt.github.io/zoldsejt/profil.html" style="color: #7A9E48;">https://zoldsejt.github.io/zoldsejt/profil.html</a></p>
-                </div>
-            `;
-            try {
-                const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-                    method: "POST",
-                    headers: { "accept": "application/json", "api-key": BREVO_API_KEY, "content-type": "application/json" },
-                    body: JSON.stringify({
-                        sender: { name: "A FEJ // Zöld Sejt", email: BREVO_SENDER },
-                        to: [{ email: toEmail, name: toName }],
-                        subject: `A FEJ // BEFOGADVA [${candidateId}]`,
-                        htmlContent: htmlContent
-                    })
-                });
-                return res.ok;
-            } catch (err) { return false; }
-        }
-
-        // Telegram Bot API hívások
-        async function createTelegramOneTimeInvite() {
-            if (!TG_BOT_TOKEN) return "https://t.me/zoldsejt";
-            try {
-                const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/createChatInviteLink`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TG_CHAT_ID, member_limit: 1, expire_date: Math.floor(Date.now() / 1000) + 259200 })
-                });
-                const data = await res.json();
-                if (data.ok) return data.result.invite_link;
-            } catch (e) {}
-            return "https://t.me/zoldsejt";
-        }
-
-        async function postToTelegram(text) {
-            if (!TG_BOT_TOKEN) return null;
-            try {
-                const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text, parse_mode: 'HTML' })
-                });
-                const d = await res.json();
-                return d.ok ? d.result.message_id : null;
-            } catch (e) { return null; }
-        }
-
-        async function editTelegramPost(messageId, text) {
-            if (!TG_BOT_TOKEN || !messageId) return;
-            try {
-                await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/editMessageText`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TG_CHAT_ID, message_id: messageId, text: text, parse_mode: 'HTML' })
-                });
-            } catch (e) {}
-        }
-
-        async function deleteTelegramPost(messageId) {
-            if (!TG_BOT_TOKEN || !messageId) return;
-            try {
-                await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/deleteMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TG_CHAT_ID, message_id: messageId })
-                });
-            } catch (e) {}
-        }
-
-        async function kickFromTelegram(tgUserId) {
-            if (!TG_BOT_TOKEN || !tgUserId) return;
-            try {
-                await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/banChatMember`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: TG_CHAT_ID, user_id: tgUserId })
-                });
-            } catch (e) {}
-        }
-
-        // TELEGRAM /start KULCS SZINKRONIZÁLÁS (Háttérben ellenőrzi a beérkezett bot indításokat)
-        async function syncTelegramBotUpdates() {
-            if (!TG_BOT_TOKEN) return;
-            try {
-                const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/getUpdates`);
-                const data = await res.json();
-                if (data.ok && data.result) {
-                    for (let update of data.result) {
-                        const msg = update.message;
-                        if (msg && msg.text && msg.text.startsWith('/start KULCS_')) {
-                            const token = msg.text.replace('/start ', '').trim();
-                            const tgUser = msg.from;
-                            
-                            // Keresés a token alapján a Firestore-ban
-                            const q = query(collection(db, "candidates"), where("connectToken", "==", token));
-                            const snap = await getDocs(q);
-                            if (!snap.empty) {
-                                const cDoc = snap.docs[0];
-                                if (!cDoc.data().telegramUserId) {
-                                    await updateDoc(doc(db, "candidates", cDoc.id), {
-                                        telegramUserId: tgUser.id,
-                                        telegramUsername: tgUser.username ? `@${tgUser.username}` : (tgUser.first_name || 'Névtelen'),
-                                        telegramLinkedAt: new Date().toISOString()
-                                    });
-
-                                    // Visszajelzés a tagnak a bot privát chatjében:
-                                    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            chat_id: tgUser.id,
-                                            text: `✓ <b>AZONOSÍTÁS SIKERES!</b>\nÖsszekapcsolva: <code>${cDoc.data().candidateId}</code>\n\nÜdv a Sejtben.`,
-                                            parse_mode: 'HTML'
-                                        })
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (e) { console.warn("Telegram polling info:", e); }
-        }
-
-        // Szabad Közlemény
+        // Szabad Közlemény kiküldése
         document.getElementById('sendBroadcastBtn').addEventListener('click', async () => {
             const text = document.getElementById('freeBroadcastText').value.trim();
             if (!text) return alert("Írj be üzenetet!");
-            await postToTelegram(`📢 <b>HÍRÖS HÍRNÖK // KÖZLEMÉNY</b>\n\n${text}`);
-            alert("✓ Közlemény sikeresen kiküldve a Telegram csatornára!");
-            document.getElementById('freeBroadcastText').value = '';
+            const res = await callBackend("/api/telegram-post", { text: `📢 <b>HÍRÖS HÍRNÖK // KÖZLEMÉNY</b>\n\n${escapeHtml(text)}` });
+            if (res && res.ok) {
+                alert("✓ Közlemény sikeresen kiküldve a Telegram csatornára!");
+                document.getElementById('freeBroadcastText').value = '';
+            } else {
+                alert("Hiba a küldés során.");
+            }
         });
 
         // Evolúció
@@ -665,14 +528,14 @@
                 tr.dataset.index = idx;
                 tr.innerHTML = `
                     <td class="p-2 text-center drag-handle text-[#5C735E] hover:text-[#7A9E48] text-base">☰</td>
-                    <td class="p-2 font-mono font-bold text-[#7A9E48] text-center">${r.code}</td>
-                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${r.name}" data-field="name" data-idx="${idx}"></td>
-                    <td class="p-2"><input type="text" class="w-full text-[#5C735E]" value="${r.cat}" data-field="cat" data-idx="${idx}"></td>
-                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${r.xp}" data-field="xp" data-idx="${idx}"></td>
+                    <td class="p-2 font-mono font-bold text-[#7A9E48] text-center">${escapeHtml(r.code)}</td>
+                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${escapeHtml(r.name)}" data-field="name" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="text" class="w-full text-[#5C735E]" value="${escapeHtml(r.cat)}" data-field="cat" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${Number(r.xp)}" data-field="xp" data-idx="${idx}"></td>
                     <td class="p-2 text-center font-mono">
                         ${count > 0 ? `<span class="px-2 py-0.5 bg-[#1E2F22] text-[#7A9E48] font-bold text-xs">${count} fő</span>` : `<span class="text-[#5C735E] text-xs">0</span>`}
                     </td>
-                    <td class="p-2"><input type="text" class="w-full" value="${r.desc}" data-field="desc" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="text" class="w-full" value="${escapeHtml(r.desc)}" data-field="desc" data-idx="${idx}"></td>
                     <td class="p-2 text-center"><button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button></td>
                 `;
                 evoTbody.appendChild(tr);
@@ -761,10 +624,13 @@
             btn.innerText = "PUBLIKÁLÁS...";
 
             try {
-                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${code}</b>\n\n<b>${title.toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${finalSkillsStr}\nJutalom: +${xp} XP\n\n${desc}`;
-                const tgMsgId = await postToTelegram(tgMsg);
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeHtml(code)}</b>\n\n<b>${escapeHtml(title).toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${escapeHtml(finalSkillsStr)}\nJutalom: +${xp} XP\n\n${escapeHtml(desc)}`;
+                
+                // Posztolás a Cloudflare Worker-en keresztül
+                const tgRes = await callBackend("/api/telegram-post", { text: tgMsg });
+                const tgMsgId = tgRes && tgRes.ok ? tgRes.result.message_id : null;
 
-                await addDoc(collection(db, "missions"), {
+                await setDoc(doc(db, "missions", code), {
                     code, title, xp, category, skills: finalSkillsStr, desc,
                     status: "open",
                     tgMessageId: tgMsgId || null,
@@ -797,19 +663,19 @@
 
                     const attendees = m.attendees || [];
                     const attendeesHtml = attendees.length > 0
-                        ? attendees.map(id => `<span class="inline-block px-1.5 py-0.5 bg-[#0B130D] border border-sejt-border text-[#7A9E48] font-mono text-[10px] m-0.5">${id}</span>`).join('')
+                        ? attendees.map(id => `<span class="inline-block px-1.5 py-0.5 bg-[#0B130D] border border-sejt-border text-[#7A9E48] font-mono text-[10px] m-0.5">${escapeHtml(id)}</span>`).join('')
                         : '<span class="text-[#5C735E] italic text-[11px]">Nincs még jelentkező</span>';
 
                     tr.innerHTML = `
-                        <td class="p-3 font-mono font-bold text-[#7A9E48]">${m.code}</td>
-                        <td class="p-3"><span class="font-bold text-white">${m.title}</span><div class="text-[10px] text-[#5C735E]">${m.category}</div></td>
-                        <td class="p-3 font-mono text-[#7A9E48]">+${m.xp} XP</td>
-                        <td class="p-3 text-[11px] text-[#5C735E]">${m.skills || 'Mindenki'}</td>
-                        <td class="p-3 text-[11px] max-w-xs truncate">${m.desc}</td>
+                        <td class="p-3 font-mono font-bold text-[#7A9E48]">${escapeHtml(m.code)}</td>
+                        <td class="p-3"><span class="font-bold text-white">${escapeHtml(m.title)}</span><div class="text-[10px] text-[#5C735E]">${escapeHtml(m.category)}</div></td>
+                        <td class="p-3 font-mono text-[#7A9E48]">+${Number(m.xp)} XP</td>
+                        <td class="p-3 text-[11px] text-[#5C735E]">${escapeHtml(m.skills || 'Mindenki')}</td>
+                        <td class="p-3 text-[11px] max-w-xs truncate">${escapeHtml(m.desc)}</td>
                         <td class="p-3 max-w-xs"><div class="flex flex-wrap items-center gap-1">${attendeesHtml}</div></td>
                         <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
                         <td class="p-3 text-center space-x-1">
-                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${d.id}" data-code="${m.code}" data-title="${m.title}" data-desc="${m.desc}" data-xp="${m.xp}" data-cat="${m.category}" data-tgid="${m.tgMessageId || ''}">Módosítás</button>
+                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${d.id}" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-desc="${escapeHtml(m.desc)}" data-xp="${m.xp}" data-cat="${m.category}" data-tgid="${m.tgMessageId || ''}">Módosítás</button>
                             <span class="text-[#1E2F22]">|</span>
                             <button class="toggle-m-btn text-[11px] text-[#5C735E] hover:underline" data-id="${d.id}" data-status="${m.status}">${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}</button>
                             <span class="text-[#1E2F22]">|</span>
@@ -821,14 +687,14 @@
 
                 tbody.querySelectorAll('.edit-m-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        const b = e.target;
-                        document.getElementById('editMissionDocId').value = b.dataset.id;
-                        document.getElementById('editMissionTgId').value = b.dataset.tgid;
-                        document.getElementById('editMissionCode').value = b.dataset.code;
-                        document.getElementById('editMTitle').value = b.dataset.title;
-                        document.getElementById('editMDesc').value = b.dataset.desc;
-                        document.getElementById('editMXp').value = b.dataset.xp;
-                        document.getElementById('editMCat').value = b.dataset.cat;
+                        const b = e.target.dataset;
+                        document.getElementById('editMissionDocId').value = b.id;
+                        document.getElementById('editMissionTgId').value = b.tgid;
+                        document.getElementById('editMissionCode').value = b.code;
+                        document.getElementById('editMTitle').value = b.title;
+                        document.getElementById('editMDesc').value = b.desc;
+                        document.getElementById('editMXp').value = b.xp;
+                        document.getElementById('editMCat').value = b.cat;
                         document.getElementById('editMissionModal').classList.remove('hidden');
                     });
                 });
@@ -844,7 +710,7 @@
                     btn.addEventListener('click', async (e) => {
                         if (confirm("Biztosan törlöd ezt a küldetést? (A Telegram poszt is törlésre kerül)")) {
                             const tgId = e.target.dataset.tgid;
-                            if (tgId) await deleteTelegramPost(tgId);
+                            if (tgId) await callBackend("/api/telegram-delete", { messageId: tgId });
                             await deleteDoc(doc(db, "missions", e.target.dataset.id));
                         }
                     });
@@ -852,7 +718,7 @@
             });
         }
 
-        // Küldetés Módosítás Mentése (Telegram szerkesztéssel!)
+        // Küldetés Módosítás Mentése (Worker szerkeszti Telegramon)
         document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
             const docId = document.getElementById('editMissionDocId').value;
             const tgId = document.getElementById('editMissionTgId').value;
@@ -866,10 +732,9 @@
 
             await updateDoc(doc(db, "missions", docId), { title, desc, xp, category, updatedAt: new Date().toISOString() });
 
-            // Telegram üzenet szerkesztése a csatornán
             if (tgId) {
-                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${code} (MÓDOSÍTVA)</b>\n\n<b>${title.toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${desc}`;
-                await editTelegramPost(tgId, tgMsg);
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeHtml(code)} (MÓDOSÍTVA)</b>\n\n<b>${escapeHtml(title).toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${escapeHtml(desc)}`;
+                await callBackend("/api/telegram-edit", { messageId: tgId, text: tgMsg });
             }
 
             document.getElementById('editMissionModal').classList.add('hidden');
@@ -880,7 +745,7 @@
             document.getElementById('editMissionModal').classList.add('hidden');
         });
 
-        // ESZKÖZTÁR ÉS IGÉNYLÉSEK
+        // ESZKÖZTÁR
         document.getElementById('addToolBtn').addEventListener('click', async () => {
             const name = document.getElementById('toolName').value.trim();
             const location = document.getElementById('toolLocation').value.trim();
@@ -898,23 +763,34 @@
                     const t = d.data();
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="p-3 font-bold text-white">${t.name}</td>
-                        <td class="p-3 text-[#5C735E]">${t.location || 'Központ'}</td>
-                        <td class="p-3 font-mono">${t.holder}</td>
+                        <td class="p-3 font-bold text-white">${escapeHtml(t.name)}</td>
+                        <td class="p-3 text-[#5C735E]">${escapeHtml(t.location || 'Központ')}</td>
+                        <td class="p-3 font-mono">${escapeHtml(t.holder)}</td>
                         <td class="p-3"><span class="px-2 py-0.5 ${t.status === 'available' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-amber-950 text-amber-400'} uppercase font-bold">${t.status === 'available' ? 'ELÉRHETŐ' : 'HASZNÁLATBAN'}</span></td>
-                        <td class="p-3 text-center"><button class="del-tool-btn text-xs text-red-400 hover:underline" data-id="${d.id}">Törlés</button></td>
+                        <td class="p-3 text-center space-x-2">
+                            ${t.status === 'in_use' ? `<button class="release-tool-btn text-xs text-[#7A9E48] hover:underline" data-id="${d.id}">Visszavétel</button> <span class="text-[#1E2F22]">|</span>` : ''}
+                            <button class="del-tool-btn text-xs text-red-400 hover:underline" data-id="${d.id}">Törlés</button>
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
+
+                tbody.querySelectorAll('.release-tool-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        await updateDoc(doc(db, "tools", e.target.dataset.id), { status: "available", holder: "A Fej" });
+                        alert("✓ Eszköz visszavételezve, újra elérhető a hálózatban!");
+                    });
+                });
+
                 tbody.querySelectorAll('.del-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if (confirm("Törlöd?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
+                        if (confirm("Törlöd ezt az eszközt?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
                     });
                 });
             });
         }
 
-        // ESZKÖZIGÉNYLÉSEK FIGYELÉSE
+        // ESZKÖZIGÉNYLÉSEK
         function loadToolRequests() {
             onSnapshot(query(collection(db, "tool_requests"), where("status", "==", "pending")), (snap) => {
                 const sec = document.getElementById('toolRequestsSection');
@@ -928,13 +804,13 @@
                     div.className = "p-2.5 bg-[#0B130D] border border-[#1E2F22] flex justify-between items-center text-xs";
                     div.innerHTML = `
                         <div>
-                            <span class="font-bold text-[#7A9E48] font-mono">${r.candidateId}</span> igényelte ezt: 
-                            <span class="text-white font-bold">${r.toolName}</span>
-                            <div class="text-[10px] text-[#5C735E] mt-0.5">Indoklás: "${r.message || 'Nincs indoklás'}"</div>
+                            <span class="font-bold text-[#7A9E48] font-mono">${escapeHtml(r.candidateId)}</span> igényelte ezt: 
+                            <span class="text-white font-bold">${escapeHtml(r.toolName)}</span>
+                            <div class="text-[10px] text-[#5C735E] mt-0.5">Indoklás: "${escapeHtml(r.message || 'Nincs indoklás')}"</div>
                         </div>
                         <div class="space-x-2">
                             <button class="accept-tool-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" 
-                                data-id="${d.id}" data-cid="${r.candidateId}" data-tname="${r.toolName}">
+                                data-id="${d.id}" data-tid="${r.toolId || ''}" data-cid="${escapeHtml(r.candidateId)}" data-tname="${escapeHtml(r.toolName)}">
                                 Jóváhagyás
                             </button>
                             <button class="reject-tool-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">
@@ -947,18 +823,17 @@
 
                 list.querySelectorAll('.accept-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const reqId = e.target.dataset.id;
-                        const cid = e.target.dataset.cid;
-                        const tname = e.target.dataset.tname;
-                        const note = prompt("Opcionális üzenet az átvételhez (pl. 'Holnap 18:00 a parknál átvehető'):", "Megbeszéltek szerint átvehető.");
+                        const b = e.target.dataset;
+                        const note = prompt("Üzenet az átvételhez:", "Megbeszéltek szerint átvehető.");
 
-                        // Eszköz frissítése használatban státuszra
-                        const tSnap = await getDocs(query(collection(db, "tools"), where("name", "==", tname)));
-                        if (!tSnap.empty) {
-                            await updateDoc(doc(db, "tools", tSnap.docs[0].id), { status: "in_use", holder: cid });
+                        if (b.tid) {
+                            await updateDoc(doc(db, "tools", b.tid), { status: "in_use", holder: b.cid });
+                        } else {
+                            const tSnap = await getDocs(query(collection(db, "tools"), where("name", "==", b.tname)));
+                            if (!tSnap.empty) await updateDoc(doc(db, "tools", tSnap.docs[0].id), { status: "in_use", holder: b.cid });
                         }
 
-                        await updateDoc(doc(db, "tool_requests", reqId), { status: "approved", adminNote: note || "Jóváhagyva" });
+                        await updateDoc(doc(db, "tool_requests", b.id), { status: "approved", adminNote: note || "Jóváhagyva" });
                         alert("✓ Eszközigénylés jóváhagyva!");
                     });
                 });
@@ -966,7 +841,7 @@
                 list.querySelectorAll('.reject-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const reqId = e.target.dataset.id;
-                        const note = prompt("Elutasítás oka (megjelenik a tagnál):", "Jelenleg nem elérhető.");
+                        const note = prompt("Elutasítás oka:", "Jelenleg nem elérhető.");
                         await updateDoc(doc(db, "tool_requests", reqId), { status: "rejected", adminNote: note || "Elutasítva" });
                     });
                 });
@@ -987,11 +862,11 @@
                     div.className = "p-2 bg-[#0B130D] border border-[#1E2F22] flex justify-between items-center text-xs";
                     div.innerHTML = `
                         <div>
-                            <span class="font-bold text-[#7A9E48] font-mono">${c.candidateId}</span> igényelt 
-                            <span class="text-white font-bold">+${c.xp} XP</span>-t: <span class="text-white">${c.missionTitle}</span> (${c.missionCode})
+                            <span class="font-bold text-[#7A9E48] font-mono">${escapeHtml(c.candidateId)}</span> igényelt 
+                            <span class="text-white font-bold">+${Number(c.xp)} XP</span>-t: <span class="text-white">${escapeHtml(c.missionTitle)}</span> (${escapeHtml(c.missionCode)})
                         </div>
                         <div class="space-x-2">
-                            <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${d.id}" data-cid="${c.candidateId}" data-xp="${c.xp}">Jóváhagyás</button>
+                            <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${d.id}" data-cid="${escapeHtml(c.candidateId)}" data-xp="${c.xp}">Jóváhagyás</button>
                             <button class="reject-claim-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">Elutasítás</button>
                         </div>
                     `;
@@ -1012,13 +887,22 @@
                             const newXp = currentXp + xpToAdd;
                             const newRank = calculateRank(newXp);
                             await updateDoc(doc(db, "candidates", cDoc.id), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
+                            
+                            await setDoc(doc(db, "public_members", cid), {
+                                candidateId: cid,
+                                levelCode: newRank.code,
+                                levelName: newRank.name,
+                                xp: newXp
+                            });
                         }
-                        await deleteDoc(doc(db, "xp_claims", claimId));
+                        await updateDoc(doc(db, "xp_claims", claimId), { status: "approved" });
                     });
                 });
 
                 list.querySelectorAll('.reject-claim-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => { await deleteDoc(doc(db, "xp_claims", e.target.dataset.id)); });
+                    btn.addEventListener('click', async (e) => { 
+                        await updateDoc(doc(db, "xp_claims", e.target.dataset.id), { status: "rejected" }); 
+                    });
                 });
             });
         }
@@ -1035,7 +919,7 @@
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');
                 
-                loadIntegrationSettings();
+                loadWorkerSettings();
 
                 onSnapshot(doc(db, "settings", "evolution"), (snap) => {
                     if (snap.exists() && snap.data().ranks) activeRanks = snap.data().ranks;
@@ -1047,10 +931,6 @@
                 loadTools();
                 loadToolRequests();
                 loadXpClaims();
-
-                // Időszakos Telegram bot szinkronizálás (/start kulcsok figyelése)
-                syncTelegramBotUpdates();
-                setInterval(syncTelegramBotUpdates, 15000);
             } else {
                 document.getElementById('loginView').classList.remove('hidden');
                 document.getElementById('dashboardView').classList.add('hidden');
@@ -1068,7 +948,6 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-        // TAGLISTA & ARCHÍVUM
         function loadCandidates() {
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
@@ -1087,12 +966,12 @@
                     if (isArchived) {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td class="p-2 font-bold font-mono text-[#5C735E]">${data.candidateId}</td>
-                            <td class="p-2">${data.fullName || 'Névtelen'} (${data.email})</td>
+                            <td class="p-2 font-bold font-mono text-[#5C735E]">${escapeHtml(data.candidateId)}</td>
+                            <td class="p-2">${escapeHtml(data.fullName || 'Névtelen')} (${escapeHtml(data.email)})</td>
                             <td class="p-2 text-red-400 font-bold uppercase">Archiválva</td>
                             <td class="p-2 text-center space-x-2">
-                                <button class="restore-btn text-xs text-[#7A9E48] hover:underline" data-id="${docSnap.id}">Visszaállítás</button>
-                                <button class="hard-del-btn text-xs text-red-400 hover:underline" data-id="${docSnap.id}">Végleges törlés</button>
+                                <button class="restore-btn text-xs text-[#7A9E48] hover:underline" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${data.xp || 0}">Visszaállítás</button>
+                                <button class="hard-del-btn text-xs text-red-400 hover:underline" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}">Végleges törlés</button>
                             </td>
                         `;
                         archTbody.appendChild(tr);
@@ -1107,83 +986,106 @@
                     const xp = data.xp || 0;
                     const rank = calculateRank(xp);
                     const tgInfo = data.telegramUserId 
-                        ? `<span class="px-1.5 py-0.5 bg-[#1E2F22] text-emerald-400 font-mono text-[10px] rounded">✓ ${data.telegramUsername || data.telegramUserId}</span>`
+                        ? `<span class="px-1.5 py-0.5 bg-[#1E2F22] text-emerald-400 font-mono text-[10px] rounded">✓ ${escapeHtml(data.telegramUsername || data.telegramUserId)}</span>`
                         : `<span class="text-[#5C735E] text-[10px] font-mono">Nincs bekötve</span>`;
 
                     tr.innerHTML = `
-                        <td class="p-3 font-bold text-[#7A9E48] font-mono">${data.candidateId}</td>
+                        <td class="p-3 font-bold text-[#7A9E48] font-mono">${escapeHtml(data.candidateId)}</td>
                         <td class="p-3">
-                            <span class="font-bold text-white">${data.fullName || 'Névtelen'}</span>
-                            <div class="text-[10px] text-[#5C735E] font-mono">${data.email}</div>
+                            <span class="font-bold text-white">${escapeHtml(data.fullName || 'Névtelen')}</span>
+                            <div class="text-[10px] text-[#5C735E] font-mono">${escapeHtml(data.email)}</div>
                         </td>
                         <td class="p-3">${tgInfo}</td>
                         <td class="p-3">
-                            <span class="font-bold text-white">${rank.code}. ${rank.name}</span>
-                            <div class="text-[10px] text-[#5C735E]">${xp} XP (${rank.cat})</div>
+                            <span class="font-bold text-white">${escapeHtml(rank.code)}. ${escapeHtml(rank.name)}</span>
+                            <div class="text-[10px] text-[#5C735E]">${xp} XP (${escapeHtml(rank.cat)})</div>
                         </td>
-                        <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).join(', ')}</td>
-                        <td class="p-3 text-[11px] text-white italic max-w-xs truncate">${data.notesToFej || '-'}</td>
+                        <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).map(s => escapeHtml(s)).join(', ')}</td>
+                        <td class="p-3 text-[11px] text-white italic max-w-xs truncate">${escapeHtml(data.notesToFej || '-')}</td>
                         <td class="p-3">
                             <span class="px-2 py-0.5 font-bold uppercase ${isPending ? 'text-amber-400 bg-amber-950/40' : (isApproved ? 'text-emerald-400 bg-emerald-950/40' : 'text-red-400 bg-red-950/40')}">
-                                ${data.status}
+                                ${escapeHtml(data.status)}
                             </span>
                         </td>
                         <td class="p-3 flex items-center space-x-1">
                             ${isPending ? `
                                 <button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" 
-                                    data-id="${docSnap.id}" data-email="${data.email}" data-cid="${data.candidateId}" data-name="${data.fullName || ''}">
+                                    data-id="${docSnap.id}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">
                                     Jóváhagyás
                                 </button>
                             ` : `
-                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="10">+10</button>
-                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="50">+50</button>
-                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-xp="${xp}" data-diff="-10">-10</button>
-                                <button class="archive-btn text-[10px] text-amber-400 hover:underline px-1" data-id="${docSnap.id}" data-tgid="${data.telegramUserId || ''}">Archiválás</button>
+                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="10">+10</button>
+                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="50">+50</button>
+                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="-10">-10</button>
+                                <button class="archive-btn text-[10px] text-amber-400 hover:underline px-1" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-tgid="${data.telegramUserId || ''}">Archiválás</button>
                             `}
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                // Gombok eseménykezelése
+                // JÓVÁHAGYÁS (A Cloudflare Worker intézi a linket és az e-mailt!)
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const docId = e.target.dataset.id;
-                        const email = e.target.dataset.email;
-                        const cid = e.target.dataset.cid;
-                        const name = e.target.dataset.name;
-                        
+                        const b = e.target.dataset;
                         btn.disabled = true;
                         btn.innerText = "FOLYAMATBAN...";
 
-                        const connectToken = `KULCS_${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-                        const tgInviteLink = await createTelegramOneTimeInvite();
-
-                        await updateDoc(doc(db, "candidates", docId), {
-                            status: 'approved',
-                            connectToken: connectToken,
-                            approvedAt: new Date().toISOString()
+                        const res = await callBackend("/api/approve", {
+                            candidateId: b.cid,
+                            name: b.name,
+                            email: b.email
                         });
 
-                        await sendApprovalEmailViaBrevo(email, name, cid, tgInviteLink, connectToken);
-                        alert(`✓ ${cid} jóváhagyva! Értesítő elküldve.`);
+                        if (res && res.ok) {
+                            await updateDoc(doc(db, "candidates", b.id), {
+                                status: 'approved',
+                                connectToken: res.connectToken,
+                                activationToken: res.activationToken,
+                                approvedAt: new Date().toISOString()
+                            });
+
+                            await setDoc(doc(db, "public_members", b.cid), {
+                                candidateId: b.cid,
+                                levelCode: '01',
+                                levelName: 'Spóra',
+                                xp: 0
+                            });
+
+                            alert(`✓ ${b.cid} jóváhagyva! A levél kiküldve.`);
+                        } else {
+                            btn.disabled = false;
+                            btn.innerText = "Jóváhagyás";
+                            alert("A jóváhagyási művelet meghiúsult a Worker oldalon.");
+                        }
                     });
                 });
 
-                // Archiválás (és azonnali Telegram kitiltás ha be volt kötve)
+                // ARCHIVÁLÁS (A Worker tiltja le a Telegramon)
                 document.querySelectorAll('.archive-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         if (confirm("Archiválod ezt a tagot? (A Telegram hozzáférése is felfüggesztésre kerül)")) {
                             const tgId = e.target.dataset.tgid;
-                            if (tgId) await kickFromTelegram(tgId);
+                            const cid = e.target.dataset.cid;
+                            if (tgId) await callBackend("/api/telegram-ban", { telegramUserId: tgId });
                             await updateDoc(doc(db, "candidates", e.target.dataset.id), { status: 'archived' });
+                            await deleteDoc(doc(db, "public_members", cid));
                         }
                     });
                 });
 
                 document.querySelectorAll('.restore-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
+                        const cid = e.target.dataset.cid;
+                        const xp = parseInt(e.target.dataset.xp) || 0;
+                        const rank = calculateRank(xp);
                         await updateDoc(doc(db, "candidates", e.target.dataset.id), { status: 'approved' });
+                        await setDoc(doc(db, "public_members", cid), {
+                            candidateId: cid,
+                            levelCode: rank.code,
+                            levelName: rank.name,
+                            xp: xp
+                        });
                     });
                 });
 
@@ -1191,19 +1093,26 @@
                     btn.addEventListener('click', async (e) => {
                         if (confirm("Véglegesen törlöd az adatbázisból?")) {
                             await deleteDoc(doc(db, "candidates", e.target.dataset.id));
+                            await deleteDoc(doc(db, "public_members", e.target.dataset.cid));
                         }
                     });
                 });
 
                 document.querySelectorAll('.mod-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const docId = e.target.dataset.id;
-                        const currentXp = parseInt(e.target.dataset.xp) || 0;
-                        const diff = parseInt(e.target.dataset.diff) || 0;
+                        const b = e.target.dataset;
+                        const currentXp = parseInt(b.xp) || 0;
+                        const diff = parseInt(b.diff) || 0;
                         const newXp = Math.max(0, currentXp + diff);
                         const newRank = calculateRank(newXp);
 
-                        await updateDoc(doc(db, "candidates", docId), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
+                        await updateDoc(doc(db, "candidates", b.id), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
+                        await setDoc(doc(db, "public_members", b.cid), {
+                            candidateId: b.cid,
+                            levelCode: newRank.code,
+                            levelName: newRank.name,
+                            xp: newXp
+                        });
                     });
                 });
             });
