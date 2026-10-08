@@ -374,15 +374,31 @@
         }
 
         document.getElementById('saveWorkerSettingsBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveWorkerSettingsBtn');
             WORKER_URL = document.getElementById('cfgWorkerUrl').value.trim().replace(/\/$/, "");
             ADMIN_SECRET = document.getElementById('cfgAdminSecret').value.trim();
 
-            await setDoc(doc(db, "settings", "worker"), {
-                workerUrl: WORKER_URL,
-                adminSecret: ADMIN_SECRET,
-                updatedAt: new Date().toISOString()
-            });
-            alert("✓ Worker csatlakozási adatok elmentve a Firestore-ba!");
+            if (!WORKER_URL || !ADMIN_SECRET) {
+                return alert("Kérjük, töltsd ki mindkét mezőt!");
+            }
+
+            btn.disabled = true;
+            btn.innerText = "MENTÉS FOLYAMATBAN...";
+
+            try {
+                await setDoc(doc(db, "settings", "worker"), {
+                    workerUrl: WORKER_URL,
+                    adminSecret: ADMIN_SECRET,
+                    updatedAt: new Date().toISOString()
+                });
+                alert("✓ Worker csatlakozási adatok sikeresen elmentve a Firestore-ba!");
+            } catch (err) {
+                console.error("Mentési hiba:", err);
+                alert("Hiba történt a mentéskor: " + err.message + "\n(Ellenőrizd, hogy a Firestore Rules-t közzétetted-e!)");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Csatlakozási Adatok Mentése";
+            }
         });
 
         // Biztonságos backend hívás segédfüggvény
