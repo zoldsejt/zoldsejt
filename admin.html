@@ -79,7 +79,7 @@
                             <th class="p-3">Képességek</th>
                             <th class="p-3">Üzenet A Fejnek</th>
                             <th class="p-3">Státusz</th>
-                            <th class="p-3 min-w-[170px]">Művelet</th>
+                            <th class="p-3 min-w-[200px]">Művelet</th>
                         </tr>
                     </thead>
                     <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
@@ -259,7 +259,7 @@
             </div>
         </div>
 
-        <!-- 5. FÜL: BEÁLLÍTÁSOK (Cloudflare Worker kapcsolat) -->
+        <!-- 5. FÜL: BEÁLLÍTÁSOK -->
         <div id="settingsTab" class="hidden space-y-6">
             <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-5">
                 <div>
@@ -276,9 +276,14 @@
                         <label class="block text-[10px] uppercase text-[#5C735E] mb-1">Admin Titkos Kulcs (ADMIN_SECRET_KEY)</label>
                         <input type="password" id="cfgAdminSecret" placeholder="A Cloudflare-ben megadott jelszó..." class="w-full font-mono">
                     </div>
-                    <button id="saveWorkerSettingsBtn" class="w-full py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
-                        Csatlakozási Adatok Mentése
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="saveWorkerSettingsBtn" class="flex-1 py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
+                            Csatlakozási Adatok Mentése
+                        </button>
+                        <button id="testTelegramBtn" type="button" class="px-4 py-2.5 bg-[#1E2F22] hover:bg-[#2A4030] text-emerald-400 text-xs font-bold uppercase tracking-wider border border-[#5A7736] transition">
+                            ⚡ Telegram Teszt
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,6 +351,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Általános HTML escape (XSS védelem az admin felületen)
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -356,11 +362,20 @@
                 .replace(/'/g, '&#039;');
         }
 
+        // Telegram-biztos szövegformázás (A Telegram HTML parse nem fogadja el az &#039;-et!)
+        function escapeTg(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
         let WORKER_URL = "";
         let ADMIN_SECRET = "";
         let candidatesCache = [];
 
-        // Worker beállítások betöltése a memóriába
+        // Worker beállítások betöltése a Firestore-ból
         async function loadWorkerSettings() {
             try {
                 const snap = await getDoc(doc(db, "settings", "worker"));
@@ -370,7 +385,7 @@
                 }
                 document.getElementById('cfgWorkerUrl').value = WORKER_URL;
                 document.getElementById('cfgAdminSecret').value = ADMIN_SECRET;
-            } catch (e) { console.warn(e); }
+            } catch (e) { console.warn("Worker settings load info:", e); }
         }
 
         document.getElementById('saveWorkerSettingsBtn').addEventListener('click', async () => {
@@ -383,7 +398,7 @@
             }
 
             btn.disabled = true;
-            btn.innerText = "MENTÉS FOLYAMATBAN...";
+            btn.innerText = "MENTÉS...";
 
             try {
                 await setDoc(doc(db, "settings", "worker"), {
@@ -391,20 +406,20 @@
                     adminSecret: ADMIN_SECRET,
                     updatedAt: new Date().toISOString()
                 });
-                alert("✓ Worker csatlakozási adatok sikeresen elmentve a Firestore-ba!");
+                alert("✓ Csatlakozási adatok sikeresen elmentve a Firestore-ba!");
             } catch (err) {
                 console.error("Mentési hiba:", err);
-                alert("Hiba történt a mentéskor: " + err.message + "\n(Ellenőrizd, hogy a Firestore Rules-t közzétetted-e!)");
+                alert("Hiba a mentéskor: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Csatlakozási Adatok Mentése";
             }
         });
 
-        // Biztonságos backend hívás segédfüggvény
+        // Backend hívás részletes hibajelzéssel
         async function callBackend(endpoint, payload) {
             if (!WORKER_URL || !ADMIN_SECRET) {
-                alert("Kérjük, add meg a Worker URL-t és az Admin Titkos Kulcsot a Beállítások fülön!");
+                alert("Kérjük, add meg és mentsd el a Worker URL-t és az Admin Titkos Kulcsot a Beállítások fülön!");
                 return null;
             }
             try {
@@ -416,24 +431,57 @@
                     },
                     body: JSON.stringify(payload)
                 });
-                return await res.json();
+                
+                const data = await res.json();
+                if (!res.ok) {
+                    console.error("Worker válaszhiba:", data);
+                    alert(`Hiba a szerveroldalon (${res.status}): ${data.error || data.description || "Ismeretlen hiba"}`);
+                    return null;
+                }
+                return data;
             } catch (err) {
-                console.error("Backend hiba:", err);
+                console.error("Hálózati/kapcsolati hiba:", err);
+                alert(`Nem sikerült elérni a Workert (${WORKER_URL}). Ellenőrizd a Worker URL-t a Beállítások fülön!`);
                 return null;
             }
         }
+
+        // TELEGRAM KAPCSOLAT TESZTELÉSE GOMB
+        document.getElementById('testTelegramBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('testTelegramBtn');
+            btn.disabled = true;
+            btn.innerText = "TESZT...";
+
+            const testMsg = `🔔 <b>A FEJ // RENDSZERTESZT</b>\n\nA koordinációs panel és a Cloudflare Worker kapcsolata sikeres.`;
+            const res = await callBackend("/api/telegram-post", { text: testMsg });
+
+            if (res && res.ok) {
+                alert("✓ SIKER! A tesztüzenet megjelent a privát Telegram csatornában!");
+            } else if (res) {
+                alert(`Telegram Hiba (${res.error_code}): ${res.description}\n\nEllenőrizd, hogy a bot bent van-e a csatornában adminisztrátorként 'Post Messages' joggal!`);
+            }
+            btn.disabled = false;
+            btn.innerText = "⚡ Telegram Teszt";
+        });
 
         // Szabad Közlemény kiküldése
         document.getElementById('sendBroadcastBtn').addEventListener('click', async () => {
             const text = document.getElementById('freeBroadcastText').value.trim();
             if (!text) return alert("Írj be üzenetet!");
-            const res = await callBackend("/api/telegram-post", { text: `📢 <b>HÍRÖS HÍRNÖK // KÖZLEMÉNY</b>\n\n${escapeHtml(text)}` });
+            
+            const btn = document.getElementById('sendBroadcastBtn');
+            btn.disabled = true;
+            btn.innerText = "KÜLDÉS...";
+
+            const res = await callBackend("/api/telegram-post", { text: `📢 <b>HÍRÖS HÍRNÖK // KÖZLEMÉNY</b>\n\n${escapeTg(text)}` });
             if (res && res.ok) {
                 alert("✓ Közlemény sikeresen kiküldve a Telegram csatornára!");
                 document.getElementById('freeBroadcastText').value = '';
-            } else {
-                alert("Hiba a küldés során.");
+            } else if (res) {
+                alert(`Nem ment ki a poszt. Telegram hiba: ${res.description || res.error}`);
             }
+            btn.disabled = false;
+            btn.innerText = "Közlemény Kiküldése →";
         });
 
         // Evolúció
@@ -620,7 +668,7 @@
             alert("⚡ Szintek elmentve!");
         });
 
-        // KÜLDETÉSEK PUBLIKÁLÁSA
+        // KÜLDETÉSEK PUBLIKÁLÁSA (Telegram-biztos formázással)
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
@@ -640,11 +688,14 @@
             btn.innerText = "PUBLIKÁLÁS...";
 
             try {
-                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeHtml(code)}</b>\n\n<b>${escapeHtml(title).toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${escapeHtml(finalSkillsStr)}\nJutalom: +${xp} XP\n\n${escapeHtml(desc)}`;
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)}</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${escapeTg(finalSkillsStr)}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
                 
-                // Posztolás a Cloudflare Worker-en keresztül
                 const tgRes = await callBackend("/api/telegram-post", { text: tgMsg });
                 const tgMsgId = tgRes && tgRes.ok ? tgRes.result.message_id : null;
+
+                if (!tgMsgId) {
+                    console.warn("Telegram poszt azonosító nem érkezett meg:", tgRes);
+                }
 
                 await setDoc(doc(db, "missions", code), {
                     code, title, xp, category, skills: finalSkillsStr, desc,
@@ -654,7 +705,7 @@
                     createdAt: new Date().toISOString()
                 });
 
-                alert("✓ Küldetés publikálva!");
+                alert("✓ Küldetés mentve és publikálva!");
                 document.getElementById('mCode').value = '';
                 document.getElementById('mTitle').value = '';
                 document.getElementById('mDesc').value = '';
@@ -734,7 +785,7 @@
             });
         }
 
-        // Küldetés Módosítás Mentése (Worker szerkeszti Telegramon)
+        // Küldetés Módosítás Mentése
         document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
             const docId = document.getElementById('editMissionDocId').value;
             const tgId = document.getElementById('editMissionTgId').value;
@@ -749,7 +800,7 @@
             await updateDoc(doc(db, "missions", docId), { title, desc, xp, category, updatedAt: new Date().toISOString() });
 
             if (tgId) {
-                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeHtml(code)} (MÓDOSÍTVA)</b>\n\n<b>${escapeHtml(title).toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${escapeHtml(desc)}`;
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)} (MÓDOSÍTVA)</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
                 await callBackend("/api/telegram-edit", { messageId: tgId, text: tgMsg });
             }
 
@@ -1033,6 +1084,7 @@
                                 <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="10">+10</button>
                                 <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="50">+50</button>
                                 <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="-10">-10</button>
+                                <button class="resend-btn text-[10px] text-sky-400 hover:underline px-1" data-id="${docSnap.id}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">Link újraküldése</button>
                                 <button class="archive-btn text-[10px] text-amber-400 hover:underline px-1" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-tgid="${data.telegramUserId || ''}">Archiválás</button>
                             `}
                         </td>
@@ -1040,7 +1092,7 @@
                     tbody.appendChild(tr);
                 });
 
-                // JÓVÁHAGYÁS (A Cloudflare Worker intézi a linket és az e-mailt!)
+                // JÓVÁHAGYÁS
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -1077,7 +1129,37 @@
                     });
                 });
 
-                // ARCHIVÁLÁS (A Worker tiltja le a Telegramon)
+                // LINK ÚJRAKÜLDÉSE (A BEÉPÍTETT MENTŐÖV)
+                document.querySelectorAll('.resend-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const b = e.target.dataset;
+                        if (!confirm(`Biztosan újraküldöd a belépési linket ${b.cid} (${b.email}) részére? A korábbi linkje érvénytelenné válik.`)) return;
+
+                        btn.disabled = true;
+                        btn.innerText = "KÜLDÉS...";
+
+                        const res = await callBackend("/api/approve", {
+                            candidateId: b.cid,
+                            name: b.name,
+                            email: b.email
+                        });
+
+                        if (res && res.ok) {
+                            await updateDoc(doc(db, "candidates", b.id), {
+                                connectToken: res.connectToken,
+                                activationToken: res.activationToken,
+                                resentAt: new Date().toISOString()
+                            });
+                            alert(`✓ Új link és aktiváló kód sikeresen elküldve a tagnak (${b.email})!`);
+                        } else {
+                            alert("Hiba történt a link újraküldésekor.");
+                        }
+                        btn.disabled = false;
+                        btn.innerText = "Link újraküldése";
+                    });
+                });
+
+                // ARCHIVÁLÁS
                 document.querySelectorAll('.archive-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         if (confirm("Archiválod ezt a tagot? (A Telegram hozzáférése is felfüggesztésre kerül)")) {
