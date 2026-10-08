@@ -77,10 +77,10 @@
             </div>
         </form>
 
-        <!-- Első Jelszóadás panel (Biztonsági aktivációs kóddal védve) -->
+        <!-- Első Jelszóadás panel -->
         <div id="firstTimeBox" class="hidden border-t border-sejt-border pt-4 space-y-3">
             <h4 class="text-xs font-bold text-[#7A9E48] uppercase">// Fiók Aktiválása Első Alkalommal</h4>
-            <p class="text-[10px] text-sejt-muted">Írd be az e-mailben kapott biztonsági aktiváló kódot az azonosításhoz:</p>
+            <p class="text-[10px] text-sejt-muted">Írd be az e-mailben kapott 6 karakteres aktiváló kódot:</p>
             <input type="text" id="activationTokenInput" placeholder="Aktiváló kód (pl. 7K4P2X)" class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white font-mono uppercase">
             <button type="button" id="doFirstTimeActivationBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase transition">
                 Jelszó Rögzítése & Fiók Aktiválása
@@ -100,7 +100,7 @@
                 <button id="pTabTools" class="py-1 font-bold text-sejt-muted hover:text-white">Eszköztár</button>
                 <button id="pTabLeaderboard" class="py-1 font-bold text-sejt-muted hover:text-white">Ranglétra</button>
             </div>
-            <button id="logoutBtn" class="text-xs text-sejt-muted hover:text-red-400 underline transition">Kijelentkezés</button>
+            <button id="logoutBtn" class="text-xs text-red-400 hover:underline transition">Kijelentkezés</button>
         </div>
 
         <!-- 1. FÜL: PROFIL ÉS TELEGRAM -->
@@ -224,7 +224,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: RANGLÉTRA (Kizárólag a védett public_members-ből olvas!) -->
+        <!-- 4. FÜL: RANGLÉTRA -->
         <div id="viewLeaderboard" class="hidden space-y-4">
             <div class="bg-sejt-surface border border-sejt-border p-4">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">Hálózati Evolúció (Anonim Ranglista)</h3>
@@ -272,8 +272,8 @@
             </div>
             <div class="space-y-3 text-sejt-muted leading-relaxed max-h-80 overflow-y-auto">
                 <p><b>1. Adatkezelő:</b> Zöld Sejt Koordináció (Kapcsolat: <code>zoldsejt@gmail.com</code>).</p>
-                <p><b>2. Kezelt adatok:</b> Név (belső szűréshez és visszaélések megelőzéséhez), e-mail cím, képességek, időbélyeg.</p>
-                <p><b>3. Adatfeldolgozók:</b> Google Firebase (felhőtárhely / EU), Brevo SAS (e-mail küldés / EU), Telegram FZ-LLC, Cloudflare Inc.</p>
+                <p><b>2. Kezelt adatok:</b> Név, e-mail cím, képességek, csatlakozási időbélyeg.</p>
+                <p><b>3. Adatfeldolgozók:</b> Google Firebase (felhőtárhely / EU), Brevo SAS (e-mail / EU), Telegram FZ-LLC, Cloudflare Inc.</p>
                 <p><b>4. Jogalap:</b> Önkéntes hozzájárulás (GDPR 6. cikk (1) a)).</p>
                 <p><b>5. Adattörlés:</b> Az önmegsemmisítés gombbal minden adat azonnal megsemmisül.</p>
             </div>
@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <!-- 60 MP-ES ÖNMEGSEMMISÍTŐ MODAL (JELSZÓVAL HITELESÍTVE) -->
+    <!-- 60 MP-ES ÖNMEGSEMMISÍTŐ MODAL -->
     <div id="selfDestructModal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 font-mono">
         <div class="bg-[#180B0B] border-2 border-red-600 max-w-lg w-full p-6 space-y-5 text-center text-red-200">
             <div class="text-red-500 font-bold tracking-widest text-sm animate-pulse">⚠️ PROTOKOLL: ZÉRÓ NYOM ⚠️</div>
@@ -525,7 +525,7 @@
                     });
                 });
 
-                // Determinisztikus XP igénylés (Nincs duplikáció!)
+                // Determinisztikus XP igénylés
                 container.querySelectorAll('.claim-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -546,14 +546,13 @@
                         } catch (err) {
                             alert("Erre a küldetésre már küldtél be igénylést vagy a küldetés lezárult.");
                             btn.disabled = false;
-                            btn.innerText = `🙋 Ott voltam (+${b.xp} XP igénylése)`;
+                            btn.innerText = `🙋 Ott voltam (+${b.xp} XP)`;
                         }
                     });
                 });
             });
         }
 
-        // Eszköztár
         function loadTools() {
             onSnapshot(collection(db, "tools"), (snap) => {
                 const tbody = document.getElementById('memberToolsBody');
@@ -627,7 +626,6 @@
             });
         }
 
-        // Anonim Ranglista (Kizárólag a privát mezőktől mentes public_members gyűjteményből olvas!)
         function loadLeaderboard() {
             onSnapshot(collection(db, "public_members"), (snap) => {
                 const tbody = document.getElementById('networkTableBody');
@@ -660,29 +658,50 @@
             document.getElementById('firstTimeBox').classList.toggle('hidden');
         });
 
-        // Fiók aktiválása token ellenőrzéssel (Fiók-előfoglalás kizárva!)
+        // JAVÍTOTT ELSŐ JELSZÓADÁS (Auth először -> Jogosultság azonnal megvan -> Token ellenőrzés -> Sikertelen esetén fióktörlés)
         document.getElementById('doFirstTimeActivationBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim().toLowerCase();
             const pass = document.getElementById('authPassword').value;
             const token = document.getElementById('activationTokenInput').value.trim().toUpperCase();
 
             if (!email || pass.length < 6 || !token) {
-                return alert("Add meg az e-mailt, legalább 6 karakteres jelszót és az e-mailben kapott aktiváló kódot!");
+                return alert("Add meg az e-mailt, legalább 6 karakteres új jelszót és az e-mailben kapott aktiváló kódot!");
             }
 
+            const btn = document.getElementById('doFirstTimeActivationBtn');
+            btn.disabled = true;
+            btn.innerText = "AKTIVÁLÁS...";
+
             try {
-                const q = query(collection(db, "candidates"), where("email", "==", email), where("activationToken", "==", token));
+                // 1. Auth felhasználó létrehozása (ez azonnal belépteti a felhasználót, így jogosultságot kap a Firestore-hoz!)
+                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                
+                // 2. Saját adatlap lekérdezése (a Rules v2 engedi, mert isOwner == true)
+                const q = query(collection(db, "candidates"), where("email", "==", email));
                 const snap = await getDocs(q);
 
                 if (snap.empty) {
-                    return alert("Érvénytelen aktiváló kód vagy nem jóváhagyott e-mail cím!");
+                    await deleteUser(userCred.user);
+                    throw new Error("Ehhez az e-mailhez nem található regisztráció a rendszerben.");
                 }
 
-                await createUserWithEmailAndPassword(auth, email, pass);
+                const candidateData = snap.docs[0].data();
+
+                // 3. Aktivációs token és jóváhagyási státusz szigorú ellenőrzése
+                if (candidateData.status !== "approved" || candidateData.activationToken !== token) {
+                    await deleteUser(userCred.user); // Illetéktelen regisztráció azonnali megsemmisítése
+                    throw new Error("Érvénytelen aktiváló kód vagy a jelentkezés még nincs jóváhagyva!");
+                }
+
+                // 4. Sikeres aktiválás: az aktivációs token törlése (egyszer használatos)
                 await updateDoc(doc(db, "candidates", snap.docs[0].id), { activationToken: null });
-                alert("✓ Fiókod sikeresen aktiválva!");
+                alert("✓ Fiókod sikeresen aktiválva és hitelesítve a hálózatban!");
             } catch (err) {
                 alert("Hiba: " + err.message);
+                signOut(auth);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Jelszó Rögzítése & Fiók Aktiválása";
             }
         });
 
@@ -701,7 +720,7 @@
             alert("✓ Frissítve a hálózatban!");
         });
 
-        // ÖNMEGSEMMISÍTÉS JAVÍTÁSA (Újrahitelesítés + Lejáratkor megszakítás)
+        // ÖNMEGSEMMISÍTÉS JAVÍTÁSA (Lejáratkor megszakít, hitelesít)
         const destructModal = document.getElementById('selfDestructModal');
         const countdownTimer = document.getElementById('countdownTimer');
         let timerInterval = null;
@@ -747,19 +766,12 @@
             if (!user) return;
 
             try {
-                // 1. Újrahitelesítés a jelszóval
                 const cred = EmailAuthProvider.credential(user.email, pass);
                 await reauthenticateWithCredential(user, cred);
 
-                // 2. Törlés a Firestore-ból
-                if (currentCandidateDocId) {
-                    await deleteDoc(doc(db, "candidates", currentCandidateDocId));
-                }
-                if (currentCandidateId) {
-                    await deleteDoc(doc(db, "public_members", currentCandidateId));
-                }
+                if (currentCandidateDocId) await deleteDoc(doc(db, "candidates", currentCandidateDocId));
+                if (currentCandidateId) await deleteDoc(doc(db, "public_members", currentCandidateId));
 
-                // 3. Auth fiók megsemmisítése
                 await deleteUser(user);
 
                 alert("Minden adatodat megsemmisítettük a Sejtből. A nyomok törölve.");
