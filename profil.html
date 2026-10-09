@@ -658,14 +658,15 @@
             document.getElementById('firstTimeBox').classList.toggle('hidden');
         });
 
-        // JAVÍTOTT ELSŐ JELSZÓADÁS (Auth először -> Jogosultság azonnal megvan -> Token ellenőrzés -> Sikertelen esetén fióktörlés)
+        // JAVÍTOTT ELSŐ JELSZÓADÁS (Több rekord kezelése, szóköz-tisztítás, pontos hibaüzenet)
         document.getElementById('doFirstTimeActivationBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim().toLowerCase();
             const pass = document.getElementById('authPassword').value;
-            const token = document.getElementById('activationTokenInput').value.trim().toUpperCase();
+            const rawToken = document.getElementById('activationTokenInput').value.trim().toUpperCase();
+            const cleanToken = rawToken.replace(/[^A-Z0-9]/g, ''); // Minden szóközt és felesleges jelet eltávolít
 
-            if (!email || pass.length < 6 || !token) {
-                return alert("Add meg az e-mailt, legalább 6 karakteres új jelszót és az e-mailben kapott aktiváló kódot!");
+            if (!email || pass.length < 6 || !cleanToken) {
+                return alert("Add meg az e-mailt, legalább 6 karakteres jelszót és az e-mailben kapott aktiváló kódot!");
             }
 
             const btn = document.getElementById('doFirstTimeActivationBtn');
@@ -673,10 +674,10 @@
             btn.innerText = "AKTIVÁLÁS...";
 
             try {
-                // 1. Auth felhasználó létrehozása (ez azonnal belépteti a felhasználót, így jogosultságot kap a Firestore-hoz!)
+                // 1. Felhasználó létrehozása az Auth-ban
                 const userCred = await createUserWithEmailAndPassword(auth, email, pass);
                 
-                // 2. Saját adatlap lekérdezése (a Rules v2 engedi, mert isOwner == true)
+                // 2. Keresés az adatbázisban az e-mail címre
                 const q = query(collection(db, "candidates"), where("email", "==", email));
                 const snap = await getDocs(q);
 
@@ -685,17 +686,32 @@
                     throw new Error("Ehhez az e-mailhez nem található regisztráció a rendszerben.");
                 }
 
-                const candidateData = snap.docs[0].data();
-
-                // 3. Aktivációs token és jóváhagyási státusz szigorú ellenőrzése
-                if (candidateData.status !== "approved" || candidateData.activationToken !== token) {
-                    await deleteUser(userCred.user); // Illetéktelen regisztráció azonnali megsemmisítése
-                    throw new Error("Érvénytelen aktiváló kód vagy a jelentkezés még nincs jóváhagyva!");
+                // 3. Megkeressük a jóváhagyott, egyező tokennel rendelkező rekordot
+                let matchedDoc = null;
+                for (let docSnap of snap.docs) {
+                    const data = docSnap.data();
+                    const dbToken = String(data.activationToken || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (data.status === "approved" && dbToken === cleanToken) {
+                        matchedDoc = docSnap;
+                        break;
+                    }
                 }
 
-                // 4. Sikeres aktiválás: az aktivációs token törlése (egyszer használatos)
-                await updateDoc(doc(db, "candidates", snap.docs[0].id), { activationToken: null });
+                if (!matchedDoc) {
+                    const anyApproved = snap.docs.some(d => d.data().status === "approved");
+                    await deleteUser(userCred.user); // Biztonsági visszaállítás
+
+                    if (!anyApproved) {
+                        throw new Error("A jelentkezésed még bírálat alatt áll A Fej által.");
+                    } else {
+                        throw new Error("A megadott aktiváló kód nem egyezik az e-mailben kapott kóddal. Ellenőrizd a betűket és számokat!");
+                    }
+                }
+
+                // 4. Sikeres aktiválás: token elhasználva, egyszer használatos
+                await updateDoc(doc(db, "candidates", matchedDoc.id), { activationToken: null });
                 alert("✓ Fiókod sikeresen aktiválva és hitelesítve a hálózatban!");
+                document.getElementById('firstTimeBox').classList.add('hidden');
             } catch (err) {
                 alert("Hiba: " + err.message);
                 signOut(auth);
