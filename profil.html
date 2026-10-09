@@ -117,7 +117,7 @@
                 </div>
                 <div id="headMsgText" class="text-sm font-bold text-white bg-[#0B130D] p-3 border border-[#1E2F22] leading-relaxed"></div>
                 
-                <!-- Válasz A Fejnek -->
+                <!-- Válasz A Fejnek (Megmarad a visszajelzés!) -->
                 <div class="pt-2 border-t border-[#1E2F22] space-y-2">
                     <label class="block text-[10px] text-sejt-muted uppercase">Válasz vagy visszajelzés A Fejnek:</label>
                     <div class="flex gap-2">
@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            <!-- Képességek Módosítása -->
+            <!-- Képességek Módosítása (Bekapcsolja a Változásjelző Lámpát az adminban!) -->
             <div class="bg-sejt-surface border border-sejt-border p-6 space-y-4">
                 <div>
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Képességek & Rendelkezésre Állás Módosítása</h3>
@@ -212,13 +212,13 @@
             </div>
         </div>
 
-        <!-- 2. FÜL: KÜLDETÉSEK -->
+        <!-- 2. FÜL: KÜLDETÉSEK (ZÁROLT / FELOLDOTT TITKOS ELIGAZÍTÁSSAL) -->
         <div id="viewMissions" class="hidden space-y-4">
             <div class="bg-sejt-surface border border-sejt-border p-4">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">// Hálózati Küldetések</h3>
-                <p class="text-xs text-sejt-muted">Jelentkezz az akciókra, vagy igazold utólag a részvételedet!</p>
+                <p class="text-xs text-sejt-muted">Csatlakozz egy küldetéshez a titkos operatív eligazítás és a találkozási pont feloldásához!</p>
             </div>
-            <div id="missionsListContainer" class="space-y-3"></div>
+            <div id="missionsListContainer" class="space-y-4"></div>
         </div>
 
         <!-- 3. FÜL: ESZKÖZTÁR & IGÉNYLÉSEK -->
@@ -447,7 +447,7 @@
             document.getElementById('profileDashboard').classList.remove('hidden');
             document.getElementById('headerUserStatus').textContent = data.candidateId;
 
-            // A Fej utasításának megjelenítése a kártyán
+            // A Fej közvetlen utasításának megjelenítése
             const headBox = document.getElementById('headInstructionBox');
             const pBadgeMsg = document.getElementById('pBadgeMsg');
             if (data.adminMessage) {
@@ -514,20 +514,29 @@
             loadLeaderboard();
         }
 
-        // Válasz küldése A Fejnek
+        // Válasz küldése A Fejnek és naplózása a Fekete Dobozba
         document.getElementById('sendReplyToHeadBtn').addEventListener('click', async () => {
             const reply = document.getElementById('replyToHeadInput').value.trim();
             if (!reply) return alert("Írj be választ!");
+            
+            const now = new Date().toISOString();
             await updateDoc(doc(db, "candidates", currentCandidateDocId), {
                 memberReply: reply,
-                memberReplyAt: new Date().toISOString()
+                memberReplyAt: now,
+                messageHistory: arrayUnion({
+                    sender: 'member',
+                    text: reply,
+                    at: now
+                })
             });
+
             alert("✓ Válasz elküldve A Fejnek!");
             document.getElementById('replyToHeadInput').value = '';
             document.getElementById('lastReplyEcho').textContent = `Legutóbbi válaszod: "${reply}"`;
             document.getElementById('lastReplyEcho').classList.remove('hidden');
         });
 
+        // Küldetések betöltése (Zárolt / Feloldott Titkos Eligazítással!)
         function loadMissions() {
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const container = document.getElementById('missionsListContainer');
@@ -547,13 +556,34 @@
                     container.innerHTML = '<div class="p-4 bg-sejt-surface border border-sejt-border text-xs text-sejt-muted">Nincs aktív küldetés kiírva.</div>';
                     return;
                 }
+
                 snap.forEach(d => {
                     const m = d.data();
                     const card = document.createElement('div');
-                    card.className = "p-4 bg-sejt-surface border border-sejt-border space-y-3";
+                    card.className = "p-4 bg-sejt-surface border border-sejt-border space-y-3.5";
                     
                     const attendees = m.attendees || [];
                     const isJoined = attendees.includes(currentCandidateId);
+
+                    // Titkos Operatív Box: Csak akkor nyílik ki, ha csatlakozott!
+                    let secretBox = '';
+                    if (isJoined) {
+                        secretBox = `
+                            <div class="p-3 bg-[#0E1A11] border border-emerald-800/60 rounded space-y-1">
+                                <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                    <span>🔓 TITKOS OPERATÍV ELIGAZÍTÁS (Csak résztvevőknek)</span>
+                                </div>
+                                <div class="text-xs text-emerald-200/90 leading-relaxed font-mono">${escapeHtml(m.operativeBriefing || 'Nincs különleges titkos utasítás rögzítve.')}</div>
+                            </div>
+                        `;
+                    } else {
+                        secretBox = `
+                            <div class="p-2.5 bg-[#14120B] border border-amber-900/40 rounded flex items-center justify-between text-[11px] text-amber-400/90 font-mono">
+                                <span>🔒 ZÁROLT OPERATÍV ELIGAZÍTÁS</span>
+                                <span class="text-[10px] text-[#5C735E] italic">Csatlakozz a részletek feloldásához!</span>
+                            </div>
+                        `;
+                    }
 
                     card.innerHTML = `
                         <div class="flex justify-between items-start">
@@ -565,10 +595,12 @@
                         </div>
                         <p class="text-xs text-sejt-text/90">${escapeHtml(m.desc)}</p>
                         
+                        ${secretBox}
+
                         <div class="flex flex-wrap justify-between items-center pt-2 border-t border-sejt-border gap-2 text-[10px]">
                             <span class="text-sejt-muted">Kategória: ${escapeHtml(m.category)} | ${attendees.length} Sejttag csatlakozott</span>
                             <div class="space-x-2">
-                                <button class="join-mission-btn px-2.5 py-1 ${isJoined ? 'bg-[#1E2F22] text-emerald-400' : 'bg-[#0B130D] border border-sejt-border text-sejt-text hover:border-[#5A7736]'} transition" data-id="${d.id}">
+                                <button class="join-mission-btn px-2.5 py-1 ${isJoined ? 'bg-[#1E2F22] text-emerald-400 font-bold' : 'bg-[#0B130D] border border-sejt-border text-sejt-text hover:border-[#5A7736]'} transition" data-id="${d.id}">
                                     ${isJoined ? '✓ Csatlakoztál' : '✋ Csatlakozom'}
                                 </button>
                                 <button class="claim-xp-btn px-2.5 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold uppercase transition" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-xp="${m.xp}">
@@ -580,14 +612,16 @@
                     container.appendChild(card);
                 });
 
+                // Csatlakozás gomb (Feloldja a titkos operatív boxot!)
                 container.querySelectorAll('.join-mission-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const mId = e.target.dataset.id;
                         await updateDoc(doc(db, "missions", mId), { attendees: arrayUnion(currentCandidateId) });
-                        alert("✓ Rögzítettük a részvételedet!");
+                        alert("✓ Csatlakoztál az akcióhoz! A titkos operatív eligazítás feloldva.");
                     });
                 });
 
+                // Determinisztikus XP igénylés
                 container.querySelectorAll('.claim-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -615,6 +649,7 @@
             });
         }
 
+        // Eszköztár
         function loadTools() {
             onSnapshot(collection(db, "tools"), (snap) => {
                 const tbody = document.getElementById('memberToolsBody');
@@ -706,167 +741,4 @@
                 members.sort((a, b) => b.xp - a.xp);
                 members.forEach(m => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-2.5 font-bold text-sejt-oliveLight font-mono">${escapeHtml(m.candidateId)}</td>
-                        <td class="p-2.5 text-white">${escapeHtml(m.levelCode)}. ${escapeHtml(m.levelName)}</td>
-                        <td class="p-2.5 text-right font-mono text-sejt-muted">${Number(m.xp)} XP</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            });
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('authEmail').value.trim().toLowerCase(), document.getElementById('authPassword').value);
-            } catch (err) {
-                document.getElementById('authMsg').textContent = "Hibás belépési adatok.";
-            }
-        });
-
-        document.getElementById('toggleFirstTimeBtn').addEventListener('click', () => {
-            document.getElementById('firstTimeBox').classList.toggle('hidden');
-        });
-
-        // JAVÍTOTT ELSŐ JELSZÓADÁS (Az engedélyezett activationToken-nel!)
-        document.getElementById('doFirstTimeActivationBtn').addEventListener('click', async () => {
-            const email = document.getElementById('authEmail').value.trim().toLowerCase();
-            const pass = document.getElementById('authPassword').value;
-            const rawToken = document.getElementById('activationTokenInput').value.trim().toUpperCase();
-            const cleanToken = rawToken.replace(/[^A-Z0-9]/g, '');
-
-            if (!email || pass.length < 6 || !cleanToken) {
-                return alert("Add meg az e-mailt, legalább 6 karakteres jelszót és az e-mailben kapott aktiváló kódot!");
-            }
-
-            const btn = document.getElementById('doFirstTimeActivationBtn');
-            btn.disabled = true;
-            btn.innerText = "AKTIVÁLÁS...";
-
-            try {
-                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-                const q = query(collection(db, "candidates"), where("email", "==", email));
-                const snap = await getDocs(q);
-
-                if (snap.empty) {
-                    await deleteUser(userCred.user);
-                    throw new Error("Ehhez az e-mailhez nem található regisztráció a rendszerben.");
-                }
-
-                let matchedDoc = null;
-                for (let docSnap of snap.docs) {
-                    const data = docSnap.data();
-                    const dbToken = String(data.activationToken || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    if (data.status === "approved" && dbToken === cleanToken) {
-                        matchedDoc = docSnap;
-                        break;
-                    }
-                }
-
-                if (!matchedDoc) {
-                    const anyApproved = snap.docs.some(d => d.data().status === "approved");
-                    await deleteUser(userCred.user);
-
-                    if (!anyApproved) {
-                        throw new Error("A jelentkezésed még bírálat alatt áll A Fej által.");
-                    } else {
-                        throw new Error("A megadott aktiváló kód nem egyezik az e-mailben kapott kóddal!");
-                    }
-                }
-
-                // Sikeres elhasználás (a Rules engedi!)
-                await updateDoc(doc(db, "candidates", matchedDoc.id), { activationToken: null });
-                alert("✓ Fiókod sikeresen aktiválva és hitelesítve!");
-                document.getElementById('firstTimeBox').classList.add('hidden');
-            } catch (err) {
-                alert("Hiba: " + err.message);
-                signOut(auth);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Jelszó Rögzítése & Fiók Aktiválása";
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
-        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentCandidateDocId) return;
-            const checkedSkills = Array.from(document.querySelectorAll('input[name="userSkill"]:checked')).map(cb => cb.value);
-            await updateDoc(doc(db, "candidates", currentCandidateDocId), {
-                skills: checkedSkills,
-                timeframe: document.getElementById('userTimeframe').value,
-                notesToFej: document.getElementById('userNotes').value.trim(),
-                updatedAt: new Date().toISOString()
-            });
-            alert("✓ Frissítve a hálózatban!");
-        });
-
-        // ÖNMEGSEMMISÍTÉS
-        const destructModal = document.getElementById('selfDestructModal');
-        const countdownTimer = document.getElementById('countdownTimer');
-        let timerInterval = null;
-        let secondsLeft = 60;
-
-        document.getElementById('openSelfDestructModalBtn').addEventListener('click', () => {
-            destructModal.classList.remove('hidden');
-            secondsLeft = 60;
-            updateTimerDisplay();
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                secondsLeft--;
-                updateTimerDisplay();
-                if (secondsLeft <= 0) {
-                    clearInterval(timerInterval);
-                    destructModal.classList.add('hidden');
-                    alert("A megsemmisítési időkorlát lejárt. A folyamat megszakítva.");
-                }
-            }, 1000);
-        });
-
-        function updateTimerDisplay() {
-            const mins = Math.floor(secondsLeft / 60);
-            const secs = secondsLeft % 60;
-            countdownTimer.textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-
-        document.getElementById('cancelDestructBtn').addEventListener('click', () => {
-            clearInterval(timerInterval);
-            destructModal.classList.add('hidden');
-            document.getElementById('destructPasswordInput').value = '';
-        });
-
-        document.getElementById('confirmDestructBtn').addEventListener('click', () => {
-            const pass = document.getElementById('destructPasswordInput').value;
-            if (!pass) return alert("Add meg a jelszavad a törléshez!");
-            clearInterval(timerInterval);
-            executeSelfDestruction(pass);
-        });
-
-        async function executeSelfDestruction(pass) {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                const cred = EmailAuthProvider.credential(user.email, pass);
-                await reauthenticateWithCredential(user, cred);
-
-                if (currentCandidateDocId) await deleteDoc(doc(db, "candidates", currentCandidateDocId));
-                if (currentCandidateId) await deleteDoc(doc(db, "public_members", currentCandidateId));
-
-                await deleteUser(user);
-                alert("Minden adatodat megsemmisítettük a Sejtből. A nyomok törölve.");
-                window.location.href = "index.html";
-            } catch (e) {
-                alert("Hiba: Hibás jelszó!");
-            }
-        }
-
-        const privacyModal = document.getElementById('privacyModal');
-        document.getElementById('privacyModalBtn').addEventListener('click', () => privacyModal.classList.remove('hidden'));
-        document.getElementById('closePrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
-        document.getElementById('okPrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
-    </script>
-</body>
-</html>
+                    tr.inne

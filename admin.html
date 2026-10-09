@@ -41,13 +41,13 @@
     <!-- ADMIN IRÁNYÍTÓPULT -->
     <div id="dashboardView" class="hidden space-y-6">
         
+        <!-- Fejléc és navigáció -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
-                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati és operatív felügyelete</p>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt operatív vezérlése és hálózati nyilvántartása</p>
             </div>
             
-            <!-- FÜLEK ÉRTESÍTÉSI SZÁMOKKAL -->
             <div class="flex flex-wrap items-center gap-4 text-xs">
                 <button id="tabMembersBtn" class="py-1 font-bold tab-active flex items-center space-x-1.5">
                     <span>Tagok</span>
@@ -70,21 +70,24 @@
         <!-- 1. FÜL: TAGOK -->
         <div id="membersTab" class="space-y-6">
             
+            <!-- Függőben lévő XP kérelmek -->
             <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
                 <div id="claimsList" class="space-y-2"></div>
             </div>
 
+            <!-- Fő Tagtáblázat -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
                         <tr>
                             <th class="p-3">Azonosító</th>
                             <th class="p-3">Név & E-mail</th>
-                            <th class="p-3">Telegram Fiók</th>
+                            <th class="p-3">Telegram</th>
                             <th class="p-3">Szint & XP</th>
                             <th class="p-3">Képességek</th>
-                            <th class="p-3">Kétirányú Kommunikáció</th>
+                            <th class="p-3 min-w-[170px]">Felajánlás / Megjegyzés</th>
+                            <th class="p-3 min-w-[200px]">Kommunikáció A Fejjel</th>
                             <th class="p-3">Státusz</th>
                             <th class="p-3 min-w-[210px]">Művelet</th>
                         </tr>
@@ -93,8 +96,8 @@
                 </table>
             </div>
 
-            <!-- Archivált irattár és ranglétra takarító -->
-            <div class="flex justify-between items-center pt-2">
+            <!-- Archivált irattár és ranglétra tisztító -->
+            <div class="flex flex-wrap justify-between items-center pt-2 gap-2">
                 <button id="toggleArchiveBtn" class="text-[11px] text-[#5C735E] hover:text-[#7A9E48] underline flex items-center space-x-1">
                     <span>📁 Archivált jelentkezések megtekintése (Irattár)</span>
                 </button>
@@ -135,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- Új Küldetés Űrlap -->
+            <!-- Új Küldetés Űrlap (Nyilvános leírás + Titkos Operatív Eligazítás) -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-4">
                 <h3 class="text-sm font-bold text-white uppercase">// Új Küldetés Kiírása</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -161,13 +164,21 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <select id="mCategory" class="w-full">
-                        <option value="5_perc">5 Perces Küldetés</option>
-                        <option value="30_perc">30 Perces Küldetés</option>
-                        <option value="sejt_akcio">Sejt-Akció (Csoportos)</option>
-                        <option value="fej_kuldetes">Fej-Küldetés (Kiemelt)</option>
-                    </select>
-                    <textarea id="mDesc" rows="2" placeholder="Operatív leírás és utasítás..." class="w-full"></textarea>
+                    <div>
+                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Kategória & Nyilvános Leírás (Mindenki látja)</label>
+                        <select id="mCategory" class="w-full mb-2">
+                            <option value="5_perc">5 Perces Küldetés</option>
+                            <option value="30_perc">30 Perces Küldetés</option>
+                            <option value="sejt_akcio">Sejt-Akció (Csoportos)</option>
+                            <option value="fej_kuldetes">Fej-Küldetés (Kiemelt)</option>
+                        </select>
+                        <textarea id="mDesc" rows="3" placeholder="Nyilvános felhívás és célkitűzés..." class="w-full"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás (Csak a becsatlakozott Sejtek látják!)</label>
+                        <textarea id="mOperative" rows="4" placeholder="Pl. Pontos találkozó 18:45-kor a sikátornál. Az ágvágót a kapualjban találjátok. Jelszó: két ujj lefelé..." class="w-full border-amber-900/60"></textarea>
+                    </div>
                 </div>
 
                 <div class="flex justify-end">
@@ -186,7 +197,8 @@
                             <th class="p-3">Cím & Kategória</th>
                             <th class="p-3">XP</th>
                             <th class="p-3">Képességek</th>
-                            <th class="p-3">Leírás</th>
+                            <th class="p-3">Nyilvános Leírás</th>
+                            <th class="p-3">🔒 Titkos Eligazítás</th>
                             <th class="p-3 min-w-[160px]">Jelentkezett Sejttagok</th>
                             <th class="p-3">Státusz</th>
                             <th class="p-3 text-center min-w-[140px]">Művelet</th>
@@ -296,11 +308,73 @@
 
     </div>
 
+    <!-- KÜLDETÉS MÓDOSÍTÁSI MODAL -->
+    <div id="editMissionModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#101912] border border-[#1E2F22] max-w-lg w-full p-6 space-y-4 text-xs">
+            <div class="flex justify-between items-center border-b border-[#1E2F22] pb-2">
+                <h3 class="font-bold text-white uppercase">Küldetés Módosítása</h3>
+                <button id="closeEditModalBtn" class="text-[#5C735E] hover:text-white font-bold text-sm">✕</button>
+            </div>
+            <input type="hidden" id="editMissionDocId">
+            <input type="hidden" id="editMissionTgId">
+            <input type="hidden" id="editMissionCode">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Küldetés Címe</label>
+                    <input type="text" id="editMTitle" class="w-full font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Kategória</label>
+                        <select id="editMCat" class="w-full">
+                            <option value="5_perc">5 Perces Küldetés</option>
+                            <option value="30_perc">30 Perces Küldetés</option>
+                            <option value="sejt_akcio">Sejt-Akció</option>
+                            <option value="fej_kuldetes">Fej-Küldetés</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">XP Jutalom</label>
+                        <input type="number" id="editMXp" class="w-full font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Nyilvános Leírás</label>
+                    <textarea id="editMDesc" rows="2" class="w-full"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás (Csak becsatlakozott Sejteknek)</label>
+                    <textarea id="editMOperative" rows="3" class="w-full border-amber-900/60"></textarea>
+                </div>
+            </div>
+            <button id="saveEditMissionBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold uppercase tracking-wider transition">
+                Módosítások Mentése & Telegram Frissítése
+            </button>
+        </div>
+    </div>
+
+    <!-- KOMMUNIKÁCIÓS ARCHÍVUM MODAL (A FEJ FEKETE DOBOZA) -->
+    <div id="commArchiveModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#101912] border border-[#1E2F22] max-w-xl w-full p-6 space-y-4 text-xs font-mono">
+            <div class="flex justify-between items-center border-b border-[#1E2F22] pb-2">
+                <div>
+                    <span class="text-[10px] text-[#5C735E] uppercase">// FEKETE DOBOZ</span>
+                    <h3 id="archiveCandidateHeader" class="font-bold text-white uppercase">Kommunikációs Napló</h3>
+                </div>
+                <button id="closeArchiveModalBtn" class="text-[#5C735E] hover:text-white font-bold text-sm">✕</button>
+            </div>
+
+            <div id="archiveMessagesList" class="space-y-3 max-h-96 overflow-y-auto p-1">
+                <!-- JS tölti be az időrendi üzenetváltást -->
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
@@ -408,7 +482,6 @@
             }
         });
 
-        // Evolúció
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -606,13 +679,14 @@
             finally { btn.disabled = false; btn.innerText = "⚡ Felsugárzás (Mentés)"; }
         });
 
-        // KÜLDETÉSEK PUBLIKÁLÁSA
+        // KÜLDETÉSEK PUBLIKÁLÁSA (Nyilvános + Titkos Operatív részlettel)
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
             const xp = parseInt(document.getElementById('mXp').value) || 20;
             const category = document.getElementById('mCategory').value;
             const desc = document.getElementById('mDesc').value.trim();
+            const operative = document.getElementById('mOperative').value.trim();
 
             const checkedSkills = Array.from(document.querySelectorAll('input[name="mSkill"]:checked')).map(cb => cb.value);
             const customSkill = document.getElementById('mCustomSkill').value.trim();
@@ -632,6 +706,7 @@
 
                 await setDoc(doc(db, "missions", code), {
                     code, title, xp, category, skills: finalSkillsStr, desc,
+                    operativeBriefing: operative, // Csak a becsatlakozott Sejtek látják!
                     status: "open",
                     tgMessageId: tgMsgId || null,
                     attendees: [],
@@ -642,6 +717,7 @@
                 document.getElementById('mCode').value = '';
                 document.getElementById('mTitle').value = '';
                 document.getElementById('mDesc').value = '';
+                document.getElementById('mOperative').value = '';
                 document.getElementById('mCustomSkill').value = '';
                 document.querySelectorAll('input[name="mSkill"]').forEach(cb => cb.checked = false);
             } catch (e) { alert("Hiba: " + e.message); } 
@@ -668,15 +744,33 @@
                         <td class="p-3 font-mono text-[#7A9E48]">+${Number(m.xp)} XP</td>
                         <td class="p-3 text-[11px] text-[#5C735E]">${escapeHtml(m.skills || 'Mindenki')}</td>
                         <td class="p-3 text-[11px] max-w-xs truncate">${escapeHtml(m.desc)}</td>
+                        <td class="p-3 text-[11px] max-w-xs truncate text-amber-300">${m.operativeBriefing ? escapeHtml(m.operativeBriefing) : '<span class="text-[#5C735E] italic">Nincs titkos utasítás</span>'}</td>
                         <td class="p-3 max-w-xs"><div class="flex flex-wrap items-center gap-1">${attendeesHtml}</div></td>
                         <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
                         <td class="p-3 text-center space-x-1">
+                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${d.id}" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-desc="${escapeHtml(m.desc)}" data-operative="${escapeHtml(m.operativeBriefing || '')}" data-xp="${m.xp}" data-cat="${m.category}" data-tgid="${m.tgMessageId || ''}">Módosítás</button>
+                            <span class="text-[#1E2F22]">|</span>
                             <button class="toggle-m-btn text-[11px] text-[#5C735E] hover:underline" data-id="${d.id}" data-status="${m.status}">${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}</button>
                             <span class="text-[#1E2F22]">|</span>
                             <button class="delete-m-btn text-[11px] text-red-400 hover:underline" data-id="${d.id}" data-tgid="${m.tgMessageId || ''}">Törlés</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
+                });
+
+                tbody.querySelectorAll('.edit-m-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const b = e.target.dataset;
+                        document.getElementById('editMissionDocId').value = b.id;
+                        document.getElementById('editMissionTgId').value = b.tgid;
+                        document.getElementById('editMissionCode').value = b.code;
+                        document.getElementById('editMTitle').value = b.title;
+                        document.getElementById('editMDesc').value = b.desc;
+                        document.getElementById('editMOperative').value = b.operative;
+                        document.getElementById('editMXp').value = b.xp;
+                        document.getElementById('editMCat').value = b.cat;
+                        document.getElementById('editMissionModal').classList.remove('hidden');
+                    });
                 });
 
                 tbody.querySelectorAll('.toggle-m-btn').forEach(btn => {
@@ -697,6 +791,36 @@
                 });
             });
         }
+
+        // Küldetés Módosítás Mentése
+        document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
+            const docId = document.getElementById('editMissionDocId').value;
+            const tgId = document.getElementById('editMissionTgId').value;
+            const code = document.getElementById('editMissionCode').value;
+            const title = document.getElementById('editMTitle').value.trim();
+            const desc = document.getElementById('editMDesc').value.trim();
+            const operative = document.getElementById('editMOperative').value.trim();
+            const xp = parseInt(document.getElementById('editMXp').value) || 20;
+            const category = document.getElementById('editMCat').value;
+
+            if (!title || !desc) return alert("Töltsd ki az adatokat!");
+
+            await updateDoc(doc(db, "missions", docId), { 
+                title, desc, operativeBriefing: operative, xp, category, updatedAt: new Date().toISOString() 
+            });
+
+            if (tgId) {
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)} (MÓDOSÍTVA)</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
+                await callBackend("/api/telegram-edit", { messageId: tgId, text: tgMsg });
+            }
+
+            document.getElementById('editMissionModal').classList.add('hidden');
+            alert("✓ Küldetés sikeresen módosítva a weben és a Telegramon is!");
+        });
+
+        document.getElementById('closeEditModalBtn').addEventListener('click', () => {
+            document.getElementById('editMissionModal').classList.add('hidden');
+        });
 
         // ESZKÖZTÁR
         document.getElementById('addToolBtn').addEventListener('click', async () => {
@@ -743,7 +867,7 @@
             });
         }
 
-        // ESZKÖZIGÉNYLÉSEK ÉS ÉRTESÍTÉSI SZÁMLÁLÓ
+        // ESZKÖZIGÉNYLÉSEK
         function loadToolRequests() {
             onSnapshot(query(collection(db, "tool_requests"), where("status", "==", "pending")), (snap) => {
                 const sec = document.getElementById('toolRequestsSection');
@@ -799,7 +923,7 @@
             });
         }
 
-        // XP IGÉNYLÉSEK ÉS ÉRTESÍTÉSI SZÁMLÁLÓ
+        // XP IGÉNYLÉSEK
         function loadXpClaims() {
             onSnapshot(query(collection(db, "xp_claims"), where("status", "==", "pending")), (snap) => {
                 const sec = document.getElementById('claimsSection');
@@ -900,7 +1024,7 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-        // TAGLISTA ÉS ÉRTESÍTŐ SZÁMLÁLÓK
+        // TAGLISTA, VÁLTOZÁSJELZŐ LÁMPA ÉS KOMMUNIKÁCIÓ
         function loadCandidates() {
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
@@ -957,12 +1081,28 @@
                         ? `<span class="px-1.5 py-0.5 bg-[#1E2F22] text-emerald-400 font-mono text-[10px] rounded">✓ ${escapeHtml(data.telegramUsername || data.telegramUserId)}</span>`
                         : `<span class="text-[#5C735E] text-[10px] font-mono">Nincs bekötve</span>`;
 
-                    // Kétirányú kommunikáció megjelenítése a sorban
+                    // Változásjelző Lámpa a megjegyzés mellett
+                    const isProfileUpdated = data.profileUpdated === true;
+                    const updateLamp = isProfileUpdated 
+                        ? `<button class="clear-lamp-btn inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse mb-1" data-id="${docSnap.id}">🔴 MÓDOSÍTOTT ADATOK [Megnézve]</button>` 
+                        : '';
+
+                    const noteCell = `
+                        <div class="max-w-xs">
+                            ${updateLamp}
+                            <div class="text-[11px] text-white italic truncate" title="${escapeHtml(data.notesToFej || '')}">${escapeHtml(data.notesToFej || '-')}</div>
+                        </div>
+                    `;
+
+                    // Kétirányú kommunikáció + Archívum gomb
                     const commBox = `
                         <div class="text-[10px] space-y-1">
-                            ${data.adminMessage ? `<div class="text-emerald-400"><b>A Fej:</b> "${escapeHtml(data.adminMessage)}"</div>` : ''}
-                            ${data.memberReply ? `<div class="text-amber-400"><b>Tag válasza:</b> "${escapeHtml(data.memberReply)}"</div>` : ''}
-                            <button class="send-msg-btn text-[#7A9E48] hover:underline font-bold" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}">✉️ Utasítás / Üzenet küldése</button>
+                            ${data.adminMessage ? `<div class="text-emerald-400 truncate" title="${escapeHtml(data.adminMessage)}"><b>A Fej:</b> "${escapeHtml(data.adminMessage)}"</div>` : ''}
+                            ${data.memberReply ? `<div class="text-amber-400 truncate" title="${escapeHtml(data.memberReply)}"><b>Tag:</b> "${escapeHtml(data.memberReply)}"</div>` : ''}
+                            <div class="flex gap-2 pt-0.5">
+                                <button class="send-msg-btn text-[#7A9E48] hover:underline font-bold" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}">✉️ Utasítás</button>
+                                <button class="open-archive-btn text-[#5C735E] hover:text-white underline" data-cid="${escapeHtml(data.candidateId)}">📜 Napló</button>
+                            </div>
                         </div>
                     `;
 
@@ -978,7 +1118,8 @@
                             <div class="text-[10px] text-[#5C735E]">${xp} XP (${escapeHtml(rank.cat)})</div>
                         </td>
                         <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).map(s => escapeHtml(s)).join(', ')}</td>
-                        <td class="p-3 max-w-xs">${commBox}</td>
+                        <td class="p-3">${noteCell}</td>
+                        <td class="p-3">${commBox}</td>
                         <td class="p-3">
                             <span class="px-2 py-0.5 font-bold uppercase ${isPending ? 'text-amber-400 bg-amber-950/40' : (isApproved ? 'text-emerald-400 bg-emerald-950/40' : 'text-red-400 bg-red-950/40')}">
                                 ${escapeHtml(data.status)}
@@ -1002,17 +1143,65 @@
                     tbody.appendChild(tr);
                 });
 
-                // Utasítás / Üzenet küldése a tagnak
+                // Változásjelző lámpa lekapcsolása
+                document.querySelectorAll('.clear-lamp-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        await updateDoc(doc(db, "candidates", e.target.dataset.id), { profileUpdated: false });
+                    });
+                });
+
+                // Kommunikációs napló megnyitása
+                document.querySelectorAll('.open-archive-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const cid = e.target.dataset.cid;
+                        const candidate = candidatesCache.find(c => c.candidateId === cid);
+                        if (!candidate) return;
+
+                        document.getElementById('archiveCandidateHeader').textContent = `Napló: ${cid}`;
+                        const list = document.getElementById('archiveMessagesList');
+                        list.innerHTML = '';
+
+                        const history = candidate.messageHistory || [];
+                        if (history.length === 0) {
+                            list.innerHTML = '<div class="text-[#5C735E] italic">Nincs rögzített üzenetváltás a fekete dobozban.</div>';
+                        } else {
+                            history.forEach(m => {
+                                const isHead = m.sender === 'fej';
+                                const div = document.createElement('div');
+                                div.className = `p-2.5 rounded border ${isHead ? 'bg-[#0E1A11] border-emerald-900/60' : 'bg-[#18150D] border-amber-900/60'}`;
+                                div.innerHTML = `
+                                    <div class="flex justify-between items-center text-[10px] ${isHead ? 'text-emerald-400' : 'text-amber-400'} font-bold">
+                                        <span>${isHead ? '👑 A FEJ UTASÍTÁSA' : `🌱 SEJTTAG VÁLASZA (${cid})`}</span>
+                                        <span class="text-[#5C735E] font-mono">${new Date(m.at).toLocaleString('hu-HU')}</span>
+                                    </div>
+                                    <div class="text-white text-xs mt-1 leading-relaxed">${escapeHtml(m.text)}</div>
+                                `;
+                                list.appendChild(div);
+                            });
+                        }
+
+                        document.getElementById('commArchiveModal').classList.remove('hidden');
+                    });
+                });
+
+                // Utasítás küldése (és naplózása a messageHistory-ba)
                 document.querySelectorAll('.send-msg-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
-                        const msg = prompt(`Közvetlen utasítás vagy üzenet küldése ${b.cid} részére (megjelenik a profilján):`);
+                        const msg = prompt(`Közvetlen utasítás küldése ${b.cid} részére:`);
                         if (!msg) return;
+
+                        const now = new Date().toISOString();
                         await updateDoc(doc(db, "candidates", b.id), {
                             adminMessage: msg.trim(),
-                            adminMessageAt: new Date().toISOString()
+                            adminMessageAt: now,
+                            messageHistory: arrayUnion({
+                                sender: 'fej',
+                                text: msg.trim(),
+                                at: now
+                            })
                         });
-                        alert(`✓ Utasítás elküldve ${b.cid} profiljára!`);
+                        alert(`✓ Utasítás elküldve és naplózva a fekete dobozba!`);
                     });
                 });
 
@@ -1124,9 +1313,14 @@
             });
         }
 
-        // Ranglétra tisztító (Kitörli a public_members-ből az árván maradt rekordokat)
+        // Kommunikációs napló bezárása
+        document.getElementById('closeArchiveModalBtn').addEventListener('click', () => {
+            document.getElementById('commArchiveModal').classList.add('hidden');
+        });
+
+        // Ranglétra újraszinkronizáló
         document.getElementById('syncLeaderboardBtn').addEventListener('click', async () => {
-            if (!confirm("Újraszinkronizálod a ranglétrát? Ez letisztítja azokat a tagokat, akiket közvetlenül töröltél az adatbázisból.")) return;
+            if (!confirm("Újraszinkronizálod a ranglétrát?")) return;
             const pubSnap = await getDocs(collection(db, "public_members"));
             const candSnap = await getDocs(collection(db, "candidates"));
             
