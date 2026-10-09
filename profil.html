@@ -13,14 +13,9 @@
                 extend: {
                     colors: {
                         sejt: {
-                            bg: '#090F0A',
-                            surface: '#101912',
-                            border: '#1E2F22',
-                            olive: '#5A7736',
-                            oliveLight: '#7A9E48',
-                            teal: '#1F6B6A',
-                            text: '#D5E2D5',
-                            muted: '#5C735E'
+                            bg: '#090F0A', surface: '#101912', border: '#1E2F22',
+                            olive: '#5A7736', oliveLight: '#7A9E48', teal: '#1F6B6A',
+                            text: '#D5E2D5', muted: '#5C735E'
                         }
                     },
                     fontFamily: { mono: ['"JetBrains Mono"', 'monospace'] }
@@ -77,7 +72,6 @@
             </div>
         </form>
 
-        <!-- Első Jelszóadás panel -->
         <div id="firstTimeBox" class="hidden border-t border-sejt-border pt-4 space-y-3">
             <h4 class="text-xs font-bold text-[#7A9E48] uppercase">// Fiók Aktiválása Első Alkalommal</h4>
             <p class="text-[10px] text-sejt-muted">Írd be az e-mailben kapott 6 karakteres aktiváló kódot:</p>
@@ -95,16 +89,46 @@
         
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-sejt-border pb-3 gap-3">
             <div class="flex space-x-4 text-xs">
-                <button id="pTabProfile" class="py-1 font-bold tab-active">Saját Sejt-Kártya</button>
-                <button id="pTabMissions" class="py-1 font-bold text-sejt-muted hover:text-white">Küldetések</button>
-                <button id="pTabTools" class="py-1 font-bold text-sejt-muted hover:text-white">Eszköztár</button>
+                <button id="pTabProfile" class="py-1 font-bold tab-active flex items-center space-x-1">
+                    <span>Saját Sejt-Kártya</span>
+                    <span id="pBadgeMsg" class="hidden w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                </button>
+                <button id="pTabMissions" class="py-1 font-bold text-sejt-muted hover:text-white flex items-center space-x-1.5">
+                    <span>Küldetések</span>
+                    <span id="pBadgeMissions" class="hidden px-1.5 py-0.2 bg-[#5A7736] text-white rounded-full text-[10px]">0</span>
+                </button>
+                <button id="pTabTools" class="py-1 font-bold text-sejt-muted hover:text-white flex items-center space-x-1.5">
+                    <span>Eszköztár</span>
+                    <span id="pBadgeTools" class="hidden px-1.5 py-0.2 bg-[#1E2F22] text-[#7A9E48] rounded-full text-[10px]">0</span>
+                </button>
                 <button id="pTabLeaderboard" class="py-1 font-bold text-sejt-muted hover:text-white">Ranglétra</button>
             </div>
             <button id="logoutBtn" class="text-xs text-red-400 hover:underline transition">Kijelentkezés</button>
         </div>
 
-        <!-- 1. FÜL: PROFIL ÉS TELEGRAM -->
+        <!-- 1. FÜL: PROFIL, A FEJ UTASÍTÁSA ÉS TELEGRAM -->
         <div id="viewProfile" class="space-y-6">
+            
+            <!-- A FEJ KÖZVETLEN UTASÍTÁSA / ÜZENETE (Ha van) -->
+            <div id="headInstructionBox" class="hidden bg-[#101912] border-2 border-[#5A7736] p-5 space-y-3">
+                <div class="flex justify-between items-center text-xs font-bold text-emerald-400 uppercase tracking-widest">
+                    <span>👑 A FEJ KÖZVETLEN UTASÍTÁSA // ÜZENETE</span>
+                    <span id="headMsgTime" class="text-[10px] text-sejt-muted font-mono">--</span>
+                </div>
+                <div id="headMsgText" class="text-sm font-bold text-white bg-[#0B130D] p-3 border border-[#1E2F22] leading-relaxed"></div>
+                
+                <!-- Válasz A Fejnek -->
+                <div class="pt-2 border-t border-[#1E2F22] space-y-2">
+                    <label class="block text-[10px] text-sejt-muted uppercase">Válasz vagy visszajelzés A Fejnek:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="replyToHeadInput" placeholder="Válaszod..." class="flex-1 bg-[#0B130D] border border-sejt-border px-3 py-1.5 text-xs text-white">
+                        <button id="sendReplyToHeadBtn" class="px-4 py-1.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase transition">Válasz Küldése</button>
+                    </div>
+                    <div id="lastReplyEcho" class="text-[10px] text-sejt-muted italic hidden"></div>
+                </div>
+            </div>
+
+            <!-- Fő Sejt-kártya -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2 bg-sejt-surface border border-sejt-border p-6 space-y-4">
                     <div class="flex justify-between items-start">
@@ -272,7 +296,7 @@
             </div>
             <div class="space-y-3 text-sejt-muted leading-relaxed max-h-80 overflow-y-auto">
                 <p><b>1. Adatkezelő:</b> Zöld Sejt Koordináció (Kapcsolat: <code>zoldsejt@gmail.com</code>).</p>
-                <p><b>2. Kezelt adatok:</b> Név, e-mail cím, képességek, csatlakozási időbélyeg.</p>
+                <p><b>2. Kezelt adatok:</b> Név, e-mail cím, képességek, időbélyeg.</p>
                 <p><b>3. Adatfeldolgozók:</b> Google Firebase (felhőtárhely / EU), Brevo SAS (e-mail / EU), Telegram FZ-LLC, Cloudflare Inc.</p>
                 <p><b>4. Jogalap:</b> Önkéntes hozzájárulás (GDPR 6. cikk (1) a)).</p>
                 <p><b>5. Adattörlés:</b> Az önmegsemmisítés gombbal minden adat azonnal megsemmisül.</p>
@@ -329,12 +353,7 @@
 
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
         let currentCandidateDocId = null;
@@ -428,6 +447,25 @@
             document.getElementById('profileDashboard').classList.remove('hidden');
             document.getElementById('headerUserStatus').textContent = data.candidateId;
 
+            // A Fej utasításának megjelenítése a kártyán
+            const headBox = document.getElementById('headInstructionBox');
+            const pBadgeMsg = document.getElementById('pBadgeMsg');
+            if (data.adminMessage) {
+                headBox.classList.remove('hidden');
+                pBadgeMsg.classList.remove('hidden');
+                document.getElementById('headMsgText').textContent = data.adminMessage;
+                document.getElementById('headMsgTime').textContent = data.adminMessageAt ? new Date(data.adminMessageAt).toLocaleString('hu-HU') : '';
+                
+                if (data.memberReply) {
+                    const echo = document.getElementById('lastReplyEcho');
+                    echo.textContent = `Legutóbbi válaszod: "${data.memberReply}"`;
+                    echo.classList.remove('hidden');
+                }
+            } else {
+                headBox.classList.add('hidden');
+                pBadgeMsg.classList.add('hidden');
+            }
+
             document.getElementById('cardCandidateId').textContent = data.candidateId;
             const xp = data.xp || 0;
             document.getElementById('cardXpText').textContent = `${xp} XP`;
@@ -476,10 +514,35 @@
             loadLeaderboard();
         }
 
+        // Válasz küldése A Fejnek
+        document.getElementById('sendReplyToHeadBtn').addEventListener('click', async () => {
+            const reply = document.getElementById('replyToHeadInput').value.trim();
+            if (!reply) return alert("Írj be választ!");
+            await updateDoc(doc(db, "candidates", currentCandidateDocId), {
+                memberReply: reply,
+                memberReplyAt: new Date().toISOString()
+            });
+            alert("✓ Válasz elküldve A Fejnek!");
+            document.getElementById('replyToHeadInput').value = '';
+            document.getElementById('lastReplyEcho').textContent = `Legutóbbi válaszod: "${reply}"`;
+            document.getElementById('lastReplyEcho').classList.remove('hidden');
+        });
+
         function loadMissions() {
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const container = document.getElementById('missionsListContainer');
+                const badge = document.getElementById('pBadgeMissions');
                 container.innerHTML = '';
+                
+                let openCount = 0;
+                snap.forEach(d => { if (d.data().status === 'open') openCount++; });
+                if (openCount > 0) {
+                    badge.textContent = openCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+
                 if (snap.empty) {
                     container.innerHTML = '<div class="p-4 bg-sejt-surface border border-sejt-border text-xs text-sejt-muted">Nincs aktív küldetés kiírva.</div>';
                     return;
@@ -509,7 +572,7 @@
                                     ${isJoined ? '✓ Csatlakoztál' : '✋ Csatlakozom'}
                                 </button>
                                 <button class="claim-xp-btn px-2.5 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold uppercase transition" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-xp="${m.xp}">
-                                    🙋 Ott voltam (+${Number(m.xp)} XP igénylése)
+                                    🙋 Ott voltam (+${Number(m.xp)} XP)
                                 </button>
                             </div>
                         </div>
@@ -525,12 +588,11 @@
                     });
                 });
 
-                // Determinisztikus XP igénylés
                 container.querySelectorAll('.claim-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
                         btn.disabled = true;
-                        btn.innerText = "IGÉNYLÉS ELKÜLDVE...";
+                        btn.innerText = "IGÉNYLÉS...";
 
                         const claimDocId = `${currentCandidateId}_${b.code}`;
                         try {
@@ -542,9 +604,9 @@
                                 status: "pending",
                                 createdAt: new Date().toISOString()
                             });
-                            alert("✓ XP igénylés elküldve A Fejnek jóváhagyásra!");
+                            alert("✓ XP igénylés elküldve A Fejnek!");
                         } catch (err) {
-                            alert("Erre a küldetésre már küldtél be igénylést vagy a küldetés lezárult.");
+                            alert("Erre a küldetésre már küldtél be igénylést.");
                             btn.disabled = false;
                             btn.innerText = `🙋 Ott voltam (+${b.xp} XP)`;
                         }
@@ -602,7 +664,16 @@
             onSnapshot(query(collection(db, "tool_requests"), where("ownerEmail", "==", currentUserEmail)), (snap) => {
                 const box = document.getElementById('myToolRequestsBox');
                 const list = document.getElementById('myToolRequestsList');
-                if (snap.empty) { box.classList.add('hidden'); return; }
+                const badge = document.getElementById('pBadgeTools');
+
+                if (snap.empty) {
+                    box.classList.add('hidden');
+                    badge.classList.add('hidden');
+                    return;
+                }
+                
+                badge.textContent = snap.size;
+                badge.classList.remove('hidden');
                 box.classList.remove('hidden');
                 list.innerHTML = '';
 
@@ -658,12 +729,12 @@
             document.getElementById('firstTimeBox').classList.toggle('hidden');
         });
 
-        // JAVÍTOTT ELSŐ JELSZÓADÁS (Több rekord kezelése, szóköz-tisztítás, pontos hibaüzenet)
+        // JAVÍTOTT ELSŐ JELSZÓADÁS (Az engedélyezett activationToken-nel!)
         document.getElementById('doFirstTimeActivationBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim().toLowerCase();
             const pass = document.getElementById('authPassword').value;
             const rawToken = document.getElementById('activationTokenInput').value.trim().toUpperCase();
-            const cleanToken = rawToken.replace(/[^A-Z0-9]/g, ''); // Minden szóközt és felesleges jelet eltávolít
+            const cleanToken = rawToken.replace(/[^A-Z0-9]/g, '');
 
             if (!email || pass.length < 6 || !cleanToken) {
                 return alert("Add meg az e-mailt, legalább 6 karakteres jelszót és az e-mailben kapott aktiváló kódot!");
@@ -674,10 +745,7 @@
             btn.innerText = "AKTIVÁLÁS...";
 
             try {
-                // 1. Felhasználó létrehozása az Auth-ban
                 const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-                
-                // 2. Keresés az adatbázisban az e-mail címre
                 const q = query(collection(db, "candidates"), where("email", "==", email));
                 const snap = await getDocs(q);
 
@@ -686,7 +754,6 @@
                     throw new Error("Ehhez az e-mailhez nem található regisztráció a rendszerben.");
                 }
 
-                // 3. Megkeressük a jóváhagyott, egyező tokennel rendelkező rekordot
                 let matchedDoc = null;
                 for (let docSnap of snap.docs) {
                     const data = docSnap.data();
@@ -699,18 +766,18 @@
 
                 if (!matchedDoc) {
                     const anyApproved = snap.docs.some(d => d.data().status === "approved");
-                    await deleteUser(userCred.user); // Biztonsági visszaállítás
+                    await deleteUser(userCred.user);
 
                     if (!anyApproved) {
                         throw new Error("A jelentkezésed még bírálat alatt áll A Fej által.");
                     } else {
-                        throw new Error("A megadott aktiváló kód nem egyezik az e-mailben kapott kóddal. Ellenőrizd a betűket és számokat!");
+                        throw new Error("A megadott aktiváló kód nem egyezik az e-mailben kapott kóddal!");
                     }
                 }
 
-                // 4. Sikeres aktiválás: token elhasználva, egyszer használatos
+                // Sikeres elhasználás (a Rules engedi!)
                 await updateDoc(doc(db, "candidates", matchedDoc.id), { activationToken: null });
-                alert("✓ Fiókod sikeresen aktiválva és hitelesítve a hálózatban!");
+                alert("✓ Fiókod sikeresen aktiválva és hitelesítve!");
                 document.getElementById('firstTimeBox').classList.add('hidden');
             } catch (err) {
                 alert("Hiba: " + err.message);
@@ -736,7 +803,7 @@
             alert("✓ Frissítve a hálózatban!");
         });
 
-        // ÖNMEGSEMMISÍTÉS JAVÍTÁSA (Lejáratkor megszakít, hitelesít)
+        // ÖNMEGSEMMISÍTÉS
         const destructModal = document.getElementById('selfDestructModal');
         const countdownTimer = document.getElementById('countdownTimer');
         let timerInterval = null;
@@ -772,7 +839,7 @@
 
         document.getElementById('confirmDestructBtn').addEventListener('click', () => {
             const pass = document.getElementById('destructPasswordInput').value;
-            if (!pass) return alert("A megsemmisítés végrehajtásához add meg a jelszavad!");
+            if (!pass) return alert("Add meg a jelszavad a törléshez!");
             clearInterval(timerInterval);
             executeSelfDestruction(pass);
         });
@@ -789,11 +856,10 @@
                 if (currentCandidateId) await deleteDoc(doc(db, "public_members", currentCandidateId));
 
                 await deleteUser(user);
-
                 alert("Minden adatodat megsemmisítettük a Sejtből. A nyomok törölve.");
                 window.location.href = "index.html";
             } catch (e) {
-                alert("Hiba a megsemmisítéskor: Hibás jelszó!");
+                alert("Hiba: Hibás jelszó!");
             }
         }
 

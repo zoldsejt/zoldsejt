@@ -98,11 +98,26 @@
                         class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive"></textarea>
                 </div>
 
-                <div class="p-3 bg-[#0B130D] border-l-2 border-sejt-olive space-y-2">
-                    <label class="flex items-start space-x-2 text-xs cursor-pointer">
+                <!-- Nyilatkozatok: 3 db kötelező checkbox -->
+                <div class="p-3 bg-[#0B130D] border-l-2 border-sejt-olive space-y-2.5 text-xs">
+                    <label class="flex items-start space-x-2 cursor-pointer">
                         <input type="checkbox" id="termsCheck" required class="mt-0.5">
                         <span class="text-sejt-text leading-tight">
-                            Elfogadom, hogy a Zöld Sejt küldetései <b>nem politikai akciók</b>, nem irányulnak mások tulajdonának károsítására vagy engedély nélküli átalakítására.
+                            Elfogadom, hogy a Zöld Sejt küldetései <b>nem politikai akciók</b>, és nem irányulnak mások tulajdonának rongálására.
+                        </span>
+                    </label>
+
+                    <label class="flex items-start space-x-2 cursor-pointer">
+                        <input type="checkbox" id="rulesCheck" required class="mt-0.5">
+                        <span class="text-sejt-text leading-tight">
+                            Elfogadom a Zöld Sejt <button type="button" id="openRulesBtn" class="text-sejt-oliveLight underline">Házirendjét és Alaptörvényeit</button>.
+                        </span>
+                    </label>
+
+                    <label class="flex items-start space-x-2 cursor-pointer">
+                        <input type="checkbox" id="privacyCheck" required class="mt-0.5">
+                        <span class="text-sejt-text leading-tight">
+                            Elolvastam és elfogadom az <button type="button" id="openPrivacyInlineBtn" class="text-sejt-oliveLight underline">Adatkezelési tájékoztatót</button>.
                         </span>
                     </label>
                 </div>
@@ -139,11 +154,33 @@
 
     <footer class="max-w-2xl mx-auto w-full text-center py-4 border-t border-sejt-border text-[10px] text-sejt-muted tracking-widest uppercase flex flex-col sm:flex-row justify-between items-center gap-2">
         <div>A FEJ FIGYEL // TITKOSÍTOTT BELÉPÉSI PONT</div>
-        <button id="privacyModalBtn" class="text-sejt-muted hover:text-white underline lowercase tracking-normal">adatkezelési tájékoztató</button>
+        <div class="space-x-3">
+            <button id="rulesModalBtn" class="text-sejt-muted hover:text-white underline lowercase tracking-normal">házirend & alaptörvények</button>
+            <button id="privacyModalBtn" class="text-sejt-muted hover:text-white underline lowercase tracking-normal">adatkezelési tájékoztató</button>
+        </div>
     </footer>
 
+    <!-- HÁZIREND & ALAPTÖRVÉNYEK MODAL -->
+    <div id="rulesModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#101912] border border-sejt-border max-w-lg w-full p-6 space-y-4 text-xs text-sejt-text">
+            <div class="flex justify-between items-center border-b border-sejt-border pb-2">
+                <h3 class="font-bold text-white uppercase tracking-wider">A Zöld Sejt Alaptörvényei & Házirendje</h3>
+                <button id="closeRulesBtn" class="text-sejt-muted hover:text-white font-bold text-sm">✕</button>
+            </div>
+            <div class="space-y-3 text-sejt-muted leading-relaxed max-h-80 overflow-y-auto">
+                <p><b>I. A Sejt nem kérdezi, ki A Fej.</b> A koordináció és a küldetések központilag érkeznek. Aki a hátteret kutatja, még nem áll készen a cselekvésre.</p>
+                <p><b>II. A Fej nem látja az arcodat.</b> Nincs dicsekvés, nincs pózolás a közösségi médiában. Kizárólag az elvégzett természetvédelmi munka és az eredmény számít.</p>
+                <p><b>III. Nem kérdezed, a másik milyen szinten van.</b> A küldetésben a kezdő Spóra és a tapasztaltabb Gyökér rangú tag egyenrangú társak.</p>
+                <p><b>IV. Semmi sem kötelező, de a szavad kötelez.</b> Nem vagyunk szekta és nem vagyunk hivatal. Mindenki szabad akaratából segít, de amit elvállalsz, azt felelősséggel végezd el.</p>
+                <p><b>V. Nem veszélyeztetünk és nem rongálunk.</b> Nem végzünk engedély nélküli beavatkozást magánterületen. Veszélyes munkát képzettség nélkül tilos végezni. Az eszközöket a megbeszéltek szerint visszaszolgáltatjuk.</p>
+                <p><b>VI. Függetlenség.</b> A Sejt nem támogat pártokat és politikai célokat. A cél a város zöld felületeinek csendes, hatékony védelme.</p>
+            </div>
+            <button id="okRulesBtn" class="w-full py-2 bg-sejt-olive hover:bg-sejt-oliveLight text-white font-bold uppercase text-[11px] tracking-wider transition">Elfogadom az Alaptörvényeket</button>
+        </div>
+    </div>
+
     <!-- ADATKEZELÉSI MODAL -->
-    <div id="privacyModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div id="privacyModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
         <div class="bg-[#101912] border border-sejt-border max-w-lg w-full p-6 space-y-4 text-xs text-sejt-text">
             <div class="flex justify-between items-center border-b border-sejt-border pb-2">
                 <h3 class="font-bold text-white uppercase tracking-wider">Adatkezelési Tájékoztató</h3>
@@ -151,8 +188,8 @@
             </div>
             <div class="space-y-3 text-sejt-muted leading-relaxed max-h-80 overflow-y-auto">
                 <p><b>1. Adatkezelő:</b> Zöld Sejt Koordináció (Kapcsolat: <code>zoldsejt@gmail.com</code>).</p>
-                <p><b>2. Kezelt adatok:</b> Név (belső szűréshez és visszaélések megelőzéséhez), e-mail cím, megadott képességek, csatlakozási időbélyeg.</p>
-                <p><b>3. Adatfeldolgozók:</b> Google Firebase (felhőtárhely / EU szerverek), Brevo SAS (tranzakciós e-mail kiküldés / EU), Telegram FZ-LLC.</p>
+                <p><b>2. Kezelt adatok:</b> Név (belső visszaélések megelőzéséhez), e-mail cím, képességek, csatlakozási időbélyeg.</p>
+                <p><b>3. Adatfeldolgozók:</b> Google Firebase (felhőtárhely / EU), Brevo SAS (e-mail / EU), Telegram FZ-LLC, Cloudflare Inc.</p>
                 <p><b>4. Jogalap:</b> Önkéntes hozzájárulás (GDPR 6. cikk (1) a)).</p>
                 <p><b>5. Adattörlés:</b> A profilban elérhető az azonnali önmegsemmisítés.</p>
             </div>
@@ -183,9 +220,7 @@
             const randomBytes = new Uint8Array(5);
             crypto.getRandomValues(randomBytes);
             let code = "";
-            for (let i = 0; i < 5; i++) {
-                code += chars[randomBytes[i] % chars.length];
-            }
+            for (let i = 0; i < 5; i++) code += chars[randomBytes[i] % chars.length];
             return `SEJT_${code}`;
         }
 
@@ -196,10 +231,7 @@
             e.preventDefault();
 
             const checkedSkills = Array.from(document.querySelectorAll('input[name="skill"]:checked')).map(cb => cb.value);
-            if (checkedSkills.length === 0) {
-                alert("Kérjük, válassz ki legalább egy területet!");
-                return;
-            }
+            if (checkedSkills.length === 0) return alert("Kérjük, válassz ki legalább egy területet!");
 
             submitBtn.disabled = true;
             submitBtn.innerText = "RÖGZÍTÉS FOLYAMATBAN...";
@@ -217,28 +249,42 @@
                 levelName: 'Spóra',
                 xp: 0,
                 privacyConsent: true,
-                privacyVersion: '1.0',
+                rulesConsent: true,
+                privacyVersion: '1.1',
                 createdAt: new Date().toISOString()
             };
 
             try {
-                // Szigorú determinisztikus azonosító: a dokumentum neve maga a SEJT_XXXXX
                 await setDoc(doc(db, "candidates", candidateId), payload);
                 document.getElementById('generatedId').textContent = candidateId;
                 document.getElementById('entrySection').classList.add('hidden');
                 document.getElementById('resultSection').classList.remove('hidden');
             } catch (err) {
-                console.error(err);
                 alert("Hiba történt a kérelem küldésekor.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "BELÉPÉSI KÉRELEM KÜLDÉSE →";
             }
         });
 
+        // Modális ablakok kezelése
+        const rulesModal = document.getElementById('rulesModal');
         const privacyModal = document.getElementById('privacyModal');
+
+        document.getElementById('openRulesBtn').addEventListener('click', () => rulesModal.classList.remove('hidden'));
+        document.getElementById('rulesModalBtn').addEventListener('click', () => rulesModal.classList.remove('hidden'));
+        document.getElementById('closeRulesBtn').addEventListener('click', () => rulesModal.classList.add('hidden'));
+        document.getElementById('okRulesBtn').addEventListener('click', () => {
+            document.getElementById('rulesCheck').checked = true;
+            rulesModal.classList.add('hidden');
+        });
+
+        document.getElementById('openPrivacyInlineBtn').addEventListener('click', () => privacyModal.classList.remove('hidden'));
         document.getElementById('privacyModalBtn').addEventListener('click', () => privacyModal.classList.remove('hidden'));
         document.getElementById('closePrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
-        document.getElementById('okPrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
+        document.getElementById('okPrivacyBtn').addEventListener('click', () => {
+            document.getElementById('privacyCheck').checked = true;
+            privacyModal.classList.add('hidden');
+        });
     </script>
 </body>
 </html>

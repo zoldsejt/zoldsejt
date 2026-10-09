@@ -41,33 +41,40 @@
     <!-- ADMIN IRÁNYÍTÓPULT -->
     <div id="dashboardView" class="hidden space-y-6">
         
-        <!-- Fejléc és navigáció -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
-                <p class="text-xs text-[#5C735E]">A Zöld Sejt szerveroldalilag védett operatív felügyelete</p>
+                <p class="text-xs text-[#5C735E]">A Zöld Sejt hálózati és operatív felügyelete</p>
             </div>
             
+            <!-- FÜLEK ÉRTESÍTÉSI SZÁMOKKAL -->
             <div class="flex flex-wrap items-center gap-4 text-xs">
-                <button id="tabMembersBtn" class="py-1 font-bold tab-active">Tagok & Igénylések</button>
-                <button id="tabMissionsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Küldetések & Infók</button>
-                <button id="tabToolsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Eszköztár</button>
+                <button id="tabMembersBtn" class="py-1 font-bold tab-active flex items-center space-x-1.5">
+                    <span>Tagok</span>
+                    <span id="badgeMembers" class="hidden px-1.5 py-0.2 bg-amber-600 text-white rounded-full text-[10px]">0</span>
+                </button>
+                <button id="tabMissionsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5] flex items-center space-x-1.5">
+                    <span>Küldetések & Infók</span>
+                    <span id="badgeMissions" class="hidden px-1.5 py-0.2 bg-emerald-600 text-white rounded-full text-[10px]">0</span>
+                </button>
+                <button id="tabToolsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5] flex items-center space-x-1.5">
+                    <span>Eszköztár</span>
+                    <span id="badgeTools" class="hidden px-1.5 py-0.2 bg-sky-600 text-white rounded-full text-[10px]">0</span>
+                </button>
                 <button id="tabEvoBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">Evolúciós Kódex</button>
                 <button id="tabSettingsBtn" class="py-1 font-bold text-[#5C735E] hover:text-[#D5E2D5]">⚙️ Beállítások</button>
                 <button id="logoutBtn" class="text-xs text-red-400 hover:underline">Kilépés</button>
             </div>
         </div>
 
-        <!-- 1. FÜL: TAGOK ÉS XP IGÉNYLÉSEK -->
+        <!-- 1. FÜL: TAGOK -->
         <div id="membersTab" class="space-y-6">
             
-            <!-- Függőben lévő XP kérelmek -->
             <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
                 <div id="claimsList" class="space-y-2"></div>
             </div>
 
-            <!-- Fő Tagtáblázat -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -77,48 +84,48 @@
                             <th class="p-3">Telegram Fiók</th>
                             <th class="p-3">Szint & XP</th>
                             <th class="p-3">Képességek</th>
-                            <th class="p-3">Üzenet A Fejnek</th>
+                            <th class="p-3">Kétirányú Kommunikáció</th>
                             <th class="p-3">Státusz</th>
-                            <th class="p-3 min-w-[200px]">Művelet</th>
+                            <th class="p-3 min-w-[210px]">Művelet</th>
                         </tr>
                     </thead>
-                    <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]">
-                        <tr><td colspan="8" class="p-4 text-center text-[#5C735E]">Adatok betöltése...</td></tr>
-                    </tbody>
+                    <tbody id="candidatesTable" class="divide-y divide-[#1E2F22]"></tbody>
                 </table>
             </div>
 
-            <!-- Archivált jelentkezések -->
-            <div class="pt-2">
+            <!-- Archivált irattár és ranglétra takarító -->
+            <div class="flex justify-between items-center pt-2">
                 <button id="toggleArchiveBtn" class="text-[11px] text-[#5C735E] hover:text-[#7A9E48] underline flex items-center space-x-1">
                     <span>📁 Archivált jelentkezések megtekintése (Irattár)</span>
                 </button>
+                <button id="syncLeaderboardBtn" class="text-[11px] text-[#5C735E] hover:text-amber-400 underline">
+                    🧹 Ranglétra újraszinkronizálása (Árva törölt rekordok takarítása)
+                </button>
+            </div>
                 
-                <div id="archiveSection" class="hidden mt-4 bg-[#0B130D] border border-[#1E2F22] p-4 space-y-3">
-                    <h4 class="text-xs font-bold text-[#5C735E] uppercase">// Archivált Jelentkezések és Letiltott Tagok</h4>
-                    <table class="w-full text-left text-xs bg-[#101912]">
-                        <thead class="text-[#5C735E] border-b border-[#1E2F22]">
-                            <tr>
-                                <th class="p-2">Azonosító</th>
-                                <th class="p-2">Név & E-mail</th>
-                                <th class="p-2">Státusz</th>
-                                <th class="p-2 text-center">Művelet</th>
-                            </tr>
-                        </thead>
-                        <tbody id="archiveTableBody" class="divide-y divide-[#1E2F22]"></tbody>
-                    </table>
-                </div>
+            <div id="archiveSection" class="hidden mt-4 bg-[#0B130D] border border-[#1E2F22] p-4 space-y-3">
+                <h4 class="text-xs font-bold text-[#5C735E] uppercase">// Archivált Jelentkezések és Letiltott Tagok</h4>
+                <table class="w-full text-left text-xs bg-[#101912]">
+                    <thead class="text-[#5C735E] border-b border-[#1E2F22]">
+                        <tr>
+                            <th class="p-2">Azonosító</th>
+                            <th class="p-2">Név & E-mail</th>
+                            <th class="p-2">Státusz</th>
+                            <th class="p-2 text-center">Művelet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveTableBody" class="divide-y divide-[#1E2F22]"></tbody>
+                </table>
             </div>
 
         </div>
 
         <!-- 2. FÜL: KÜLDETÉSEK & INFÓK -->
         <div id="missionsTab" class="hidden space-y-6">
-            
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">📢 Hírös Hírnök // Szabad Telegram Közlemény</h3>
-                    <span class="text-[10px] text-[#5C735E]">Közvetlen csatornaposzt küldetés nélkül</span>
+                    <span class="text-[10px] text-[#5C735E]">Közvetlen csatornaposzt</span>
                 </div>
                 <textarea id="freeBroadcastText" rows="2" placeholder="Írd be a közleményt a csatornára..." class="w-full"></textarea>
                 <div class="flex justify-end">
@@ -150,7 +157,7 @@
                         <label class="flex items-center space-x-1 p-1.5 bg-[#0B130D] border border-[#1E2F22] cursor-pointer"><input type="checkbox" name="mSkill" value="Grafika"> <span>Grafika</span></label>
                         <label class="flex items-center space-x-1 p-1.5 bg-[#0B130D] border border-[#1E2F22] cursor-pointer"><input type="checkbox" name="mSkill" value="Tudás"> <span>Tudás</span></label>
                     </div>
-                    <input type="text" id="mCustomSkill" placeholder="Egyéb speciális készség vagy eszközigény (opcionális)..." class="w-full mt-2">
+                    <input type="text" id="mCustomSkill" placeholder="Egyéb speciális készség vagy eszközigény..." class="w-full mt-2">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -192,7 +199,6 @@
 
         <!-- 3. FÜL: ESZKÖZTÁR -->
         <div id="toolsTab" class="hidden space-y-6">
-            
             <div id="toolRequestsSection" class="hidden bg-[#101912] border border-emerald-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">// Beérkezett Eszközigénylések</h3>
                 <div id="toolRequestsList" class="space-y-2"></div>
@@ -290,47 +296,6 @@
 
     </div>
 
-    <!-- KÜLDETÉS MÓDOSÍTÁSI MODAL -->
-    <div id="editMissionModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-        <div class="bg-[#101912] border border-[#1E2F22] max-w-lg w-full p-6 space-y-4 text-xs">
-            <div class="flex justify-between items-center border-b border-[#1E2F22] pb-2">
-                <h3 class="font-bold text-white uppercase">Küldetés Módosítása</h3>
-                <button id="closeEditModalBtn" class="text-[#5C735E] hover:text-white font-bold text-sm">✕</button>
-            </div>
-            <input type="hidden" id="editMissionDocId">
-            <input type="hidden" id="editMissionTgId">
-            <input type="hidden" id="editMissionCode">
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Küldetés Címe</label>
-                    <input type="text" id="editMTitle" class="w-full font-bold">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Kategória</label>
-                        <select id="editMCat" class="w-full">
-                            <option value="5_perc">5 Perces Küldetés</option>
-                            <option value="30_perc">30 Perces Küldetés</option>
-                            <option value="sejt_akcio">Sejt-Akció</option>
-                            <option value="fej_kuldetes">Fej-Küldetés</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">XP Jutalom</label>
-                        <input type="number" id="editMXp" class="w-full font-mono">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Leírás & Utasítás</label>
-                    <textarea id="editMDesc" rows="3" class="w-full"></textarea>
-                </div>
-            </div>
-            <button id="saveEditMissionBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold uppercase tracking-wider transition">
-                Módosítások Mentése & Telegram Frissítése
-            </button>
-        </div>
-    </div>
-
     <!-- Firebase SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
@@ -351,31 +316,20 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Általános HTML escape (XSS védelem az admin felületen)
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // Telegram-biztos szövegformázás (A Telegram HTML parse nem fogadja el az &#039;-et!)
         function escapeTg(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
         let WORKER_URL = "";
         let ADMIN_SECRET = "";
         let candidatesCache = [];
 
-        // Worker beállítások betöltése a Firestore-ból
         async function loadWorkerSettings() {
             try {
                 const snap = await getDoc(doc(db, "settings", "worker"));
@@ -385,7 +339,7 @@
                 }
                 document.getElementById('cfgWorkerUrl').value = WORKER_URL;
                 document.getElementById('cfgAdminSecret').value = ADMIN_SECRET;
-            } catch (e) { console.warn("Worker settings load info:", e); }
+            } catch (e) {}
         }
 
         document.getElementById('saveWorkerSettingsBtn').addEventListener('click', async () => {
@@ -393,95 +347,65 @@
             WORKER_URL = document.getElementById('cfgWorkerUrl').value.trim().replace(/\/$/, "");
             ADMIN_SECRET = document.getElementById('cfgAdminSecret').value.trim();
 
-            if (!WORKER_URL || !ADMIN_SECRET) {
-                return alert("Kérjük, töltsd ki mindkét mezőt!");
-            }
+            if (!WORKER_URL || !ADMIN_SECRET) return alert("Kérjük, töltsd ki mindkét mezőt!");
 
             btn.disabled = true;
             btn.innerText = "MENTÉS...";
 
             try {
-                await setDoc(doc(db, "settings", "worker"), {
-                    workerUrl: WORKER_URL,
-                    adminSecret: ADMIN_SECRET,
-                    updatedAt: new Date().toISOString()
-                });
-                alert("✓ Csatlakozási adatok sikeresen elmentve a Firestore-ba!");
+                await setDoc(doc(db, "settings", "worker"), { workerUrl: WORKER_URL, adminSecret: ADMIN_SECRET, updatedAt: new Date().toISOString() });
+                alert("✓ Csatlakozási adatok elmentve a Firestore-ba!");
             } catch (err) {
-                console.error("Mentési hiba:", err);
-                alert("Hiba a mentéskor: " + err.message);
+                alert("Hiba: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Csatlakozási Adatok Mentése";
             }
         });
 
-        // Backend hívás részletes hibajelzéssel
         async function callBackend(endpoint, payload) {
             if (!WORKER_URL || !ADMIN_SECRET) {
-                alert("Kérjük, add meg és mentsd el a Worker URL-t és az Admin Titkos Kulcsot a Beállítások fülön!");
+                alert("Add meg a Worker URL-t és az Admin Titkos Kulcsot a Beállítások fülön!");
                 return null;
             }
             try {
                 const res = await fetch(`${WORKER_URL}${endpoint}`, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${ADMIN_SECRET}`
-                    },
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ADMIN_SECRET}` },
                     body: JSON.stringify(payload)
                 });
-                
                 const data = await res.json();
                 if (!res.ok) {
-                    console.error("Worker válaszhiba:", data);
-                    alert(`Hiba a szerveroldalon (${res.status}): ${data.error || data.description || "Ismeretlen hiba"}`);
+                    alert(`Hiba (${res.status}): ${data.error || data.description || "Ismeretlen hiba"}`);
                     return null;
                 }
                 return data;
             } catch (err) {
-                console.error("Hálózati/kapcsolati hiba:", err);
-                alert(`Nem sikerült elérni a Workert (${WORKER_URL}). Ellenőrizd a Worker URL-t a Beállítások fülön!`);
+                alert("Nem sikerült elérni a Cloudflare Workert.");
                 return null;
             }
         }
 
-        // TELEGRAM KAPCSOLAT TESZTELÉSE GOMB
+        // TELEGRAM TESZT
         document.getElementById('testTelegramBtn').addEventListener('click', async () => {
             const btn = document.getElementById('testTelegramBtn');
             btn.disabled = true;
             btn.innerText = "TESZT...";
-
-            const testMsg = `🔔 <b>A FEJ // RENDSZERTESZT</b>\n\nA koordinációs panel és a Cloudflare Worker kapcsolata sikeres.`;
-            const res = await callBackend("/api/telegram-post", { text: testMsg });
-
-            if (res && res.ok) {
-                alert("✓ SIKER! A tesztüzenet megjelent a privát Telegram csatornában!");
-            } else if (res) {
-                alert(`Telegram Hiba (${res.error_code}): ${res.description}\n\nEllenőrizd, hogy a bot bent van-e a csatornában adminisztrátorként 'Post Messages' joggal!`);
-            }
+            const res = await callBackend("/api/telegram-post", { text: `🔔 <b>A FEJ // RENDSZERTESZT</b>\n\nA koordináció és a Worker kapcsolata aktív.` });
+            if (res && res.ok) alert("✓ SIKER! A tesztüzenet megjelent a csatornában!");
             btn.disabled = false;
             btn.innerText = "⚡ Telegram Teszt";
         });
 
-        // Szabad Közlemény kiküldése
+        // KÖZLEMÉNY
         document.getElementById('sendBroadcastBtn').addEventListener('click', async () => {
             const text = document.getElementById('freeBroadcastText').value.trim();
             if (!text) return alert("Írj be üzenetet!");
-            
-            const btn = document.getElementById('sendBroadcastBtn');
-            btn.disabled = true;
-            btn.innerText = "KÜLDÉS...";
-
             const res = await callBackend("/api/telegram-post", { text: `📢 <b>HÍRÖS HÍRNÖK // KÖZLEMÉNY</b>\n\n${escapeTg(text)}` });
             if (res && res.ok) {
-                alert("✓ Közlemény sikeresen kiküldve a Telegram csatornára!");
+                alert("✓ Közlemény sikeresen kiküldve!");
                 document.getElementById('freeBroadcastText').value = '';
-            } else if (res) {
-                alert(`Nem ment ki a poszt. Telegram hiba: ${res.description || res.error}`);
             }
-            btn.disabled = false;
-            btn.innerText = "Közlemény Kiküldése →";
         });
 
         // Evolúció
@@ -562,6 +486,7 @@
                 if (Number(activeRanks[i].xp) > Number(activeRanks[i+1].xp)) { isBroken = true; break; }
             }
             document.getElementById('xpWarning').classList.toggle('hidden', !isBroken);
+            return isBroken;
         }
 
         function renumberRanks() {
@@ -663,12 +588,25 @@
             renumberRanks();
         });
 
+        // XP Sorrend Blokkoló Mentés
         document.getElementById('saveEvoBtn').addEventListener('click', async () => {
-            await setDoc(doc(db, "settings", "evolution"), { ranks: activeRanks, updatedAt: new Date().toISOString() });
-            alert("⚡ Szintek elmentve!");
+            if (checkXpOrder()) {
+                alert("⛔ MENTÉS MEGTAGADVA!\n\nAz XP értékek nem növekvő sorrendben vannak. Kérjük javítsd az értékeket, mielőtt felsugárzod a hálózatba!");
+                return;
+            }
+
+            const btn = document.getElementById('saveEvoBtn');
+            btn.disabled = true;
+            btn.innerText = "FELSUGÁRZÁS...";
+
+            try {
+                await setDoc(doc(db, "settings", "evolution"), { ranks: activeRanks, updatedAt: new Date().toISOString() });
+                alert("⚡ Szintek elmentve!");
+            } catch (err) { alert("Hiba: " + err.message); } 
+            finally { btn.disabled = false; btn.innerText = "⚡ Felsugárzás (Mentés)"; }
         });
 
-        // KÜLDETÉSEK PUBLIKÁLÁSA (Telegram-biztos formázással)
+        // KÜLDETÉSEK PUBLIKÁLÁSA
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
@@ -689,13 +627,8 @@
 
             try {
                 const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)}</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${escapeTg(finalSkillsStr)}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
-                
                 const tgRes = await callBackend("/api/telegram-post", { text: tgMsg });
                 const tgMsgId = tgRes && tgRes.ok ? tgRes.result.message_id : null;
-
-                if (!tgMsgId) {
-                    console.warn("Telegram poszt azonosító nem érkezett meg:", tgRes);
-                }
 
                 await setDoc(doc(db, "missions", code), {
                     code, title, xp, category, skills: finalSkillsStr, desc,
@@ -719,10 +652,6 @@
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const tbody = document.getElementById('missionsTableBody');
                 tbody.innerHTML = '';
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-[#5C735E]">Nincs aktív küldetés.</td></tr>';
-                    return;
-                }
                 snap.forEach(d => {
                     const m = d.data();
                     const tr = document.createElement('tr');
@@ -742,28 +671,12 @@
                         <td class="p-3 max-w-xs"><div class="flex flex-wrap items-center gap-1">${attendeesHtml}</div></td>
                         <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
                         <td class="p-3 text-center space-x-1">
-                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${d.id}" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-desc="${escapeHtml(m.desc)}" data-xp="${m.xp}" data-cat="${m.category}" data-tgid="${m.tgMessageId || ''}">Módosítás</button>
-                            <span class="text-[#1E2F22]">|</span>
                             <button class="toggle-m-btn text-[11px] text-[#5C735E] hover:underline" data-id="${d.id}" data-status="${m.status}">${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}</button>
                             <span class="text-[#1E2F22]">|</span>
                             <button class="delete-m-btn text-[11px] text-red-400 hover:underline" data-id="${d.id}" data-tgid="${m.tgMessageId || ''}">Törlés</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
-                });
-
-                tbody.querySelectorAll('.edit-m-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const b = e.target.dataset;
-                        document.getElementById('editMissionDocId').value = b.id;
-                        document.getElementById('editMissionTgId').value = b.tgid;
-                        document.getElementById('editMissionCode').value = b.code;
-                        document.getElementById('editMTitle').value = b.title;
-                        document.getElementById('editMDesc').value = b.desc;
-                        document.getElementById('editMXp').value = b.xp;
-                        document.getElementById('editMCat').value = b.cat;
-                        document.getElementById('editMissionModal').classList.remove('hidden');
-                    });
                 });
 
                 tbody.querySelectorAll('.toggle-m-btn').forEach(btn => {
@@ -784,33 +697,6 @@
                 });
             });
         }
-
-        // Küldetés Módosítás Mentése
-        document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
-            const docId = document.getElementById('editMissionDocId').value;
-            const tgId = document.getElementById('editMissionTgId').value;
-            const code = document.getElementById('editMissionCode').value;
-            const title = document.getElementById('editMTitle').value.trim();
-            const desc = document.getElementById('editMDesc').value.trim();
-            const xp = parseInt(document.getElementById('editMXp').value) || 20;
-            const category = document.getElementById('editMCat').value;
-
-            if (!title || !desc) return alert("Töltsd ki az adatokat!");
-
-            await updateDoc(doc(db, "missions", docId), { title, desc, xp, category, updatedAt: new Date().toISOString() });
-
-            if (tgId) {
-                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)} (MÓDOSÍTVA)</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
-                await callBackend("/api/telegram-edit", { messageId: tgId, text: tgMsg });
-            }
-
-            document.getElementById('editMissionModal').classList.add('hidden');
-            alert("✓ Küldetés sikeresen módosítva a weben és a Telegramon is!");
-        });
-
-        document.getElementById('closeEditModalBtn').addEventListener('click', () => {
-            document.getElementById('editMissionModal').classList.add('hidden');
-        });
 
         // ESZKÖZTÁR
         document.getElementById('addToolBtn').addEventListener('click', async () => {
@@ -845,44 +731,49 @@
                 tbody.querySelectorAll('.release-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         await updateDoc(doc(db, "tools", e.target.dataset.id), { status: "available", holder: "A Fej" });
-                        alert("✓ Eszköz visszavételezve, újra elérhető a hálózatban!");
+                        alert("✓ Eszköz felszabadítva!");
                     });
                 });
 
                 tbody.querySelectorAll('.del-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if (confirm("Törlöd ezt az eszközt?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
+                        if (confirm("Törlöd?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
                     });
                 });
             });
         }
 
-        // ESZKÖZIGÉNYLÉSEK
+        // ESZKÖZIGÉNYLÉSEK ÉS ÉRTESÍTÉSI SZÁMLÁLÓ
         function loadToolRequests() {
             onSnapshot(query(collection(db, "tool_requests"), where("status", "==", "pending")), (snap) => {
                 const sec = document.getElementById('toolRequestsSection');
                 const list = document.getElementById('toolRequestsList');
-                if (snap.empty) { sec.classList.add('hidden'); return; }
+                const badge = document.getElementById('badgeTools');
+
+                if (snap.empty) {
+                    sec.classList.add('hidden');
+                    badge.classList.add('hidden');
+                    return;
+                }
+                
+                badge.textContent = snap.size;
+                badge.classList.remove('hidden');
                 sec.classList.remove('hidden');
                 list.innerHTML = '';
+
                 snap.forEach(d => {
                     const r = d.data();
                     const div = document.createElement('div');
                     div.className = "p-2.5 bg-[#0B130D] border border-[#1E2F22] flex justify-between items-center text-xs";
                     div.innerHTML = `
                         <div>
-                            <span class="font-bold text-[#7A9E48] font-mono">${escapeHtml(r.candidateId)}</span> igényelte ezt: 
+                            <span class="font-bold text-[#7A9E48] font-mono">${escapeHtml(r.candidateId)}</span> igényelte: 
                             <span class="text-white font-bold">${escapeHtml(r.toolName)}</span>
-                            <div class="text-[10px] text-[#5C735E] mt-0.5">Indoklás: "${escapeHtml(r.message || 'Nincs indoklás')}"</div>
+                            <div class="text-[10px] text-[#5C735E]">Indoklás: "${escapeHtml(r.message || 'Nincs')}"</div>
                         </div>
                         <div class="space-x-2">
-                            <button class="accept-tool-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" 
-                                data-id="${d.id}" data-tid="${r.toolId || ''}" data-cid="${escapeHtml(r.candidateId)}" data-tname="${escapeHtml(r.toolName)}">
-                                Jóváhagyás
-                            </button>
-                            <button class="reject-tool-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">
-                                Elutasítás
-                            </button>
+                            <button class="accept-tool-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${d.id}" data-tname="${escapeHtml(r.toolName)}" data-cid="${escapeHtml(r.candidateId)}">Jóváhagyás</button>
+                            <button class="reject-tool-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">Elutasítás</button>
                         </div>
                     `;
                     list.appendChild(div);
@@ -892,14 +783,8 @@
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
                         const note = prompt("Üzenet az átvételhez:", "Megbeszéltek szerint átvehető.");
-
-                        if (b.tid) {
-                            await updateDoc(doc(db, "tools", b.tid), { status: "in_use", holder: b.cid });
-                        } else {
-                            const tSnap = await getDocs(query(collection(db, "tools"), where("name", "==", b.tname)));
-                            if (!tSnap.empty) await updateDoc(doc(db, "tools", tSnap.docs[0].id), { status: "in_use", holder: b.cid });
-                        }
-
+                        const tSnap = await getDocs(query(collection(db, "tools"), where("name", "==", b.tname)));
+                        if (!tSnap.empty) await updateDoc(doc(db, "tools", tSnap.docs[0].id), { status: "in_use", holder: b.cid });
                         await updateDoc(doc(db, "tool_requests", b.id), { status: "approved", adminNote: note || "Jóváhagyva" });
                         alert("✓ Eszközigénylés jóváhagyva!");
                     });
@@ -907,22 +792,31 @@
 
                 list.querySelectorAll('.reject-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const reqId = e.target.dataset.id;
                         const note = prompt("Elutasítás oka:", "Jelenleg nem elérhető.");
-                        await updateDoc(doc(db, "tool_requests", reqId), { status: "rejected", adminNote: note || "Elutasítva" });
+                        await updateDoc(doc(db, "tool_requests", e.target.dataset.id), { status: "rejected", adminNote: note || "Elutasítva" });
                     });
                 });
             });
         }
 
-        // XP IGÉNYLÉSEK
+        // XP IGÉNYLÉSEK ÉS ÉRTESÍTÉSI SZÁMLÁLÓ
         function loadXpClaims() {
             onSnapshot(query(collection(db, "xp_claims"), where("status", "==", "pending")), (snap) => {
                 const sec = document.getElementById('claimsSection');
                 const list = document.getElementById('claimsList');
-                if (snap.empty) { sec.classList.add('hidden'); return; }
+                const badge = document.getElementById('badgeMissions');
+
+                if (snap.empty) {
+                    sec.classList.add('hidden');
+                    badge.classList.add('hidden');
+                    return;
+                }
+
+                badge.textContent = snap.size;
+                badge.classList.remove('hidden');
                 sec.classList.remove('hidden');
                 list.innerHTML = '';
+
                 snap.forEach(d => {
                     const c = d.data();
                     const div = document.createElement('div');
@@ -930,7 +824,7 @@
                     div.innerHTML = `
                         <div>
                             <span class="font-bold text-[#7A9E48] font-mono">${escapeHtml(c.candidateId)}</span> igényelt 
-                            <span class="text-white font-bold">+${Number(c.xp)} XP</span>-t: <span class="text-white">${escapeHtml(c.missionTitle)}</span> (${escapeHtml(c.missionCode)})
+                            <span class="text-white font-bold">+${Number(c.xp)} XP</span>-t: <span class="text-white">${escapeHtml(c.missionTitle)}</span>
                         </div>
                         <div class="space-x-2">
                             <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${d.id}" data-cid="${escapeHtml(c.candidateId)}" data-xp="${c.xp}">Jóváhagyás</button>
@@ -942,27 +836,18 @@
 
                 list.querySelectorAll('.accept-claim-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const claimId = e.target.dataset.id;
-                        const cid = e.target.dataset.cid;
-                        const xpToAdd = parseInt(e.target.dataset.xp) || 0;
-
-                        const q = query(collection(db, "candidates"), where("candidateId", "==", cid));
+                        const b = e.target.dataset;
+                        const xpToAdd = parseInt(b.xp) || 0;
+                        const q = query(collection(db, "candidates"), where("candidateId", "==", b.cid));
                         const snap = await getDocs(q);
                         if (!snap.empty) {
                             const cDoc = snap.docs[0];
-                            const currentXp = cDoc.data().xp || 0;
-                            const newXp = currentXp + xpToAdd;
+                            const newXp = (cDoc.data().xp || 0) + xpToAdd;
                             const newRank = calculateRank(newXp);
                             await updateDoc(doc(db, "candidates", cDoc.id), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
-                            
-                            await setDoc(doc(db, "public_members", cid), {
-                                candidateId: cid,
-                                levelCode: newRank.code,
-                                levelName: newRank.name,
-                                xp: newXp
-                            });
+                            await setDoc(doc(db, "public_members", b.cid), { candidateId: b.cid, levelCode: newRank.code, levelName: newRank.name, xp: newXp });
                         }
-                        await updateDoc(doc(db, "xp_claims", claimId), { status: "approved" });
+                        await updateDoc(doc(db, "xp_claims", b.id), { status: "approved" });
                     });
                 });
 
@@ -1015,15 +900,31 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
+        // TAGLISTA ÉS ÉRTESÍTŐ SZÁMLÁLÓK
         function loadCandidates() {
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
                 const archTbody = document.getElementById('archiveTableBody');
+                const badgeMembers = document.getElementById('badgeMembers');
                 tbody.innerHTML = '';
                 archTbody.innerHTML = '';
                 
                 candidatesCache = [];
-                snapshot.forEach(docSnap => candidatesCache.push(docSnap.data()));
+                let pendingCount = 0;
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    candidatesCache.push(data);
+                    if (data.status === 'pending') pendingCount++;
+                });
+
+                if (pendingCount > 0) {
+                    badgeMembers.textContent = pendingCount;
+                    badgeMembers.classList.remove('hidden');
+                } else {
+                    badgeMembers.classList.add('hidden');
+                }
+
                 renderEvoTable();
 
                 snapshot.forEach((docSnap) => {
@@ -1056,6 +957,15 @@
                         ? `<span class="px-1.5 py-0.5 bg-[#1E2F22] text-emerald-400 font-mono text-[10px] rounded">✓ ${escapeHtml(data.telegramUsername || data.telegramUserId)}</span>`
                         : `<span class="text-[#5C735E] text-[10px] font-mono">Nincs bekötve</span>`;
 
+                    // Kétirányú kommunikáció megjelenítése a sorban
+                    const commBox = `
+                        <div class="text-[10px] space-y-1">
+                            ${data.adminMessage ? `<div class="text-emerald-400"><b>A Fej:</b> "${escapeHtml(data.adminMessage)}"</div>` : ''}
+                            ${data.memberReply ? `<div class="text-amber-400"><b>Tag válasza:</b> "${escapeHtml(data.memberReply)}"</div>` : ''}
+                            <button class="send-msg-btn text-[#7A9E48] hover:underline font-bold" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}">✉️ Utasítás / Üzenet küldése</button>
+                        </div>
+                    `;
+
                     tr.innerHTML = `
                         <td class="p-3 font-bold text-[#7A9E48] font-mono">${escapeHtml(data.candidateId)}</td>
                         <td class="p-3">
@@ -1068,13 +978,13 @@
                             <div class="text-[10px] text-[#5C735E]">${xp} XP (${escapeHtml(rank.cat)})</div>
                         </td>
                         <td class="p-3 text-[11px] text-[#5C735E]">${(data.skills || []).map(s => escapeHtml(s)).join(', ')}</td>
-                        <td class="p-3 text-[11px] text-white italic max-w-xs truncate">${escapeHtml(data.notesToFej || '-')}</td>
+                        <td class="p-3 max-w-xs">${commBox}</td>
                         <td class="p-3">
                             <span class="px-2 py-0.5 font-bold uppercase ${isPending ? 'text-amber-400 bg-amber-950/40' : (isApproved ? 'text-emerald-400 bg-emerald-950/40' : 'text-red-400 bg-red-950/40')}">
                                 ${escapeHtml(data.status)}
                             </span>
                         </td>
-                        <td class="p-3 flex items-center space-x-1">
+                        <td class="p-3 flex flex-wrap gap-1 items-center">
                             ${isPending ? `
                                 <button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" 
                                     data-id="${docSnap.id}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">
@@ -1092,6 +1002,20 @@
                     tbody.appendChild(tr);
                 });
 
+                // Utasítás / Üzenet küldése a tagnak
+                document.querySelectorAll('.send-msg-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const b = e.target.dataset;
+                        const msg = prompt(`Közvetlen utasítás vagy üzenet küldése ${b.cid} részére (megjelenik a profilján):`);
+                        if (!msg) return;
+                        await updateDoc(doc(db, "candidates", b.id), {
+                            adminMessage: msg.trim(),
+                            adminMessageAt: new Date().toISOString()
+                        });
+                        alert(`✓ Utasítás elküldve ${b.cid} profiljára!`);
+                    });
+                });
+
                 // JÓVÁHAGYÁS
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
@@ -1100,9 +1024,7 @@
                         btn.innerText = "FOLYAMATBAN...";
 
                         const res = await callBackend("/api/approve", {
-                            candidateId: b.cid,
-                            name: b.name,
-                            email: b.email
+                            candidateId: b.cid, name: b.name, email: b.email
                         });
 
                         if (res && res.ok) {
@@ -1114,34 +1036,28 @@
                             });
 
                             await setDoc(doc(db, "public_members", b.cid), {
-                                candidateId: b.cid,
-                                levelCode: '01',
-                                levelName: 'Spóra',
-                                xp: 0
+                                candidateId: b.cid, levelCode: '01', levelName: 'Spóra', xp: 0
                             });
 
                             alert(`✓ ${b.cid} jóváhagyva! A levél kiküldve.`);
                         } else {
                             btn.disabled = false;
                             btn.innerText = "Jóváhagyás";
-                            alert("A jóváhagyási művelet meghiúsult a Worker oldalon.");
                         }
                     });
                 });
 
-                // LINK ÚJRAKÜLDÉSE (A BEÉPÍTETT MENTŐÖV)
+                // LINK ÚJRAKÜLDÉSE
                 document.querySelectorAll('.resend-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
-                        if (!confirm(`Biztosan újraküldöd a belépési linket ${b.cid} (${b.email}) részére? A korábbi linkje érvénytelenné válik.`)) return;
+                        if (!confirm(`Biztosan újraküldöd a belépési linket ${b.cid} részére?`)) return;
 
                         btn.disabled = true;
                         btn.innerText = "KÜLDÉS...";
 
                         const res = await callBackend("/api/approve", {
-                            candidateId: b.cid,
-                            name: b.name,
-                            email: b.email
+                            candidateId: b.cid, name: b.name, email: b.email
                         });
 
                         if (res && res.ok) {
@@ -1150,9 +1066,7 @@
                                 activationToken: res.activationToken,
                                 resentAt: new Date().toISOString()
                             });
-                            alert(`✓ Új link és aktiváló kód sikeresen elküldve a tagnak (${b.email})!`);
-                        } else {
-                            alert("Hiba történt a link újraküldésekor.");
+                            alert(`✓ Új link és kód elküldve a tagnak!`);
                         }
                         btn.disabled = false;
                         btn.innerText = "Link újraküldése";
@@ -1162,7 +1076,7 @@
                 // ARCHIVÁLÁS
                 document.querySelectorAll('.archive-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if (confirm("Archiválod ezt a tagot? (A Telegram hozzáférése is felfüggesztésre kerül)")) {
+                        if (confirm("Archiválod ezt a tagot?")) {
                             const tgId = e.target.dataset.tgid;
                             const cid = e.target.dataset.cid;
                             if (tgId) await callBackend("/api/telegram-ban", { telegramUserId: tgId });
@@ -1179,10 +1093,7 @@
                         const rank = calculateRank(xp);
                         await updateDoc(doc(db, "candidates", e.target.dataset.id), { status: 'approved' });
                         await setDoc(doc(db, "public_members", cid), {
-                            candidateId: cid,
-                            levelCode: rank.code,
-                            levelName: rank.name,
-                            xp: xp
+                            candidateId: cid, levelCode: rank.code, levelName: rank.name, xp: xp
                         });
                     });
                 });
@@ -1206,15 +1117,33 @@
 
                         await updateDoc(doc(db, "candidates", b.id), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
                         await setDoc(doc(db, "public_members", b.cid), {
-                            candidateId: b.cid,
-                            levelCode: newRank.code,
-                            levelName: newRank.name,
-                            xp: newXp
+                            candidateId: b.cid, levelCode: newRank.code, levelName: newRank.name, xp: newXp
                         });
                     });
                 });
             });
         }
+
+        // Ranglétra tisztító (Kitörli a public_members-ből az árván maradt rekordokat)
+        document.getElementById('syncLeaderboardBtn').addEventListener('click', async () => {
+            if (!confirm("Újraszinkronizálod a ranglétrát? Ez letisztítja azokat a tagokat, akiket közvetlenül töröltél az adatbázisból.")) return;
+            const pubSnap = await getDocs(collection(db, "public_members"));
+            const candSnap = await getDocs(collection(db, "candidates"));
+            
+            const validApprovedIds = new Set();
+            candSnap.forEach(d => {
+                if (d.data().status === 'approved') validApprovedIds.add(d.data().candidateId);
+            });
+
+            let cleaned = 0;
+            for (let docSnap of pubSnap.docs) {
+                if (!validApprovedIds.has(docSnap.id)) {
+                    await deleteDoc(doc(db, "public_members", docSnap.id));
+                    cleaned++;
+                }
+            }
+            alert(`✓ Ranglétra kitakarítva! ${cleaned} árva bejegyzés törölve.`);
+        });
 
         document.getElementById('toggleArchiveBtn').addEventListener('click', () => {
             document.getElementById('archiveSection').classList.toggle('hidden');
