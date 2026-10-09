@@ -741,4 +741,169 @@
                 members.sort((a, b) => b.xp - a.xp);
                 members.forEach(m => {
                     const tr = document.createElement('tr');
-                    tr.inne
+                    tr.innerHTML = `
+                        <td class="p-2.5 font-bold text-sejt-oliveLight font-mono">${escapeHtml(m.candidateId)}</td>
+                        <td class="p-2.5 text-white">${escapeHtml(m.levelCode)}. ${escapeHtml(m.levelName)}</td>
+                        <td class="p-2.5 text-right font-mono text-sejt-muted">${Number(m.xp)} XP</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('authEmail').value.trim().toLowerCase(), document.getElementById('authPassword').value);
+            } catch (err) {
+                document.getElementById('authMsg').textContent = "Hibás belépési adatok.";
+            }
+        });
+
+        document.getElementById('toggleFirstTimeBtn').addEventListener('click', () => {
+            document.getElementById('firstTimeBox').classList.toggle('hidden');
+        });
+
+        // JAVÍTOTT ELSŐ JELSZÓADÁS
+        document.getElementById('doFirstTimeActivationBtn').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('authPassword').value;
+            const rawToken = document.getElementById('activationTokenInput').value.trim().toUpperCase();
+            const cleanToken = rawToken.replace(/[^A-Z0-9]/g, '');
+
+            if (!email || pass.length < 6 || !cleanToken) {
+                return alert("Add meg az e-mailt, legalább 6 karakteres jelszót és az aktiváló kódot!");
+            }
+
+            const btn = document.getElementById('doFirstTimeActivationBtn');
+            btn.disabled = true;
+            btn.innerText = "AKTIVÁLÁS...";
+
+            try {
+                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                const q = query(collection(db, "candidates"), where("email", "==", email));
+                const snap = await getDocs(q);
+
+                if (snap.empty) {
+                    await deleteUser(userCred.user);
+                    throw new Error("Ehhez az e-mailhez nem található regisztráció a rendszerben.");
+                }
+
+                let matchedDoc = null;
+                for (let docSnap of snap.docs) {
+                    const data = docSnap.data();
+                    const dbToken = String(data.activationToken || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (data.status === "approved" && dbToken === cleanToken) {
+                        matchedDoc = docSnap;
+                        break;
+                    }
+                }
+
+                if (!matchedDoc) {
+                    const anyApproved = snap.docs.some(d => d.data().status === "approved");
+                    await deleteUser(userCred.user);
+
+                    if (!anyApproved) {
+                        throw new Error("A jelentkezésed még bírálat alatt áll A Fej által.");
+                    } else {
+                        throw new Error("A megadott aktiváló kód nem egyezik az e-mailben kapott kóddal!");
+                    }
+                }
+
+                await updateDoc(doc(db, "candidates", matchedDoc.id), { activationToken: null });
+                alert("✓ Fiókod sikeresen aktiválva és hitelesítve!");
+                document.getElementById('firstTimeBox').classList.add('hidden');
+            } catch (err) {
+                alert("Hiba: " + err.message);
+                signOut(auth);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Jelszó Rögzítése & Fiók Aktiválása";
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+        // PROFIL MÓDOSÍTÁSA (BEKAPCSOLJA A VÁLTOZÁSJELZŐ LÁMPÁT AZ ADMINBAN!)
+        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentCandidateDocId) return;
+            const checkedSkills = Array.from(document.querySelectorAll('input[name="userSkill"]:checked')).map(cb => cb.value);
+            
+            await updateDoc(doc(db, "candidates", currentCandidateDocId), {
+                skills: checkedSkills,
+                timeframe: document.getElementById('userTimeframe').value,
+                notesToFej: document.getElementById('userNotes').value.trim(),
+                profileUpdated: true, // Bekapcsolja a 🔴 MÓDOSÍTOTT ADATOK jelzést az adminban!
+                updatedAt: new Date().toISOString()
+            });
+            alert("✓ Frissítve a hálózatban! A Fej értesítést kapott az új felajánlásodról.");
+        });
+
+        // ÖNMEGSEMMISÍTÉS
+        const destructModal = document.getElementById('selfDestructModal');
+        const countdownTimer = document.getElementById('countdownTimer');
+        let timerInterval = null;
+        let secondsLeft = 60;
+
+        document.getElementById('openSelfDestructModalBtn').addEventListener('click', () => {
+            destructModal.classList.remove('hidden');
+            secondsLeft = 60;
+            updateTimerDisplay();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsLeft--;
+                updateTimerDisplay();
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    destructModal.classList.add('hidden');
+                    alert("A megsemmisítési időkorlát lejárt. A folyamat megszakítva.");
+                }
+            }, 1000);
+        });
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(secondsLeft / 60);
+            const secs = secondsLeft % 60;
+            countdownTimer.textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        document.getElementById('cancelDestructBtn').addEventListener('click', () => {
+            clearInterval(timerInterval);
+            destructModal.classList.add('hidden');
+            document.getElementById('destructPasswordInput').value = '';
+        });
+
+        document.getElementById('confirmDestructBtn').addEventListener('click', () => {
+            const pass = document.getElementById('destructPasswordInput').value;
+            if (!pass) return alert("Add meg a jelszavad a törléshez!");
+            clearInterval(timerInterval);
+            executeSelfDestruction(pass);
+        });
+
+        async function executeSelfDestruction(pass) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const cred = EmailAuthProvider.credential(user.email, pass);
+                await reauthenticateWithCredential(user, cred);
+
+                if (currentCandidateDocId) await deleteDoc(doc(db, "candidates", currentCandidateDocId));
+                if (currentCandidateId) await deleteDoc(doc(db, "public_members", currentCandidateId));
+
+                await deleteUser(user);
+                alert("Minden adatodat megsemmisítettük a Sejtből. A nyomok törölve.");
+                window.location.href = "index.html";
+            } catch (e) {
+                alert("Hiba: Hibás jelszó!");
+            }
+        }
+
+        const privacyModal = document.getElementById('privacyModal');
+        document.getElementById('privacyModalBtn').addEventListener('click', () => privacyModal.classList.remove('hidden'));
+        document.getElementById('closePrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
+        document.getElementById('okPrivacyBtn').addEventListener('click', () => privacyModal.classList.add('hidden'));
+    </script>
+</body>
+</html>
