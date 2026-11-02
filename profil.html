@@ -26,7 +26,7 @@
     <style>
         body { background-color: #090F0A; color: #D5E2D5; font-family: 'JetBrains Mono', monospace; }
         .scanlines {
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
         }
@@ -34,52 +34,61 @@
         .tab-active { border-bottom: 2px solid #7A9E48; color: #7A9E48; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 md:p-8 relative selection:bg-sejt-olive selection:text-white">
+<body class="min-h-screen flex flex-col justify-start relative selection:bg-sejt-olive selection:text-white">
     <div class="fixed inset-0 scanlines z-40"></div>
 
-    <!-- Fejléc -->
-    <header class="max-w-4xl mx-auto w-full flex justify-between items-center py-4 border-b border-sejt-border text-xs tracking-widest text-sejt-muted">
-        <div class="flex items-center space-x-2">
-            <span class="inline-block w-2 h-2 rounded-full bg-sejt-olive animate-pulse"></span>
-            <span>BELSŐ TERMINÁL</span>
+    <!-- FIX, NEM UGRÁLÓ FEJLÉC -->
+    <header class="sticky top-0 z-30 bg-[#090F0A]/95 backdrop-blur border-b border-sejt-border px-4 md:px-8 py-3.5">
+        <div class="max-w-4xl mx-auto w-full flex justify-between items-center text-xs tracking-widest text-sejt-muted">
+            <div class="flex items-center space-x-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-sejt-olive animate-pulse"></span>
+                <span>BELSŐ TERMINÁL</span>
+            </div>
+            <div id="headerUserStatus" class="font-mono text-white">ZÖLD SEJT</div>
         </div>
-        <div id="headerUserStatus">ZÖLD SEJT</div>
     </header>
 
     <!-- 1. SZEKCIÓ: BELÉPÉS / ELSŐ JELSZÓADÁS -->
-    <div id="authSection" class="max-w-md mx-auto my-12 w-full space-y-6 bg-sejt-surface border border-sejt-border p-6 md:p-8">
-        <div class="text-center space-y-1">
-            <div class="text-xs uppercase tracking-widest text-sejt-olive font-bold">// HÁLÓZATI AZONOSÍTÁS</div>
-            <h1 class="text-xl font-bold text-white uppercase">SEJTTAG BELÉPÉS</h1>
-            <p class="text-xs text-sejt-muted">Add meg a jóváhagyott e-mail címedet a profilod eléréséhez.</p>
-        </div>
+    <div id="authSection" class="max-w-md mx-auto my-12 w-full px-4 space-y-6">
+        <div class="bg-sejt-surface border border-sejt-border p-6 md:p-8 space-y-5">
+            <div class="text-center space-y-1">
+                <div class="text-xs uppercase tracking-widest text-sejt-olive font-bold">// HÁLÓZATI AZONOSÍTÁS</div>
+                <h1 class="text-xl font-bold text-white uppercase">SEJTTAG BELÉPÉS</h1>
+                <p class="text-xs text-sejt-muted">Add meg a jóváhagyott e-mail címedet a profilod eléréséhez.</p>
+            </div>
 
-        <form id="loginForm" class="space-y-4">
-            <div>
-                <label class="block text-[11px] uppercase text-sejt-muted mb-1">E-mail cím</label>
-                <input type="email" id="authEmail" required placeholder="sejt@proton.me" 
-                    class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive">
-            </div>
-            <div>
-                <label class="block text-[11px] uppercase text-sejt-muted mb-1">Jelszó</label>
-                <input type="password" id="authPassword" required placeholder="••••••••" 
-                    class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive">
-            </div>
+            <form id="loginForm" class="space-y-4" autocomplete="off">
+                <div>
+                    <label class="block text-[11px] uppercase text-sejt-muted mb-1">E-mail cím</label>
+                    <input type="email" id="authEmail" required autocomplete="off" placeholder="sejt@proton.me" 
+                        class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive">
+                </div>
+                <div>
+                    <label class="block text-[11px] uppercase text-sejt-muted mb-1">Jelszó</label>
+                    <input type="password" id="authPassword" required autocomplete="new-password" placeholder="••••••••" 
+                        class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white focus:outline-none focus:border-sejt-olive">
+                </div>
+                
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" id="loginBtn" class="flex-1 py-2.5 bg-sejt-olive hover:bg-sejt-oliveLight text-white text-xs uppercase font-bold tracking-wider transition">Belépés</button>
+                    <button type="button" id="doFirstTimeActivationBtn" class="px-3 py-2.5 bg-[#1E2F22] hover:bg-sejt-border text-sejt-text text-xs uppercase font-bold transition">Első jelszóadás</button>
+                </div>
+            </form>
+
+            <div id="authMsg" class="text-xs text-amber-400 font-mono text-center min-h-[16px] leading-relaxed"></div>
             
-            <div class="flex gap-2 pt-2">
-                <button type="submit" id="loginBtn" class="flex-1 py-2.5 bg-sejt-olive hover:bg-sejt-oliveLight text-white text-xs uppercase font-bold tracking-wider transition">Belépés</button>
-                <button type="button" id="doFirstTimeActivationBtn" class="px-3 py-2.5 bg-[#1E2F22] hover:bg-sejt-border text-sejt-text text-xs uppercase font-bold transition" title="Első alkalommal jelszó beállítása és megerősítő levél kérése">Első jelszóadás</button>
+            <div class="p-2.5 bg-[#0B130D] border border-sejt-border/60 text-[11px] text-sejt-muted leading-relaxed">
+                ℹ️ <b>Első belépés:</b> Írd be az e-mailed és egy min. 8 karakteres jelszót, majd kattints az <i>Első jelszóadás</i> gombra. A megerősítő levél a <b>Spam / Levélszemét</b> mappába is érkezhet!
             </div>
-        </form>
-
-        <div id="authMsg" class="text-xs text-amber-400 font-mono text-center min-h-[16px] leading-relaxed"></div>
+        </div>
     </div>
 
     <!-- 2. SZEKCIÓ: BELSŐ IRÁNYÍTÓPULT -->
-    <main id="profileDashboard" class="hidden max-w-4xl mx-auto w-full my-6 space-y-6">
+    <main id="profileDashboard" class="hidden max-w-4xl mx-auto w-full px-4 py-6 space-y-6">
         
+        <!-- FIX NAVIGÁCIÓS SÁV -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-sejt-border pb-3 gap-3">
-            <div class="flex space-x-4 text-xs">
+            <div class="flex space-x-4 text-xs font-mono">
                 <button id="pTabProfile" class="py-1 font-bold tab-active flex items-center space-x-1">
                     <span>Saját Sejt-Kártya</span>
                     <span id="pBadgeMsg" class="hidden w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
@@ -100,7 +109,7 @@
         <!-- 1. FÜL: PROFIL, A FEJ UTASÍTÁSA ÉS TELEGRAM -->
         <div id="viewProfile" class="space-y-6">
             
-            <!-- A FEJ KÖZVETLEN UTASÍTÁSA -->
+            <!-- A FEJ KÖZVETLEN UTASÍTÁSA // ÜZENETE -->
             <div id="headInstructionBox" class="hidden bg-[#101912] border-2 border-[#5A7736] p-5 space-y-3">
                 <div class="flex justify-between items-center text-xs font-bold text-emerald-400 uppercase tracking-widest">
                     <span>👑 A FEJ KÖZVETLEN UTASÍTÁSA // ÜZENETE</span>
@@ -108,10 +117,11 @@
                 </div>
                 <div id="headMsgText" class="text-sm font-bold text-white bg-[#0B130D] p-3 border border-[#1E2F22] leading-relaxed"></div>
                 
+                <!-- Válasz A Fejnek -->
                 <div class="pt-2 border-t border-[#1E2F22] space-y-2">
                     <label class="block text-[10px] text-sejt-muted uppercase">Válasz vagy visszajelzés A Fejnek:</label>
                     <div class="flex gap-2">
-                        <input type="text" id="replyToHeadInput" maxlength="500" placeholder="Válaszod (max 500 kar)..." class="flex-1 bg-[#0B130D] border border-sejt-border px-3 py-1.5 text-xs text-white">
+                        <input type="text" id="replyToHeadInput" maxlength="500" autocomplete="off" placeholder="Válaszod..." class="flex-1 bg-[#0B130D] border border-sejt-border px-3 py-1.5 text-xs text-white">
                         <button id="sendReplyToHeadBtn" class="px-4 py-1.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase transition">Válasz Küldése</button>
                     </div>
                     <div id="lastReplyEcho" class="text-[10px] text-sejt-muted italic hidden"></div>
@@ -149,11 +159,14 @@
                     <div>
                         <div class="text-[10px] text-sejt-muted uppercase tracking-wider">Telegram Hálózat</div>
                         <div id="tgStatusText" class="text-xs font-bold text-amber-400 mt-1">Nincs összekötve</div>
-                        <p id="tgSubText" class="text-[11px] text-sejt-muted mt-2 leading-tight">Kattints az összekötéshez, hogy a Hírös Hírnök felismerje a fiókodat!</p>
+                        <p id="tgSubText" class="text-[11px] text-sejt-muted mt-2 leading-tight">Elsődleges egyirányú adóállomás a riasztásokhoz.</p>
                     </div>
-                    <div id="tgActionContainer">
+                    <div id="tgActionContainer" class="space-y-2">
                         <a id="connectTgBtn" href="#" target="_blank" class="block text-center py-2 px-3 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-[11px] uppercase font-bold transition">
                             🔗 Telegram Összekötése
+                        </a>
+                        <a id="openChannelBtn" href="https://t.me/zoldsejt" target="_blank" class="hidden block text-center py-2 px-3 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-[11px] uppercase font-bold transition">
+                            📡 Zöld Sejt Csatorna
                         </a>
                     </div>
                 </div>
@@ -166,7 +179,7 @@
                     <p class="text-xs text-sejt-muted">Frissítsd a képességeidet vagy küldj új felajánlást A Fejnek.</p>
                 </div>
 
-                <form id="updateProfileForm" class="space-y-4">
+                <form id="updateProfileForm" class="space-y-4" autocomplete="off">
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer"><input type="checkbox" name="userSkill" value="5_perc"> <span>Van 5 percem</span></label>
                         <label class="flex items-center space-x-2 p-2 bg-[#0B130D] border border-sejt-border cursor-pointer"><input type="checkbox" name="userSkill" value="Növények"> <span>Növények</span></label>
@@ -190,8 +203,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] text-sejt-muted uppercase mb-1">Üzenet / Felajánlás A Fejnek</label>
-                            <input type="text" id="userNotes" maxlength="300" placeholder="Pl.: Új szerszámom lett..." class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white">
+                            <label class="block text-[11px] text-sejt-muted uppercase mb-1">Felajánlás / Megjegyzés A Fejnek</label>
+                            <input type="text" id="userNotes" maxlength="300" autocomplete="off" placeholder="Pl.: Van egy új ágvágóm..." class="w-full bg-[#0B130D] border border-sejt-border px-3 py-2 text-xs text-white">
                         </div>
                     </div>
 
@@ -202,11 +215,11 @@
             </div>
         </div>
 
-        <!-- 2. FÜL: KÜLDETÉSEK (TITKOS OPERATÍV ELIGAZÍTÁSSAL) -->
+        <!-- 2. FÜL: KÜLDETÉSEK (JELENTKEZÉS ÉS FEJ ÁLTALI JÓVÁHAGYÁS) -->
         <div id="viewMissions" class="hidden space-y-4">
             <div class="bg-sejt-surface border border-sejt-border p-4">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">// Hálózati Küldetések</h3>
-                <p class="text-xs text-sejt-muted">Csatlakozz egy küldetéshez az operatív tájékoztató feloldásához!</p>
+                <p class="text-xs text-sejt-muted">Jelentkezz az akciókra! A titkos operatív eligazítást A Fej jóváhagyása után éred el.</p>
             </div>
             <div id="missionsListContainer" class="space-y-4"></div>
         </div>
@@ -238,7 +251,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: RANGLÉTRA (Kizárólag public_members-ből!) -->
+        <!-- 4. FÜL: RANGLÉTRA -->
         <div id="viewLeaderboard" class="hidden space-y-4">
             <div class="bg-sejt-surface border border-sejt-border p-4">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">Hálózati Evolúció (Anonim Ranglista)</h3>
@@ -262,7 +275,7 @@
         <div class="p-4 bg-[#140B0B] border border-[#3A1818] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
                 <div class="text-xs font-bold text-red-400 uppercase">Biztonsági Vészhelyzet // Adattörlés</div>
-                <div class="text-[11px] text-red-300/70">Ha kompromittálódtál, minden nyomodat azonnal megsemmisítheted.</div>
+                <div class="text-[11px] text-red-300/70">Ha kompromittálódtál, minden személyes nyomodat azonnal megsemmisítheted.</div>
             </div>
             <button id="openSelfDestructModalBtn" class="px-4 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 text-xs font-bold uppercase tracking-wider border border-red-700 transition">
                 ⚡ Önmegsemmisítés
@@ -272,9 +285,11 @@
     </main>
 
     <!-- Lábléc -->
-    <footer class="max-w-4xl mx-auto w-full text-center py-4 border-t border-sejt-border text-[10px] text-sejt-muted tracking-widest uppercase flex flex-col sm:flex-row justify-between items-center gap-2">
-        <div>A FEJ FIGYEL // BELSŐ KÖR</div>
-        <button id="privacyModalBtn" class="text-sejt-muted hover:text-white underline lowercase tracking-normal">adatkezelési tájékoztató</button>
+    <footer class="mt-auto border-t border-sejt-border py-4 px-4 text-center text-[10px] text-sejt-muted tracking-widest uppercase">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div>A FEJ FIGYEL // BELSŐ KÖR</div>
+            <button id="privacyModalBtn" class="text-sejt-muted hover:text-white underline lowercase tracking-normal">adatkezelési tájékoztató</button>
+        </div>
     </footer>
 
     <!-- ADATKEZELÉSI MODAL -->
@@ -311,7 +326,7 @@
 
             <div class="space-y-2 max-w-xs mx-auto text-left">
                 <label class="block text-[10px] text-red-400 uppercase">Add meg a jelszavad a véglegesítéshez:</label>
-                <input type="password" id="destructPasswordInput" placeholder="Jelszavad..." class="w-full bg-black border border-red-700 text-red-300 p-2 text-xs focus:outline-none focus:border-red-500">
+                <input type="password" id="destructPasswordInput" autocomplete="current-password" placeholder="Jelszavad..." class="w-full bg-black border border-red-700 text-red-300 p-2 text-xs focus:outline-none focus:border-red-500">
             </div>
 
             <div class="flex gap-3 justify-center pt-2">
@@ -377,7 +392,6 @@
         let currentUserEmail = null;
         let activeRanks = [];
 
-        // 4. JAVÍTÁS: Figyelők leiratkozási kezelője (stopAll)
         let unsubs = [];
         const track = (unsub) => { unsubs.push(unsub); };
         const stopAll = () => { unsubs.forEach(u => u()); unsubs = []; };
@@ -428,7 +442,6 @@
         pTabs.tools.btn.addEventListener('click', () => switchPTab('tools'));
         pTabs.leaderboard.btn.addEventListener('click', () => switchPTab('leaderboard'));
 
-        // 1. JAVÍTÁS: onAuthStateChanged csak megerősített e-mail esetén tölt adatot
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (user.email === "zoldsejt@gmail.com") {
@@ -439,12 +452,11 @@
                     return;
                 }
 
-                // Megerősítetlen e-mail ellenőrzése
                 if (!user.emailVerified) {
                     stopAll();
                     document.getElementById('authSection').classList.remove('hidden');
                     document.getElementById('profileDashboard').classList.add('hidden');
-                    document.getElementById('authMsg').innerHTML = "<span class='text-amber-400'>Az e-mail címed még nincs megerősítve! Kérjük, kattints a megerősítő levélben lévő linkre, majd lépj be újra.</span>";
+                    document.getElementById('authMsg').innerHTML = "<span class='text-amber-400'>Az e-mail címed még nincs megerősítve! Kérjük kattints a megerősítő levélben lévő linkre (ellenőrizd a Spam mappát is), majd lépj be újra.</span>";
                     return;
                 }
 
@@ -459,7 +471,7 @@
         });
 
         async function loadUserData(email) {
-            stopAll(); // Korábbi figyelők leállítása
+            stopAll();
 
             const q = query(collection(db, "candidates"), where("email", "==", email.trim().toLowerCase()));
             const snap = await getDocs(q);
@@ -469,7 +481,6 @@
                 return;
             }
 
-            // 7. JAVÍTÁS: Jóváhagyott rekord kiválasztása, ha több jelentkezés történt
             const cDoc = snap.docs.find(d => d.data().status === 'approved') || snap.docs[0];
             const data = cDoc.data();
             currentCandidateDocId = cDoc.id;
@@ -484,7 +495,7 @@
             document.getElementById('profileDashboard').classList.remove('hidden');
             document.getElementById('headerUserStatus').textContent = data.candidateId;
 
-            // A Fej utasításának megjelenítése
+            // A Fej utasítása
             const headBox = document.getElementById('headInstructionBox');
             const pBadgeMsg = document.getElementById('pBadgeMsg');
             if (data.adminMessage) {
@@ -521,20 +532,24 @@
                 document.getElementById('nextRankNotice').textContent = "Elérted a legfelsőbb rangot.";
             }
 
+            // Telegram állapot és csatorna link
             const tgStatusText = document.getElementById('tgStatusText');
             const tgSubText = document.getElementById('tgSubText');
             const connectTgBtn = document.getElementById('connectTgBtn');
+            const openChannelBtn = document.getElementById('openChannelBtn');
 
             if (data.telegramUserId) {
                 tgStatusText.textContent = `✓ Összekötve (${data.telegramUsername || data.telegramUserId})`;
                 tgStatusText.className = "text-xs font-bold text-emerald-400 mt-1";
                 tgSubText.textContent = "A fiókod azonosítva van a Telegram hálózatban.";
                 connectTgBtn.classList.add('hidden');
+                openChannelBtn.classList.remove('hidden');
             } else {
                 tgStatusText.textContent = "Nincs összekötve";
                 tgStatusText.className = "text-xs font-bold text-amber-400 mt-1";
                 tgSubText.textContent = "Kattints az összekötéshez, hogy a Hírös Hírnök felismerje a fiókodat!";
                 connectTgBtn.classList.remove('hidden');
+                openChannelBtn.classList.add('hidden');
                 connectTgBtn.href = `https://t.me/hiros_hirnok_bot?start=${data.connectToken || 'KULCS'}`;
             }
 
@@ -551,7 +566,7 @@
             loadLeaderboard();
         }
 
-        // 2. JAVÍTÁS: Válasz küldése A Fejnek (hibakezeléssel & méretkorláttal)
+        // Válasz küldése A Fejnek
         document.getElementById('sendReplyToHeadBtn').addEventListener('click', async () => {
             const reply = document.getElementById('replyToHeadInput').value.trim();
             if (!reply) return alert("Írj be választ!");
@@ -579,7 +594,7 @@
             }
         });
 
-        // 5. JAVÍTÁS: Küldetések (Gombok letiltása & Titkos eligazítás feloldása)
+        // KÜLDETÉSEK (Jelentkezés -> Fej Jóváhagyása -> Titkos Eligazítás Feloldása)
         function loadMissions() {
             track(onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const container = document.getElementById('missionsListContainer');
@@ -605,26 +620,52 @@
                     const card = document.createElement('div');
                     card.className = "p-4 bg-sejt-surface border border-sejt-border space-y-3.5";
                     
+                    const applicants = m.applicants || [];
                     const attendees = m.attendees || [];
-                    const isJoined = attendees.includes(currentCandidateId);
-                    const canClaim = isJoined && m.status === 'open';
+                    
+                    const isApplicant = applicants.includes(currentCandidateId);
+                    const isAttendee = attendees.includes(currentCandidateId); // A Fej által JÓVÁHAGYOTT résztvevő!
+                    const canClaim = isAttendee && m.status === 'open';
 
+                    // Titkos Box: Kizárólag a Fej által jóváhagyott résztvevőknek (attendees) nyílik ki!
                     let secretBox = '';
-                    if (isJoined) {
+                    if (isAttendee) {
                         secretBox = `
                             <div class="p-3 bg-[#0E1A11] border border-emerald-800/60 rounded space-y-1">
-                                <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                                    <span>🔓 OPERATÍV ELIGAZÍTÁS (Csak résztvevőknek)</span>
+                                <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                                    <span>🔓 JÓVÁHAGYOTT OPERATÍV ELIGAZÍTÁS</span>
+                                    <span class="text-[9px] bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-300">FEJ JÓVÁHAGYTA</span>
                                 </div>
                                 <div class="text-xs text-emerald-200/90 leading-relaxed font-mono">${escapeHtml(m.operativeBriefing || 'Nincs különleges titkos utasítás rögzítve.')}</div>
+                            </div>
+                        `;
+                    } else if (isApplicant) {
+                        secretBox = `
+                            <div class="p-2.5 bg-[#14120B] border border-amber-800/60 rounded flex items-center justify-between text-[11px] text-amber-400 font-mono">
+                                <span>⏳ JELENTKEZÉSED BÍRÁLAT ALATT</span>
+                                <span class="text-[10px] text-amber-300/80 italic">A Fej dönt a létszámkeretről és a jóváhagyásról...</span>
                             </div>
                         `;
                     } else {
                         secretBox = `
                             <div class="p-2.5 bg-[#14120B] border border-amber-900/40 rounded flex items-center justify-between text-[11px] text-amber-400/90 font-mono">
                                 <span>🔒 ZÁROLT OPERATÍV ELIGAZÍTÁS</span>
-                                <span class="text-[10px] text-[#5C735E] italic">Csatlakozz a részletek feloldásához!</span>
+                                <span class="text-[10px] text-[#5C735E] italic">Jelentkezz a részletek feloldásához!</span>
                             </div>
+                        `;
+                    }
+
+                    // Gomb állapotok
+                    let joinBtnHtml = '';
+                    if (isAttendee) {
+                        joinBtnHtml = `<span class="px-2.5 py-1 bg-[#1E2F22] text-emerald-400 font-bold text-[10px] rounded border border-emerald-800/50">✓ Részvétel Jóváhagyva</span>`;
+                    } else if (isApplicant) {
+                        joinBtnHtml = `<span class="px-2.5 py-1 bg-[#231E0D] text-amber-400 font-bold text-[10px] rounded border border-amber-800/50">⏳ Jelentkeztél (Várakozás)</span>`;
+                    } else {
+                        joinBtnHtml = `
+                            <button class="join-mission-btn px-2.5 py-1 bg-[#0B130D] border border-sejt-border text-sejt-text hover:border-[#5A7736] hover:text-white transition" data-id="${escapeHtml(d.id)}">
+                                ✋ Jelentkezem a küldetésre
+                            </button>
                         `;
                     }
 
@@ -641,15 +682,12 @@
                         ${secretBox}
 
                         <div class="flex flex-wrap justify-between items-center pt-2 border-t border-sejt-border gap-2 text-[10px]">
-                            <span class="text-sejt-muted">Kategória: ${escapeHtml(m.category)} | ${attendees.length} Sejttag csatlakozott</span>
+                            <span class="text-sejt-muted">Kategória: ${escapeHtml(m.category)} | Jóváhagyott résztvevők: ${attendees.length} fő</span>
                             <div class="space-x-2">
-                                <button class="join-mission-btn px-2.5 py-1 ${isJoined ? 'bg-[#1E2F22] text-[#5C735E] cursor-not-allowed' : 'bg-[#0B130D] border border-sejt-border text-sejt-text hover:border-[#5A7736]'} transition" 
-                                    data-id="${escapeHtml(d.id)}" ${isJoined ? 'disabled' : ''}>
-                                    ${isJoined ? '✓ Csatlakoztál' : '✋ Csatlakozom'}
-                                </button>
+                                ${joinBtnHtml}
                                 <button class="claim-xp-btn px-2.5 py-1 ${canClaim ? 'bg-[#5A7736] hover:bg-[#7A9E48] text-white' : 'bg-[#1A241C] text-[#5C735E] cursor-not-allowed'} font-bold uppercase transition" 
                                     data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-xp="${Number(m.xp)}" ${canClaim ? '' : 'disabled'}
-                                    title="${!isJoined ? 'Előbb csatlakozz a küldetéshez!' : (m.status !== 'open' ? 'A küldetés már lezárult' : '')}">
+                                    title="${!isAttendee ? 'Csak jóváhagyott résztvevő igényelhet XP-t!' : (m.status !== 'open' ? 'A küldetés már lezárult' : '')}">
                                     🙋 Ott voltam (+${Number(m.xp)} XP)
                                 </button>
                             </div>
@@ -658,20 +696,22 @@
                     container.appendChild(card);
                 });
 
-                container.querySelectorAll('.join-mission-btn:not([disabled])').forEach(btn => {
+                // Jelentkezés (applicants listához adás)
+                container.querySelectorAll('.join-mission-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const mId = e.target.dataset.id;
                         btn.disabled = true;
                         try {
-                            await updateDoc(doc(db, "missions", mId), { attendees: arrayUnion(currentCandidateId) });
-                            alert("✓ Csatlakoztál az akcióhoz! Az operatív eligazítás feloldva.");
+                            await updateDoc(doc(db, "missions", mId), { applicants: arrayUnion(currentCandidateId) });
+                            alert("✓ Jelentkezés elküldve! A Fej elbírálja a létszámot.");
                         } catch (err) {
-                            alert("Hiba a csatlakozáskor: " + err.code);
+                            alert("Hiba a jelentkezéskor: " + err.code);
                             btn.disabled = false;
                         }
                     });
                 });
 
+                // XP Igénylés (JAVÍTVA: ownerEmail hozzáadva!)
                 container.querySelectorAll('.claim-xp-btn:not([disabled])').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -682,6 +722,7 @@
                         try {
                             await setDoc(doc(db, "xp_claims", claimDocId), {
                                 candidateId: currentCandidateId,
+                                ownerEmail: currentUserEmail, // EZ HIÁNYZOTT KORÁBBAN!
                                 missionCode: b.code,
                                 missionTitle: b.title,
                                 xp: parseInt(b.xp) || 20,
@@ -691,7 +732,7 @@
                             alert("✓ XP igénylés elküldve A Fejnek!");
                         } catch (err) {
                             alert(err.code === 'permission-denied' 
-                                ? 'Az igénylés nem engedélyezett: csatlakozz a küldetéshez, vagy már igényeltél korábban.' 
+                                ? 'Az igénylés nem engedélyezett: vagy még nem hagyták jóvá a részvételt, vagy már igényeltél korábban.' 
                                 : 'Hiba: ' + err.code);
                             btn.disabled = false;
                             btn.innerText = `🙋 Ott voltam (+${b.xp} XP)`;
@@ -701,7 +742,7 @@
             }, (err) => console.warn('Figyelő hiba (küldetések):', err.code)));
         }
 
-        // Eszköztár (max 300 kar indoklás)
+        // Eszköztár (JAVÍTVA: reason és ownerEmail mezőkkel!)
         function loadTools() {
             track(onSnapshot(collection(db, "tools"), (snap) => {
                 const tbody = document.getElementById('memberToolsBody');
@@ -729,7 +770,7 @@
                     btn.addEventListener('click', async (e) => {
                         const tool = e.target.dataset.tool;
                         const toolId = e.target.dataset.id;
-                        const rawReason = prompt(`Milyen célra igényled ezt: ${tool}? (max 300 kar):`, "Hétvégi zöldakció");
+                        const rawReason = prompt(`Milyen célra / akcióhoz igénylid ezt: ${tool}? (max 300 kar):`, "Zöldterület rendezés");
                         if (!rawReason) return;
                         const reason = rawReason.trim().slice(0, 300);
 
@@ -739,8 +780,9 @@
                                 ownerEmail: currentUserEmail,
                                 toolId: toolId,
                                 toolName: tool,
-                                message: reason,
+                                reason: reason, // PONTOSAN AZ, AMIT A SZABÁLYZAT KÉR!
                                 status: "pending",
+                                requestedAt: new Date().toISOString(),
                                 createdAt: new Date().toISOString()
                             });
                             alert(`✓ Igénylés elküldve A Fejnek!`);
@@ -808,7 +850,7 @@
             }, (err) => console.warn('Figyelő hiba (ranglétra):', err.code)));
         }
 
-        // 1. JAVÍTÁS: Belépés ellenőrzött emailVerified feltétellel
+        // Belépés
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('authEmail').value.trim().toLowerCase();
@@ -821,7 +863,7 @@
                 if (!cred.user.emailVerified) {
                     await sendEmailVerification(cred.user);
                     await signOut(auth);
-                    msg.innerHTML = "<span class='text-amber-400'>Előbb erősítsd meg az e-mailedet! Új megerősítő levelet küldtünk a postafiókodba.</span>";
+                    msg.innerHTML = "<span class='text-amber-400'>Előbb erősítsd meg az e-mailedet! Megerősítő levelet küldtünk (ellenőrizd a Spam mappát is!).</span>";
                     return;
                 }
             } catch (err) {
@@ -829,7 +871,7 @@
             }
         });
 
-        // 1. JAVÍTÁS: Első jelszóadás (Aktiváló kód helyett hivatalos e-mail megerősítés)
+        // Első jelszóadás
         document.getElementById('doFirstTimeActivationBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim().toLowerCase();
             const pass = document.getElementById('authPassword').value;
@@ -846,12 +888,12 @@
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
                 await sendEmailVerification(cred.user);
                 await signOut(auth);
-                alert("✓ Megerősítő levelet küldtünk a megadott e-mail címedre! Kattints a levélben lévő linkre, majd lépj be a Belépés gombbal.");
+                alert("✓ Megerősítő levelet küldtünk a postafiókodba! Kérjük ellenőrizd a SPAM / Levélszemét mappát is, kattints a linkre, majd lépj be a Belépés gombbal.");
             } catch (err) {
                 if (err.code === 'auth/email-already-in-use') {
                     try {
                         await sendPasswordResetEmail(auth, email);
-                        alert("Ehhez az e-mailhez már létezik fiók. Jelszó-visszaállító levelet küldtünk a postafiókodba.");
+                        alert("Ehhez az e-mailhez már létezik fiók. Jelszó-visszaállító levelet küldtünk a postafiókodba (nézd meg a Spam mappát is).");
                     } catch (resetErr) {
                         alert("Hiba: " + resetErr.message);
                     }
@@ -869,7 +911,7 @@
             signOut(auth);
         });
 
-        // Profil frissítés (Lámpa bekapcsolása az adminban)
+        // Profil frissítés
         document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentCandidateDocId) return;
@@ -889,7 +931,7 @@
             }
         });
 
-        // 3. JAVÍTÁS: Önmegsemmisítés atomi sorrendben (Jelszó hitelesítés -> public_members -> candidates -> deleteUser)
+        // Önmegsemmisítés
         const destructModal = document.getElementById('selfDestructModal');
         const countdownTimer = document.getElementById('countdownTimer');
         let timerInterval = null;
