@@ -146,7 +146,7 @@
                 <p>A jelentkezésed megérkezett a koordinációs rendszerbe.</p>
                 <div class="p-3 bg-[#0B130D] border border-sejt-border text-sejt-muted font-mono">
                     ÁLLAPOT: <span class="text-amber-500 font-bold">VÁRAKOZIK A JÓVÁHAGYÁSRA</span><br>
-                    KÖVETKEZŐ LÉPÉS: Jóváhagyás után a megadott e-mailre érkezik a biztonsági aktiváló kód és a zárt Telegram csatorna link.
+                    KÖVETKEZŐ LÉPÉS: Jóváhagyás után a megadott e-mailre érkezik a hivatalos értesítés és a zárt Telegram csatlakozási kulcs.
                 </div>
             </div>
         </div>
@@ -179,7 +179,7 @@
         </div>
     </div>
 
-    <!-- ADATKEZELÉSI MODAL -->
+    <!-- ADATKEZELÉSI MODAL (PONTOSÍTOTT TÖRLÉSI TÁJÉKOZTATÓVAL) -->
     <div id="privacyModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
         <div class="bg-[#101912] border border-sejt-border max-w-lg w-full p-6 space-y-4 text-xs text-sejt-text">
             <div class="flex justify-between items-center border-b border-sejt-border pb-2">
@@ -188,10 +188,10 @@
             </div>
             <div class="space-y-3 text-sejt-muted leading-relaxed max-h-80 overflow-y-auto">
                 <p><b>1. Adatkezelő:</b> Zöld Sejt Koordináció (Kapcsolat: <code>zoldsejt@gmail.com</code>).</p>
-                <p><b>2. Kezelt adatok:</b> Név (belső visszaélések megelőzéséhez), e-mail cím, képességek, csatlakozási időbélyeg.</p>
+                <p><b>2. Kezelt adatok:</b> Név (belső szűréshez és visszaélések megelőzéséhez), e-mail cím, megadott képességek, csatlakozási időbélyeg.</p>
                 <p><b>3. Adatfeldolgozók:</b> Google Firebase (felhőtárhely / EU), Brevo SAS (e-mail / EU), Telegram FZ-LLC, Cloudflare Inc.</p>
                 <p><b>4. Jogalap:</b> Önkéntes hozzájárulás (GDPR 6. cikk (1) a)).</p>
-                <p><b>5. Adattörlés:</b> A profilban elérhető az azonnali önmegsemmisítés.</p>
+                <p><b>5. Adattörlés:</b> Az önmegsemmisítés azonnal törli a személyes profilodat és a nyilvános ranglista-bejegyzésedet. A korábbi küldetés- és igénylési naplókat, valamint a Telegram-tagságot a koordináció külön kérésre törli.</p>
             </div>
             <button id="okPrivacyBtn" class="w-full py-2 bg-sejt-olive hover:bg-sejt-oliveLight text-white font-bold uppercase text-[11px] tracking-wider transition">Megértettem és elfogadom</button>
         </div>
@@ -236,31 +236,46 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "RÖGZÍTÉS FOLYAMATBAN...";
 
-            const candidateId = generateSecureId();
-            const payload = {
-                candidateId: candidateId,
-                fullName: document.getElementById('fullName').value.trim(),
-                email: document.getElementById('email').value.trim().toLowerCase(),
-                skills: checkedSkills,
+            const payloadBase = {
+                fullName: document.getElementById('fullName').value.trim().slice(0, 100),
+                email: document.getElementById('email').value.trim().toLowerCase().slice(0, 100),
+                skills: checkedSkills.slice(0, 15),
                 timeframe: document.getElementById('timeframe').value,
-                notesToFej: document.getElementById('notesToFej').value.trim(),
+                notesToFej: document.getElementById('notesToFej').value.trim().slice(0, 300),
                 status: 'pending',
                 levelCode: '01',
                 levelName: 'Spóra',
                 xp: 0,
                 privacyConsent: true,
                 rulesConsent: true,
-                privacyVersion: '1.1',
+                privacyVersion: '1.2',
                 createdAt: new Date().toISOString()
             };
 
-            try {
-                await setDoc(doc(db, "candidates", candidateId), payload);
-                document.getElementById('generatedId').textContent = candidateId;
+            // 1. JAVÍTÁS: Retry loop azonosító-ütközés esetére (max. 3 próbálkozás)
+            let savedId = null;
+            for (let attempt = 0; attempt < 3 && !savedId; attempt++) {
+                const candidateId = generateSecureId();
+                try {
+                    await setDoc(doc(db, 'candidates', candidateId), {
+                        ...payloadBase,
+                        candidateId: candidateId
+                    });
+                    savedId = candidateId;
+                } catch (err) {
+                    if (err.code !== 'permission-denied') {
+                        console.error("Nem jogosultsági mentési hiba:", err);
+                        break;
+                    }
+                }
+            }
+
+            if (savedId) {
+                document.getElementById('generatedId').textContent = savedId;
                 document.getElementById('entrySection').classList.add('hidden');
                 document.getElementById('resultSection').classList.remove('hidden');
-            } catch (err) {
-                alert("Hiba történt a kérelem küldésekor.");
+            } else {
+                alert("A csatlakozási kérelem mentése sikertelen volt. Kérjük, próbáld újra pár perc múlva.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "BELÉPÉSI KÉRELEM KÜLDÉSE →";
             }

@@ -41,7 +41,6 @@
     <!-- ADMIN IRÁNYÍTÓPULT -->
     <div id="dashboardView" class="hidden space-y-6">
         
-        <!-- Fejléc és navigáció -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1E2F22] pb-4 gap-4">
             <div>
                 <h1 class="text-xl font-bold text-[#7A9E48]">A FEJ // KOORDINÁCIÓS PANEL</h1>
@@ -70,13 +69,11 @@
         <!-- 1. FÜL: TAGOK -->
         <div id="membersTab" class="space-y-6">
             
-            <!-- Függőben lévő XP kérelmek -->
             <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
                 <div id="claimsList" class="space-y-2"></div>
             </div>
 
-            <!-- Fő Tagtáblázat -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -96,13 +93,12 @@
                 </table>
             </div>
 
-            <!-- Archivált irattár és ranglétra tisztító -->
             <div class="flex flex-wrap justify-between items-center pt-2 gap-2">
                 <button id="toggleArchiveBtn" class="text-[11px] text-[#5C735E] hover:text-[#7A9E48] underline flex items-center space-x-1">
                     <span>📁 Archivált jelentkezések megtekintése (Irattár)</span>
                 </button>
                 <button id="syncLeaderboardBtn" class="text-[11px] text-[#5C735E] hover:text-amber-400 underline">
-                    🧹 Ranglétra újraszinkronizálása (Árva törölt rekordok takarítása)
+                    🧹 Ranglétra újraszinkronizálása (Árva rekordok takarítása)
                 </button>
             </div>
                 
@@ -120,7 +116,6 @@
                     <tbody id="archiveTableBody" class="divide-y divide-[#1E2F22]"></tbody>
                 </table>
             </div>
-
         </div>
 
         <!-- 2. FÜL: KÜLDETÉSEK & INFÓK -->
@@ -130,7 +125,7 @@
                     <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">📢 Hírös Hírnök // Szabad Telegram Közlemény</h3>
                     <span class="text-[10px] text-[#5C735E]">Közvetlen csatornaposzt</span>
                 </div>
-                <textarea id="freeBroadcastText" rows="2" placeholder="Írd be a közleményt a csatornára..." class="w-full"></textarea>
+                <textarea id="freeBroadcastText" rows="2" maxlength="4000" placeholder="Írd be a közleményt a csatornára..." class="w-full"></textarea>
                 <div class="flex justify-end">
                     <button id="sendBroadcastBtn" class="px-4 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase tracking-wider transition">
                         Közlemény Kiküldése →
@@ -138,13 +133,13 @@
                 </div>
             </div>
 
-            <!-- Új Küldetés Űrlap (Nyilvános leírás + Titkos Operatív Eligazítás) -->
+            <!-- Új Küldetés Űrlap -->
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-4">
                 <h3 class="text-sm font-bold text-white uppercase">// Új Küldetés Kiírása</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <input type="text" id="mCode" placeholder="Kód (pl. 001)" class="w-full font-mono">
-                    <input type="text" id="mTitle" placeholder="Küldetés címe" class="sm:col-span-2 w-full font-bold">
-                    <input type="number" id="mXp" placeholder="Jutalom XP (pl. 20)" class="w-full font-mono">
+                    <input type="text" id="mCode" placeholder="Kód (pl. 001 - max 20 kar)" maxlength="20" class="w-full font-mono">
+                    <input type="text" id="mTitle" placeholder="Küldetés címe" maxlength="100" class="sm:col-span-2 w-full font-bold">
+                    <input type="number" id="mXp" placeholder="Jutalom XP (pl. 20)" min="1" max="1000" class="w-full font-mono">
                 </div>
                 
                 <div class="space-y-2">
@@ -160,30 +155,30 @@
                         <label class="flex items-center space-x-1 p-1.5 bg-[#0B130D] border border-[#1E2F22] cursor-pointer"><input type="checkbox" name="mSkill" value="Grafika"> <span>Grafika</span></label>
                         <label class="flex items-center space-x-1 p-1.5 bg-[#0B130D] border border-[#1E2F22] cursor-pointer"><input type="checkbox" name="mSkill" value="Tudás"> <span>Tudás</span></label>
                     </div>
-                    <input type="text" id="mCustomSkill" placeholder="Egyéb speciális készség vagy eszközigény..." class="w-full mt-2">
+                    <input type="text" id="mCustomSkill" placeholder="Egyéb speciális készség vagy eszközigény..." maxlength="100" class="w-full mt-2">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Kategória & Nyilvános Leírás (Mindenki látja)</label>
+                        <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Kategória & Nyilvános Leírás (Hangulati elem)</label>
                         <select id="mCategory" class="w-full mb-2">
                             <option value="5_perc">5 Perces Küldetés</option>
                             <option value="30_perc">30 Perces Küldetés</option>
                             <option value="sejt_akcio">Sejt-Akció (Csoportos)</option>
                             <option value="fej_kuldetes">Fej-Küldetés (Kiemelt)</option>
                         </select>
-                        <textarea id="mDesc" rows="3" placeholder="Nyilvános felhívás és célkitűzés..." class="w-full"></textarea>
+                        <textarea id="mDesc" rows="3" maxlength="1000" placeholder="Nyilvános felhívás és célkitűzés..." class="w-full"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás (Csak a becsatlakozott Sejtek látják!)</label>
-                        <textarea id="mOperative" rows="4" placeholder="Pl. Pontos találkozó 18:45-kor a sikátornál. Az ágvágót a kapualjban találjátok. Jelszó: két ujj lefelé..." class="w-full border-amber-900/60"></textarea>
+                        <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Operatív Tájékoztató (Csak hangulati/belső elem)</label>
+                        <textarea id="mOperative" rows="4" maxlength="1000" placeholder="Operatív részletek..." class="w-full border-amber-900/60"></textarea>
                     </div>
                 </div>
 
                 <div class="flex justify-end">
                     <button id="publishMissionBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">
-                        ⚡ Publikálás Telegramra & Firestore-ba
+                        ⚡ Publikálás Firestore-ba & Telegramra
                     </button>
                 </div>
             </div>
@@ -198,7 +193,7 @@
                             <th class="p-3">XP</th>
                             <th class="p-3">Képességek</th>
                             <th class="p-3">Nyilvános Leírás</th>
-                            <th class="p-3">🔒 Titkos Eligazítás</th>
+                            <th class="p-3">🔒 Operatív Eligazítás</th>
                             <th class="p-3 min-w-[160px]">Jelentkezett Sejttagok</th>
                             <th class="p-3">Státusz</th>
                             <th class="p-3 text-center min-w-[140px]">Művelet</th>
@@ -219,8 +214,8 @@
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <h3 class="text-sm font-bold text-white uppercase">// Új Eszköz Rögzítése</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <input type="text" id="toolName" placeholder="Eszköz neve" class="w-full font-bold">
-                    <input type="text" id="toolLocation" placeholder="Körzet / Helyszín" class="w-full">
+                    <input type="text" id="toolName" placeholder="Eszköz neve" maxlength="100" class="w-full font-bold">
+                    <input type="text" id="toolLocation" placeholder="Körzet / Helyszín" maxlength="100" class="w-full">
                     <button id="addToolBtn" class="px-4 py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs font-bold uppercase tracking-wider transition">+ Rögzítés</button>
                 </div>
             </div>
@@ -246,7 +241,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
                     <h3 class="text-sm font-bold text-white uppercase">Dinamikus Szintmátrix & Létszám</h3>
-                    <p class="text-xs text-[#5C735E]">Húzd a <b>☰</b> jelet az átrendezéshez.</p>
+                    <p class="text-xs text-[#5C735E]">A ☰ jellel átrendezheted a szinteket. A rejtett rangok rögzítettek.</p>
                 </div>
                 <div class="flex space-x-2">
                     <button id="addLevelBtn" class="px-3 py-1.5 bg-[#1E2F22] hover:bg-[#5A7736] text-white text-xs font-bold uppercase transition">+ Új szint</button>
@@ -343,7 +338,7 @@
                     <textarea id="editMDesc" rows="2" class="w-full"></textarea>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás (Csak becsatlakozott Sejteknek)</label>
+                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Operatív Eligazítás</label>
                     <textarea id="editMOperative" rows="3" class="w-full border-amber-900/60"></textarea>
                 </div>
             </div>
@@ -353,7 +348,7 @@
         </div>
     </div>
 
-    <!-- KOMMUNIKÁCIÓS ARCHÍVUM MODAL (A FEJ FEKETE DOBOZA) -->
+    <!-- KOMMUNIKÁCIÓS ARCHÍVUM MODAL -->
     <div id="commArchiveModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
         <div class="bg-[#101912] border border-[#1E2F22] max-w-xl w-full p-6 space-y-4 text-xs font-mono">
             <div class="flex justify-between items-center border-b border-[#1E2F22] pb-2">
@@ -363,10 +358,7 @@
                 </div>
                 <button id="closeArchiveModalBtn" class="text-[#5C735E] hover:text-white font-bold text-sm">✕</button>
             </div>
-
-            <div id="archiveMessagesList" class="space-y-3 max-h-96 overflow-y-auto p-1">
-                <!-- JS tölti be az időrendi üzenetváltást -->
-            </div>
+            <div id="archiveMessagesList" class="space-y-3 max-h-96 overflow-y-auto p-1"></div>
         </div>
     </div>
 
@@ -374,7 +366,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, getDocs, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
@@ -413,7 +405,7 @@
                 }
                 document.getElementById('cfgWorkerUrl').value = WORKER_URL;
                 document.getElementById('cfgAdminSecret').value = ADMIN_SECRET;
-            } catch (e) {}
+            } catch (e) { console.warn("Worker settings load info:", e); }
         }
 
         document.getElementById('saveWorkerSettingsBtn').addEventListener('click', async () => {
@@ -460,7 +452,6 @@
             }
         }
 
-        // TELEGRAM TESZT
         document.getElementById('testTelegramBtn').addEventListener('click', async () => {
             const btn = document.getElementById('testTelegramBtn');
             btn.disabled = true;
@@ -471,7 +462,6 @@
             btn.innerText = "⚡ Telegram Teszt";
         });
 
-        // KÖZLEMÉNY
         document.getElementById('sendBroadcastBtn').addEventListener('click', async () => {
             const text = document.getElementById('freeBroadcastText').value.trim();
             if (!text) return alert("Írj be üzenetet!");
@@ -482,6 +472,7 @@
             }
         });
 
+        // 3. JAVÍTÁS: DEFAULT_RANKS utolsó két eleme hidden: true
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -508,8 +499,8 @@
             { code: "23", name: "Ökoszisztéma", cat: "Ökoszisztéma", xp: 3850, desc: "Városi hatás" },
             { code: "24", name: "Biodiverzitás", cat: "Ökoszisztéma", xp: 4350, desc: "Fajmentő mentor" },
             { code: "25", name: "Bioszféra", cat: "Ökoszisztéma", xp: 5000, desc: "Legmagasabb rang" },
-            { code: "26", name: "???", cat: "Ismeretlen", xp: 9999, desc: "„Most már kérdezhetnél.”" },
-            { code: "27", name: "A FEJ", cat: "Funkció", xp: 99999, desc: "Nem elérhető szint." }
+            { code: "26", name: "???", cat: "Ismeretlen", xp: 9999, desc: "„Most már kérdezhetnél.”", hidden: true },
+            { code: "27", name: "A FEJ", cat: "Funkció", xp: 99999, desc: "Nem elérhető szint.", hidden: true }
         ];
 
         let activeRanks = [...DEFAULT_RANKS];
@@ -518,7 +509,7 @@
             let currentRank = activeRanks[0] || DEFAULT_RANKS[0];
             const sorted = [...activeRanks].sort((a, b) => Number(a.xp) - Number(b.xp));
             for (let r of sorted) {
-                if (r.code === "26" || r.code === "27") continue;
+                if (r.hidden) continue;
                 if (xp >= Number(r.xp)) currentRank = r;
             }
             return currentRank;
@@ -555,17 +546,21 @@
         function checkXpOrder() {
             let isBroken = false;
             for (let i = 0; i < activeRanks.length - 1; i++) {
-                if (activeRanks[i].code === "26" || activeRanks[i].code === "27") continue;
+                if (activeRanks[i].hidden || activeRanks[i+1].hidden) continue;
                 if (Number(activeRanks[i].xp) > Number(activeRanks[i+1].xp)) { isBroken = true; break; }
             }
             document.getElementById('xpWarning').classList.toggle('hidden', !isBroken);
             return isBroken;
         }
 
+        // Rangkódok újraszámozása: a rejtettek nem tolódnak el!
         function renumberRanks() {
-            activeRanks.forEach((r, idx) => {
-                const num = idx + 1;
-                r.code = num < 10 ? `0${num}` : `${num}`;
+            let visibleIdx = 1;
+            activeRanks.forEach(r => {
+                if (!r.hidden) {
+                    r.code = visibleIdx < 10 ? `0${visibleIdx}` : `${visibleIdx}`;
+                    visibleIdx++;
+                }
             });
             renderEvoTable();
             checkXpOrder();
@@ -586,19 +581,19 @@
                 const count = rankCounts[r.code] || 0;
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-[#0B130D] transition";
-                tr.draggable = true;
+                tr.draggable = !r.hidden;
                 tr.dataset.index = idx;
                 tr.innerHTML = `
-                    <td class="p-2 text-center drag-handle text-[#5C735E] hover:text-[#7A9E48] text-base">☰</td>
+                    <td class="p-2 text-center drag-handle text-[#5C735E] hover:text-[#7A9E48] text-base">${r.hidden ? '🔒' : '☰'}</td>
                     <td class="p-2 font-mono font-bold text-[#7A9E48] text-center">${escapeHtml(r.code)}</td>
-                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${escapeHtml(r.name)}" data-field="name" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${escapeHtml(r.name)}" data-field="name" data-idx="${idx}" ${r.hidden ? 'readonly' : ''}></td>
                     <td class="p-2"><input type="text" class="w-full text-[#5C735E]" value="${escapeHtml(r.cat)}" data-field="cat" data-idx="${idx}"></td>
-                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${Number(r.xp)}" data-field="xp" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${Number(r.xp)}" data-field="xp" data-idx="${idx}" ${r.hidden ? 'readonly' : ''}></td>
                     <td class="p-2 text-center font-mono">
                         ${count > 0 ? `<span class="px-2 py-0.5 bg-[#1E2F22] text-[#7A9E48] font-bold text-xs">${count} fő</span>` : `<span class="text-[#5C735E] text-xs">0</span>`}
                     </td>
                     <td class="p-2"><input type="text" class="w-full" value="${escapeHtml(r.desc)}" data-field="desc" data-idx="${idx}"></td>
-                    <td class="p-2 text-center"><button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button></td>
+                    <td class="p-2 text-center">${r.hidden ? '-' : `<button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button>`}</td>
                 `;
                 evoTbody.appendChild(tr);
             });
@@ -620,7 +615,7 @@
                     e.preventDefault();
                     tr.classList.remove('drop-target');
                     const targetIdx = Number(tr.dataset.index);
-                    if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
+                    if (dragSrcIdx !== null && dragSrcIdx !== targetIdx && !activeRanks[targetIdx].hidden) {
                         const movedItem = activeRanks.splice(dragSrcIdx, 1)[0];
                         activeRanks.splice(targetIdx, 0, movedItem);
                         renumberRanks();
@@ -649,22 +644,26 @@
             });
         }
 
+        // 3. JAVÍTÁS: Új szint mindig a rejtettek elé kerül
         document.getElementById('addLevelBtn').addEventListener('click', () => {
-            const nextNum = activeRanks.length + 1;
-            activeRanks.push({
-                code: nextNum < 10 ? `0${nextNum}` : `${nextNum}`,
-                name: `Új Szint ${nextNum}`,
-                cat: "Fejlődés",
-                xp: (activeRanks[activeRanks.length - 1]?.xp || 0) + 500,
-                desc: "Küldetéssel elérhető állapot"
+            const firstHidden = activeRanks.findIndex(r => r.hidden);
+            const at = firstHidden === -1 ? activeRanks.length : firstHidden;
+            const visible = activeRanks.filter(r => !r.hidden);
+            const baseXp = visible.length ? Number(visible[visible.length - 1].xp) : 0;
+            
+            activeRanks.splice(at, 0, {
+                code: '',
+                name: 'Új szint',
+                cat: 'Fejlődés',
+                xp: baseXp + 500,
+                desc: 'Küldetéssel elérhető állapot'
             });
             renumberRanks();
         });
 
-        // XP Sorrend Blokkoló Mentés
         document.getElementById('saveEvoBtn').addEventListener('click', async () => {
             if (checkXpOrder()) {
-                alert("⛔ MENTÉS MEGTAGADVA!\n\nAz XP értékek nem növekvő sorrendben vannak. Kérjük javítsd az értékeket, mielőtt felsugárzod a hálózatba!");
+                alert("⛔ MENTÉS MEGTAGADVA!\n\nAz XP értékek nem növekvő sorrendben vannak!");
                 return;
             }
 
@@ -679,7 +678,7 @@
             finally { btn.disabled = false; btn.innerText = "⚡ Felsugárzás (Mentés)"; }
         });
 
-        // KÜLDETÉSEK PUBLIKÁLÁSA (Nyilvános + Titkos Operatív részlettel)
+        // 4. JAVÍTÁS: Küldetés kód regex + felülírás védelem + sorrendbiztos mentés
         document.getElementById('publishMissionBtn').addEventListener('click', async () => {
             const code = document.getElementById('mCode').value.trim();
             const title = document.getElementById('mTitle').value.trim();
@@ -688,30 +687,45 @@
             const desc = document.getElementById('mDesc').value.trim();
             const operative = document.getElementById('mOperative').value.trim();
 
+            if (!/^[A-Za-z0-9_-]{1,20}$/.test(code)) {
+                return alert("A kód csak betű, szám, aláhúzás és kötőjel lehet (1-20 karakter)!");
+            }
+            if (!title || !desc) return alert("Töltsd ki az adatokat!");
+
+            const btn = document.getElementById('publishMissionBtn');
+            btn.disabled = true;
+            btn.innerText = "ELLENŐRZÉS...";
+
+            const ref = doc(db, 'missions', code);
+            const existSnap = await getDoc(ref);
+            if (existSnap.exists()) {
+                btn.disabled = false;
+                btn.innerText = "⚡ Publikálás Firestore-ba & Telegramra";
+                return alert("Ilyen kódú küldetés már létezik!");
+            }
+
             const checkedSkills = Array.from(document.querySelectorAll('input[name="mSkill"]:checked')).map(cb => cb.value);
             const customSkill = document.getElementById('mCustomSkill').value.trim();
             if (customSkill) checkedSkills.push(customSkill);
             const finalSkillsStr = checkedSkills.join(', ') || 'Mindenki';
 
-            if (!code || !title || !desc) return alert("Töltsd ki az adatokat!");
-
-            const btn = document.getElementById('publishMissionBtn');
-            btn.disabled = true;
-            btn.innerText = "PUBLIKÁLÁS...";
-
             try {
-                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)}</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${escapeTg(finalSkillsStr)}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
-                const tgRes = await callBackend("/api/telegram-post", { text: tgMsg });
-                const tgMsgId = tgRes && tgRes.ok ? tgRes.result.message_id : null;
-
-                await setDoc(doc(db, "missions", code), {
+                // Előbb Firestore mentés (nem lesz árva Telegram poszt)
+                await setDoc(ref, {
                     code, title, xp, category, skills: finalSkillsStr, desc,
-                    operativeBriefing: operative, // Csak a becsatlakozott Sejtek látják!
+                    operativeBriefing: operative,
                     status: "open",
-                    tgMessageId: tgMsgId || null,
+                    tgMessageId: null,
                     attendees: [],
                     createdAt: new Date().toISOString()
                 });
+
+                // Utána Telegram poszt a Workerrel
+                const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)}</b>\n\n<b>${escapeTg(title).toUpperCase()}</b>\nKategória: ${category}\nSzükséges: ${escapeTg(finalSkillsStr)}\nJutalom: +${xp} XP\n\n${escapeTg(desc)}`;
+                const tgRes = await callBackend("/api/telegram-post", { text: tgMsg });
+                if (tgRes && tgRes.ok) {
+                    await updateDoc(ref, { tgMessageId: tgRes.result.message_id });
+                }
 
                 alert("✓ Küldetés mentve és publikálva!");
                 document.getElementById('mCode').value = '';
@@ -721,7 +735,7 @@
                 document.getElementById('mCustomSkill').value = '';
                 document.querySelectorAll('input[name="mSkill"]').forEach(cb => cb.checked = false);
             } catch (e) { alert("Hiba: " + e.message); } 
-            finally { btn.disabled = false; btn.innerText = "⚡ Publikálás Telegramra & Firestore-ba"; }
+            finally { btn.disabled = false; btn.innerText = "⚡ Publikálás Firestore-ba & Telegramra"; }
         });
 
         function loadMissions() {
@@ -748,11 +762,11 @@
                         <td class="p-3 max-w-xs"><div class="flex flex-wrap items-center gap-1">${attendeesHtml}</div></td>
                         <td class="p-3"><span class="px-2 py-0.5 ${m.status === 'open' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-red-950 text-red-400'} font-bold uppercase">${m.status === 'open' ? 'NYITOTT' : 'LEZÁRT'}</span></td>
                         <td class="p-3 text-center space-x-1">
-                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${d.id}" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-desc="${escapeHtml(m.desc)}" data-operative="${escapeHtml(m.operativeBriefing || '')}" data-xp="${m.xp}" data-cat="${m.category}" data-tgid="${m.tgMessageId || ''}">Módosítás</button>
+                            <button class="edit-m-btn text-[11px] text-[#7A9E48] hover:underline" data-id="${escapeHtml(d.id)}" data-code="${escapeHtml(m.code)}" data-title="${escapeHtml(m.title)}" data-desc="${escapeHtml(m.desc)}" data-operative="${escapeHtml(m.operativeBriefing || '')}" data-xp="${Number(m.xp)}" data-cat="${escapeHtml(m.category)}" data-tgid="${escapeHtml(m.tgMessageId || '')}">Módosítás</button>
                             <span class="text-[#1E2F22]">|</span>
-                            <button class="toggle-m-btn text-[11px] text-[#5C735E] hover:underline" data-id="${d.id}" data-status="${m.status}">${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}</button>
+                            <button class="toggle-m-btn text-[11px] text-[#5C735E] hover:underline" data-id="${escapeHtml(d.id)}" data-status="${escapeHtml(m.status)}">${m.status === 'open' ? 'Lezárás' : 'Megnyitás'}</button>
                             <span class="text-[#1E2F22]">|</span>
-                            <button class="delete-m-btn text-[11px] text-red-400 hover:underline" data-id="${d.id}" data-tgid="${m.tgMessageId || ''}">Törlés</button>
+                            <button class="delete-m-btn text-[11px] text-red-400 hover:underline" data-id="${escapeHtml(d.id)}" data-tgid="${escapeHtml(m.tgMessageId || '')}">Törlés</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -789,10 +803,9 @@
                         }
                     });
                 });
-            });
+            }, (err) => console.warn('Küldetés figyelő hiba:', err.code));
         }
 
-        // Küldetés Módosítás Mentése
         document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
             const docId = document.getElementById('editMissionDocId').value;
             const tgId = document.getElementById('editMissionTgId').value;
@@ -815,7 +828,7 @@
             }
 
             document.getElementById('editMissionModal').classList.add('hidden');
-            alert("✓ Küldetés sikeresen módosítva a weben és a Telegramon is!");
+            alert("✓ Küldetés sikeresen módosítva!");
         });
 
         document.getElementById('closeEditModalBtn').addEventListener('click', () => {
@@ -845,8 +858,8 @@
                         <td class="p-3 font-mono">${escapeHtml(t.holder)}</td>
                         <td class="p-3"><span class="px-2 py-0.5 ${t.status === 'available' ? 'bg-[#1E2F22] text-emerald-400' : 'bg-amber-950 text-amber-400'} uppercase font-bold">${t.status === 'available' ? 'ELÉRHETŐ' : 'HASZNÁLATBAN'}</span></td>
                         <td class="p-3 text-center space-x-2">
-                            ${t.status === 'in_use' ? `<button class="release-tool-btn text-xs text-[#7A9E48] hover:underline" data-id="${d.id}">Visszavétel</button> <span class="text-[#1E2F22]">|</span>` : ''}
-                            <button class="del-tool-btn text-xs text-red-400 hover:underline" data-id="${d.id}">Törlés</button>
+                            ${t.status === 'in_use' ? `<button class="release-tool-btn text-xs text-[#7A9E48] hover:underline" data-id="${escapeHtml(d.id)}">Visszavétel</button> <span class="text-[#1E2F22]">|</span>` : ''}
+                            <button class="del-tool-btn text-xs text-red-400 hover:underline" data-id="${escapeHtml(d.id)}">Törlés</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -864,10 +877,10 @@
                         if (confirm("Törlöd?")) await deleteDoc(doc(db, "tools", e.target.dataset.id));
                     });
                 });
-            });
+            }, (err) => console.warn('Eszköz figyelő hiba:', err.code));
         }
 
-        // ESZKÖZIGÉNYLÉSEK
+        // 5. JAVÍTÁS: Eszközigénylés atomi tranzakcióval toolId alapján
         function loadToolRequests() {
             onSnapshot(query(collection(db, "tool_requests"), where("status", "==", "pending")), (snap) => {
                 const sec = document.getElementById('toolRequestsSection');
@@ -896,8 +909,11 @@
                             <div class="text-[10px] text-[#5C735E]">Indoklás: "${escapeHtml(r.message || 'Nincs')}"</div>
                         </div>
                         <div class="space-x-2">
-                            <button class="accept-tool-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${d.id}" data-tname="${escapeHtml(r.toolName)}" data-cid="${escapeHtml(r.candidateId)}">Jóváhagyás</button>
-                            <button class="reject-tool-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">Elutasítás</button>
+                            <button class="accept-tool-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" 
+                                data-id="${escapeHtml(d.id)}" data-toolid="${escapeHtml(r.toolId)}" data-cid="${escapeHtml(r.candidateId)}">
+                                Jóváhagyás
+                            </button>
+                            <button class="reject-tool-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${escapeHtml(d.id)}">Elutasítás</button>
                         </div>
                     `;
                     list.appendChild(div);
@@ -906,11 +922,24 @@
                 list.querySelectorAll('.accept-tool-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
+                        btn.disabled = true;
                         const note = prompt("Üzenet az átvételhez:", "Megbeszéltek szerint átvehető.");
-                        const tSnap = await getDocs(query(collection(db, "tools"), where("name", "==", b.tname)));
-                        if (!tSnap.empty) await updateDoc(doc(db, "tools", tSnap.docs[0].id), { status: "in_use", holder: b.cid });
-                        await updateDoc(doc(db, "tool_requests", b.id), { status: "approved", adminNote: note || "Jóváhagyva" });
-                        alert("✓ Eszközigénylés jóváhagyva!");
+
+                        try {
+                            await runTransaction(db, async (tx) => {
+                                const toolRef = doc(db, 'tools', b.toolid);
+                                const tool = await tx.get(toolRef);
+                                if (!tool.exists() || tool.data().status !== 'available') {
+                                    throw new Error('Az eszköz már nem elérhető!');
+                                }
+                                tx.update(toolRef, { status: 'in_use', holder: b.cid });
+                                tx.update(doc(db, 'tool_requests', b.id), { status: 'approved', adminNote: note || 'Jóváhagyva' });
+                            });
+                            alert("✓ Eszközigénylés atomian jóváhagyva!");
+                        } catch (err) {
+                            alert("Hiba: " + err.message);
+                            btn.disabled = false;
+                        }
                     });
                 });
 
@@ -920,6 +949,32 @@
                         await updateDoc(doc(db, "tool_requests", e.target.dataset.id), { status: "rejected", adminNote: note || "Elutasítva" });
                     });
                 });
+            }, (err) => console.warn('Eszközigénylés figyelő hiba:', err.code));
+        }
+
+        // 2. JAVÍTÁS: Atomi XP-jóváhagyás (runTransaction)
+        async function changeXp(cid, diff, claimId) {
+            await runTransaction(db, async (tx) => {
+                const candRef = doc(db, 'candidates', cid);
+                const cand = await tx.get(candRef);
+                let claimRef = null, claim = null;
+
+                if (claimId) {
+                    claimRef = doc(db, 'xp_claims', claimId);
+                    claim = await tx.get(claimRef);
+                    if (!claim.exists() || claim.data().status !== 'pending') return;
+                }
+
+                if (!cand.exists()) throw new Error('A tag már nem létezik.');
+
+                const add = claim ? claim.data().xp : diff;
+                const newXp = Math.max(0, (cand.data().xp || 0) + add);
+                const rank = calculateRank(newXp);
+
+                tx.update(candRef, { xp: newXp, levelCode: rank.code, levelName: rank.name });
+                tx.set(doc(db, 'public_members', cid), { candidateId: cid, levelCode: rank.code, levelName: rank.name, xp: newXp });
+
+                if (claimRef) tx.update(claimRef, { status: 'approved' });
             });
         }
 
@@ -951,8 +1006,8 @@
                             <span class="text-white font-bold">+${Number(c.xp)} XP</span>-t: <span class="text-white">${escapeHtml(c.missionTitle)}</span>
                         </div>
                         <div class="space-x-2">
-                            <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${d.id}" data-cid="${escapeHtml(c.candidateId)}" data-xp="${c.xp}">Jóváhagyás</button>
-                            <button class="reject-claim-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${d.id}">Elutasítás</button>
+                            <button class="accept-claim-btn px-2 py-1 bg-[#5A7736] hover:bg-[#7A9E48] text-white font-bold text-[10px] uppercase" data-id="${escapeHtml(d.id)}" data-cid="${escapeHtml(c.candidateId)}">Jóváhagyás</button>
+                            <button class="reject-claim-btn px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 text-[10px] uppercase" data-id="${escapeHtml(d.id)}">Elutasítás</button>
                         </div>
                     `;
                     list.appendChild(div);
@@ -961,17 +1016,13 @@
                 list.querySelectorAll('.accept-claim-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
-                        const xpToAdd = parseInt(b.xp) || 0;
-                        const q = query(collection(db, "candidates"), where("candidateId", "==", b.cid));
-                        const snap = await getDocs(q);
-                        if (!snap.empty) {
-                            const cDoc = snap.docs[0];
-                            const newXp = (cDoc.data().xp || 0) + xpToAdd;
-                            const newRank = calculateRank(newXp);
-                            await updateDoc(doc(db, "candidates", cDoc.id), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
-                            await setDoc(doc(db, "public_members", b.cid), { candidateId: b.cid, levelCode: newRank.code, levelName: newRank.name, xp: newXp });
+                        btn.disabled = true;
+                        try {
+                            await changeXp(b.cid, 0, b.id);
+                        } catch (err) {
+                            alert("Hiba: " + err.message);
+                            btn.disabled = false;
                         }
-                        await updateDoc(doc(db, "xp_claims", b.id), { status: "approved" });
                     });
                 });
 
@@ -980,7 +1031,7 @@
                         await updateDoc(doc(db, "xp_claims", e.target.dataset.id), { status: "rejected" }); 
                     });
                 });
-            });
+            }, (err) => console.warn('XP claim figyelő hiba:', err.code));
         }
 
         // AUTH & TAGOK
@@ -998,9 +1049,15 @@
                 loadWorkerSettings();
 
                 onSnapshot(doc(db, "settings", "evolution"), (snap) => {
-                    if (snap.exists() && snap.data().ranks) activeRanks = snap.data().ranks;
+                    if (snap.exists() && snap.data().ranks) {
+                        // 3. JAVÍTÁS: Firestore-ból betöltött szinteknél a hidden flag pótlása
+                        activeRanks = snap.data().ranks.map(r => ({
+                            ...r,
+                            hidden: r.hidden ?? ['???', 'A FEJ'].includes(r.name)
+                        }));
+                    }
                     renderEvoTable();
-                });
+                }, (err) => console.warn('Evo figyelő hiba:', err.code));
 
                 loadCandidates();
                 loadMissions();
@@ -1024,7 +1081,7 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-        // TAGLISTA, VÁLTOZÁSJELZŐ LÁMPA ÉS KOMMUNIKÁCIÓ
+        // 6. JAVÍTÁS: Tag jóváhagyása writeBatch-el
         function loadCandidates() {
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
@@ -1062,8 +1119,8 @@
                             <td class="p-2">${escapeHtml(data.fullName || 'Névtelen')} (${escapeHtml(data.email)})</td>
                             <td class="p-2 text-red-400 font-bold uppercase">Archiválva</td>
                             <td class="p-2 text-center space-x-2">
-                                <button class="restore-btn text-xs text-[#7A9E48] hover:underline" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${data.xp || 0}">Visszaállítás</button>
-                                <button class="hard-del-btn text-xs text-red-400 hover:underline" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}">Végleges törlés</button>
+                                <button class="restore-btn text-xs text-[#7A9E48] hover:underline" data-id="${escapeHtml(docSnap.id)}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${Number(data.xp || 0)}">Visszaállítás</button>
+                                <button class="hard-del-btn text-xs text-red-400 hover:underline" data-id="${escapeHtml(docSnap.id)}" data-cid="${escapeHtml(data.candidateId)}">Végleges törlés</button>
                             </td>
                         `;
                         archTbody.appendChild(tr);
@@ -1081,10 +1138,9 @@
                         ? `<span class="px-1.5 py-0.5 bg-[#1E2F22] text-emerald-400 font-mono text-[10px] rounded">✓ ${escapeHtml(data.telegramUsername || data.telegramUserId)}</span>`
                         : `<span class="text-[#5C735E] text-[10px] font-mono">Nincs bekötve</span>`;
 
-                    // Változásjelző Lámpa a megjegyzés mellett
                     const isProfileUpdated = data.profileUpdated === true;
                     const updateLamp = isProfileUpdated 
-                        ? `<button class="clear-lamp-btn inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse mb-1" data-id="${docSnap.id}">🔴 MÓDOSÍTOTT ADATOK [Megnézve]</button>` 
+                        ? `<button class="clear-lamp-btn inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse mb-1" data-id="${escapeHtml(docSnap.id)}">🔴 MÓDOSÍTOTT ADATOK [Megnézve]</button>` 
                         : '';
 
                     const noteCell = `
@@ -1094,13 +1150,12 @@
                         </div>
                     `;
 
-                    // Kétirányú kommunikáció + Archívum gomb
                     const commBox = `
                         <div class="text-[10px] space-y-1">
                             ${data.adminMessage ? `<div class="text-emerald-400 truncate" title="${escapeHtml(data.adminMessage)}"><b>A Fej:</b> "${escapeHtml(data.adminMessage)}"</div>` : ''}
                             ${data.memberReply ? `<div class="text-amber-400 truncate" title="${escapeHtml(data.memberReply)}"><b>Tag:</b> "${escapeHtml(data.memberReply)}"</div>` : ''}
                             <div class="flex gap-2 pt-0.5">
-                                <button class="send-msg-btn text-[#7A9E48] hover:underline font-bold" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}">✉️ Utasítás</button>
+                                <button class="send-msg-btn text-[#7A9E48] hover:underline font-bold" data-id="${escapeHtml(docSnap.id)}" data-cid="${escapeHtml(data.candidateId)}">✉️ Utasítás</button>
                                 <button class="open-archive-btn text-[#5C735E] hover:text-white underline" data-cid="${escapeHtml(data.candidateId)}">📜 Napló</button>
                             </div>
                         </div>
@@ -1128,29 +1183,27 @@
                         <td class="p-3 flex flex-wrap gap-1 items-center">
                             ${isPending ? `
                                 <button class="approve-btn bg-[#5A7736] hover:bg-[#7A9E48] text-white px-2 py-1 text-[10px] uppercase font-bold" 
-                                    data-id="${docSnap.id}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">
+                                    data-id="${escapeHtml(docSnap.id)}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">
                                     Jóváhagyás
                                 </button>
                             ` : `
-                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="10">+10</button>
-                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="50">+50</button>
-                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-xp="${xp}" data-diff="-10">-10</button>
-                                <button class="resend-btn text-[10px] text-sky-400 hover:underline px-1" data-id="${docSnap.id}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">Link újraküldése</button>
-                                <button class="archive-btn text-[10px] text-amber-400 hover:underline px-1" data-id="${docSnap.id}" data-cid="${escapeHtml(data.candidateId)}" data-tgid="${data.telegramUserId || ''}">Archiválás</button>
+                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-cid="${escapeHtml(data.candidateId)}" data-diff="10">+10</button>
+                                <button class="mod-xp-btn bg-[#1E2F22] hover:bg-[#5A7736] text-white px-1.5 py-1 text-[10px]" data-cid="${escapeHtml(data.candidateId)}" data-diff="50">+50</button>
+                                <button class="mod-xp-btn bg-[#2a1717] hover:bg-[#8b2626] text-red-200 px-1.5 py-1 text-[10px]" data-cid="${escapeHtml(data.candidateId)}" data-diff="-10">-10</button>
+                                <button class="resend-btn text-[10px] text-sky-400 hover:underline px-1" data-id="${escapeHtml(docSnap.id)}" data-email="${escapeHtml(data.email)}" data-cid="${escapeHtml(data.candidateId)}" data-name="${escapeHtml(data.fullName || '')}">Link újraküldése</button>
+                                <button class="archive-btn text-[10px] text-amber-400 hover:underline px-1" data-id="${escapeHtml(docSnap.id)}" data-cid="${escapeHtml(data.candidateId)}" data-tgid="${escapeHtml(data.telegramUserId || '')}">Archiválás</button>
                             `}
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                // Változásjelző lámpa lekapcsolása
                 document.querySelectorAll('.clear-lamp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         await updateDoc(doc(db, "candidates", e.target.dataset.id), { profileUpdated: false });
                     });
                 });
 
-                // Kommunikációs napló megnyitása
                 document.querySelectorAll('.open-archive-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const cid = e.target.dataset.cid;
@@ -1179,33 +1232,35 @@
                                 list.appendChild(div);
                             });
                         }
-
                         document.getElementById('commArchiveModal').classList.remove('hidden');
                     });
                 });
 
-                // Utasítás küldése (és naplózása a messageHistory-ba)
+                // Utasítás küldése (max 200 elem tárolása a doksi mérethatár miatt)
                 document.querySelectorAll('.send-msg-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
-                        const msg = prompt(`Közvetlen utasítás küldése ${b.cid} részére:`);
+                        const msg = prompt(`Közvetlen utasítás küldése ${b.cid} részére (max 500 kar):`);
                         if (!msg) return;
 
+                        const cand = candidatesCache.find(c => c.candidateId === b.cid);
+                        const existingHistory = cand?.messageHistory || [];
+                        const trimmedHistory = existingHistory.slice(-199); // utolsó 199 megőrzése
+
                         const now = new Date().toISOString();
+                        const newEntry = { sender: 'fej', text: msg.trim().slice(0, 500), at: now };
+                        trimmedHistory.push(newEntry);
+
                         await updateDoc(doc(db, "candidates", b.id), {
-                            adminMessage: msg.trim(),
+                            adminMessage: msg.trim().slice(0, 500),
                             adminMessageAt: now,
-                            messageHistory: arrayUnion({
-                                sender: 'fej',
-                                text: msg.trim(),
-                                at: now
-                            })
+                            messageHistory: trimmedHistory
                         });
-                        alert(`✓ Utasítás elküldve és naplózva a fekete dobozba!`);
+                        alert(`✓ Utasítás elküldve és naplózva!`);
                     });
                 });
 
-                // JÓVÁHAGYÁS
+                // 6. JAVÍTÁS: Jóváhagyás batch írással
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -1217,18 +1272,24 @@
                         });
 
                         if (res && res.ok) {
-                            await updateDoc(doc(db, "candidates", b.id), {
-                                status: 'approved',
-                                connectToken: res.connectToken,
-                                activationToken: res.activationToken,
-                                approvedAt: new Date().toISOString()
-                            });
-
-                            await setDoc(doc(db, "public_members", b.cid), {
-                                candidateId: b.cid, levelCode: '01', levelName: 'Spóra', xp: 0
-                            });
-
-                            alert(`✓ ${b.cid} jóváhagyva! A levél kiküldve.`);
+                            try {
+                                const batch = writeBatch(db);
+                                batch.update(doc(db, 'candidates', b.id), {
+                                    status: 'approved',
+                                    connectToken: res.connectToken,
+                                    approvedAt: new Date().toISOString()
+                                });
+                                batch.set(doc(db, 'public_members', b.cid), {
+                                    candidateId: b.cid,
+                                    levelCode: '01',
+                                    levelName: 'Spóra',
+                                    xp: 0
+                                });
+                                await batch.commit();
+                                alert(`✓ ${b.cid} jóváhagyva! A levél kiküldve.`);
+                            } catch (writeErr) {
+                                alert("Hiba a Firestore mentés során: " + writeErr.message);
+                            }
                         } else {
                             btn.disabled = false;
                             btn.innerText = "Jóváhagyás";
@@ -1236,7 +1297,6 @@
                     });
                 });
 
-                // LINK ÚJRAKÜLDÉSE
                 document.querySelectorAll('.resend-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -1252,7 +1312,6 @@
                         if (res && res.ok) {
                             await updateDoc(doc(db, "candidates", b.id), {
                                 connectToken: res.connectToken,
-                                activationToken: res.activationToken,
                                 resentAt: new Date().toISOString()
                             });
                             alert(`✓ Új link és kód elküldve a tagnak!`);
@@ -1262,7 +1321,6 @@
                     });
                 });
 
-                // ARCHIVÁLÁS
                 document.querySelectorAll('.archive-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         if (confirm("Archiválod ezt a tagot?")) {
@@ -1296,29 +1354,27 @@
                     });
                 });
 
+                // 2. JAVÍTÁS: XP módosítás tranzakcióval (nincs felülírás)
                 document.querySelectorAll('.mod-xp-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
-                        const currentXp = parseInt(b.xp) || 0;
-                        const diff = parseInt(b.diff) || 0;
-                        const newXp = Math.max(0, currentXp + diff);
-                        const newRank = calculateRank(newXp);
-
-                        await updateDoc(doc(db, "candidates", b.id), { xp: newXp, levelCode: newRank.code, levelName: newRank.name });
-                        await setDoc(doc(db, "public_members", b.cid), {
-                            candidateId: b.cid, levelCode: newRank.code, levelName: newRank.name, xp: newXp
-                        });
+                        btn.disabled = true;
+                        try {
+                            await changeXp(b.cid, parseInt(b.diff) || 0, null);
+                        } catch (err) {
+                            alert("Hiba az XP módosításakor: " + err.message);
+                        } finally {
+                            btn.disabled = false;
+                        }
                     });
                 });
-            });
+            }, (err) => console.warn('Tag figyelő hiba:', err.code));
         }
 
-        // Kommunikációs napló bezárása
         document.getElementById('closeArchiveModalBtn').addEventListener('click', () => {
             document.getElementById('commArchiveModal').classList.add('hidden');
         });
 
-        // Ranglétra újraszinkronizáló
         document.getElementById('syncLeaderboardBtn').addEventListener('click', async () => {
             if (!confirm("Újraszinkronizálod a ranglétrát?")) return;
             const pubSnap = await getDocs(collection(db, "public_members"));
