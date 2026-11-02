@@ -26,16 +26,16 @@
 </head>
 <body class="p-4 md:p-8 max-w-7xl mx-auto">
     
-    <!-- LOGIN SZEKCIÓ -->
+    <!-- LOGIN SZEKCIÓ (Fizikai újratöltés elleni védelemmel) -->
     <div id="loginView" class="max-w-md mx-auto my-20 p-6 bg-[#101912] border border-[#1E2F22] space-y-4">
         <div class="text-xs uppercase tracking-widest text-[#7A9E48] font-bold text-center">// HÁTTÉR RENDSZER</div>
         <h1 class="text-lg font-bold text-white uppercase tracking-wider text-center">A FEJ // AZONOSÍTÁS</h1>
-        <form id="loginForm" class="space-y-3" autocomplete="off">
+        <form id="loginForm" onsubmit="event.preventDefault(); return false;" class="space-y-3" autocomplete="off">
             <input type="email" id="adminEmail" placeholder="admin e-mail cím" required autocomplete="off" class="w-full">
             <input type="password" id="adminPass" placeholder="Jelszó" required autocomplete="current-password" class="w-full">
-            <button type="submit" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">Belépés</button>
+            <button type="submit" id="loginBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">Belépés</button>
         </form>
-        <div id="loginErrorMsg" class="text-xs text-red-400 font-mono text-center min-h-[16px]"></div>
+        <div id="loginErrorMsg" class="text-xs text-red-400 font-mono text-center min-h-[16px] leading-relaxed"></div>
     </div>
 
     <!-- ADMIN IRÁNYÍTÓPULT -->
@@ -70,11 +70,13 @@
         <!-- 1. FÜL: TAGOK -->
         <div id="membersTab" class="space-y-6">
             
+            <!-- Függőben lévő XP kérelmek -->
             <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
                 <div id="claimsList" class="space-y-2"></div>
             </div>
 
+            <!-- Fő Tagtáblázat -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -94,6 +96,7 @@
                 </table>
             </div>
 
+            <!-- Archivált irattár és ranglétra tisztító -->
             <div class="flex flex-wrap justify-between items-center pt-2 gap-2">
                 <button id="toggleArchiveBtn" class="text-[11px] text-[#5C735E] hover:text-[#7A9E48] underline flex items-center space-x-1">
                     <span>📁 Archivált jelentkezések megtekintése (Irattár)</span>
@@ -237,7 +240,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: EVOLÚCIÓS XP (X, Y, Z Titkos Szintekkel) -->
+        <!-- 4. FÜL: EVOLÚCIÓS XP -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
@@ -274,7 +277,7 @@
             </div>
         </div>
 
-        <!-- 5. FÜL: BEÁLLÍTÁSOK & ÁLLAPOT (LETISZTÍTVA) -->
+        <!-- 5. FÜL: BEÁLLÍTÁSOK & ÁLLAPOT -->
         <div id="settingsTab" class="hidden space-y-6">
             <div class="max-w-xl bg-[#101912] border border-[#1E2F22] p-6 space-y-5">
                 <div>
@@ -297,7 +300,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-[#5C735E]">WORKER STÁTUSZ:</span>
-                        <span id="workerStatusIndicator" class="text-emerald-400 font-bold">✓ CSATLAKOZVA</span>
+                        <span id="workerStatusIndicator" class="text-emerald-400 font-bold">✓ AKTÍV</span>
                     </div>
                 </div>
 
@@ -348,11 +351,11 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Nyilvános Leírás (Telegramon is módosul, ha megváltozik)</label>
+                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Nyilvános Leírás</label>
                     <textarea id="editMDesc" rows="2" autocomplete="off" class="w-full"></textarea>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás (Csak a jóváhagyott Sejteknek)</label>
+                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás</label>
                     <textarea id="editMOperative" rows="3" autocomplete="off" class="w-full border-amber-900/60"></textarea>
                 </div>
             </div>
@@ -395,6 +398,94 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // 1. BEJELENTKEZÉS KEZELŐJE AZONNAL A LEGELSŐ HELYEN
+        const loginForm = document.getElementById('loginForm');
+        const adminEmailInput = document.getElementById('adminEmail');
+        const adminPassInput = document.getElementById('adminPass');
+        const loginErrorMsg = document.getElementById('loginErrorMsg');
+        const loginBtn = document.getElementById('loginBtn');
+
+        async function handleAdminLogin(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            const email = adminEmailInput.value.trim().toLowerCase();
+            const pass = adminPassInput.value;
+
+            if (!email || !pass) {
+                loginErrorMsg.className = "text-xs text-red-400 font-mono text-center min-h-[16px]";
+                loginErrorMsg.textContent = "Kérjük töltsd ki mindkét mezőt!";
+                return;
+            }
+
+            loginErrorMsg.className = "text-xs text-amber-400 font-mono text-center min-h-[16px]";
+            loginErrorMsg.textContent = "Azonosítás folyamatban...";
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.innerText = "ELLENŐRZÉS...";
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                loginErrorMsg.className = "text-xs text-red-400 font-mono text-center min-h-[16px]";
+                loginErrorMsg.textContent = "Sikertelen azonosítás: " + err.message;
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = "Belépés";
+                }
+            }
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', handleAdminLogin);
+        }
+
+        // 2. AUTH FIGYELŐ
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userEmail = (user.email || '').toLowerCase();
+                if (userEmail !== "zoldsejt@gmail.com") {
+                    loginErrorMsg.className = "text-xs text-red-400 font-mono text-center min-h-[16px]";
+                    loginErrorMsg.textContent = `Hozzáférés megtagadva. (${userEmail} nem admin fiók)`;
+                    signOut(auth);
+                    return;
+                }
+
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('dashboardView').classList.remove('hidden');
+                
+                loadWorkerSettings();
+
+                onSnapshot(doc(db, "settings", "evolution"), (snap) => {
+                    if (snap.exists() && snap.data().ranks) {
+                        activeRanks = snap.data().ranks.map(r => ({
+                            ...r,
+                            hidden: r.hidden ?? ['X', 'Y', 'Z', '???', 'A FEJ'].includes(r.code) || ['???', 'A FEJ', 'AZ ARC', 'HOMLOKLEBENY'].includes(r.name)
+                        }));
+                    }
+                    renderEvoTable();
+                }, (err) => console.warn('Evo figyelő hiba:', err.code));
+
+                loadCandidates();
+                loadMissions();
+                loadTools();
+                loadToolRequests();
+                loadXpClaims();
+            } else {
+                document.getElementById('loginView').classList.remove('hidden');
+                document.getElementById('dashboardView').classList.add('hidden');
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = "Belépés";
+                }
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -468,7 +559,7 @@
             }
         });
 
-        // 3. JAVÍTÁS: TITKOS FUNKCIONÁLIS SZINTEK (Z, Y, X)
+        // TITKOS SZINTEK (Z, Y, X)
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -495,7 +586,6 @@
             { code: "23", name: "Ökoszisztéma", cat: "Ökoszisztéma", xp: 3850, desc: "Városi hatás" },
             { code: "24", name: "Biodiverzitás", cat: "Ökoszisztéma", xp: 4350, desc: "Fajmentő mentor" },
             { code: "25", name: "Bioszféra", cat: "Ökoszisztéma", xp: 5000, desc: "Legmagasabb elérhető rang" },
-            // TITKOS HÁTTÉR-FUNKCIÓK
             { code: "Z", name: "AZ ARC", cat: "Operatív", xp: 9999, desc: "A Sejt operatív megjelenése és kapcsolattartója.", hidden: true },
             { code: "Y", name: "HOMLOKLEBENY", cat: "Stratégia", xp: 99999, desc: "A háttérben tervező stratégiai mag.", hidden: true },
             { code: "X", name: "A FEJ", cat: "Központ", xp: 999999, desc: "A koordinációs mag. Funkció, nem rang.", hidden: true }
@@ -583,14 +673,14 @@
                 tr.innerHTML = `
                     <td class="p-2 text-center drag-handle text-[#5C735E] hover:text-[#7A9E48] text-base">${r.hidden ? '🔒' : '☰'}</td>
                     <td class="p-2 font-mono font-bold text-[#7A9E48] text-center">${escapeHtml(r.code)}</td>
-                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${escapeHtml(r.name)}" data-field="name" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="text" class="w-full font-bold text-white" value="${escapeHtml(r.name)}" data-field="name" data-idx="${idx}" ${r.hidden ? 'readonly' : ''}></td>
                     <td class="p-2"><input type="text" class="w-full text-[#5C735E]" value="${escapeHtml(r.cat)}" data-field="cat" data-idx="${idx}"></td>
-                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${Number(r.xp)}" data-field="xp" data-idx="${idx}"></td>
+                    <td class="p-2"><input type="number" class="w-20 font-mono text-[#7A9E48]" value="${Number(r.xp)}" data-field="xp" data-idx="${idx}" ${r.hidden ? 'readonly' : ''}></td>
                     <td class="p-2 text-center font-mono">
                         ${count > 0 ? `<span class="px-2 py-0.5 bg-[#1E2F22] text-[#7A9E48] font-bold text-xs">${count} fő</span>` : `<span class="text-[#5C735E] text-xs">0</span>`}
                     </td>
                     <td class="p-2"><input type="text" class="w-full" value="${escapeHtml(r.desc)}" data-field="desc" data-idx="${idx}"></td>
-                    <td class="p-2 text-center"><button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button></td>
+                    <td class="p-2 text-center">${r.hidden ? '-' : `<button class="delete-rank-btn text-red-400 hover:text-red-300 font-bold" data-idx="${idx}">✕</button>`}</td>
                 `;
                 evoTbody.appendChild(tr);
             });
@@ -641,7 +731,6 @@
             });
         }
 
-        // Új normál szint
         document.getElementById('addLevelBtn').addEventListener('click', () => {
             const firstHidden = activeRanks.findIndex(r => r.hidden);
             const at = firstHidden === -1 ? activeRanks.length : firstHidden;
@@ -658,7 +747,6 @@
             renumberRanks();
         });
 
-        // Új titkos szint hozzáadása
         document.getElementById('addSecretLevelBtn').addEventListener('click', () => {
             const code = prompt("Add meg a titkos szint betűjelét (pl. W, V, K):", "W");
             if (!code) return;
@@ -749,7 +837,7 @@
             finally { btn.disabled = false; btn.innerText = "⚡ Publikálás Firestore-ba & Telegramra"; }
         });
 
-        // 1. JAVÍTÁS: KÜLDETÉSEK LISTÁZÁSA + JELENTKEZÉSEK JÓVÁHAGYÁSA
+        // KÜLDETÉSEK LISTÁZÁSA + JELENTKEZÉSEK JÓVÁHAGYÁSA
         function loadMissions() {
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const tbody = document.getElementById('missionsTableBody');
@@ -762,7 +850,6 @@
                     const applicants = m.applicants || [];
                     const attendees = m.attendees || [];
 
-                    // Bírálatra váró jelentkezők
                     let applicantsHtml = '';
                     if (applicants.length > 0) {
                         applicantsHtml = `
@@ -781,7 +868,6 @@
                         `;
                     }
 
-                    // Jóváhagyott résztvevők
                     let attendeesHtml = '';
                     if (attendees.length > 0) {
                         attendeesHtml = `
@@ -820,7 +906,6 @@
                     tbody.appendChild(tr);
                 });
 
-                // Jelentkezés jóváhagyása küldetéshez (applicants -> attendees)
                 tbody.querySelectorAll('.approve-app-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const mid = e.target.dataset.mid;
@@ -862,7 +947,6 @@
                         document.getElementById('editMXp').value = b.xp;
                         document.getElementById('editMCat').value = b.cat;
 
-                        // Eredeti értékek tárolása a Telegram szinkron okos ellenőrzéséhez
                         document.getElementById('origMTitle').value = b.title;
                         document.getElementById('origMDesc').value = b.desc;
                         document.getElementById('origMCat').value = b.cat;
@@ -892,7 +976,7 @@
             }, (err) => console.warn('Küldetés figyelő hiba:', err.code));
         }
 
-        // 2. JAVÍTÁS: Küldetés Módosítás Mentése (Csak akkor posztol Telegramra ha a fő adatok változtak!)
+        // Küldetés Módosítás Mentése
         document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
             const docId = document.getElementById('editMissionDocId').value;
             const tgId = document.getElementById('editMissionTgId').value;
@@ -929,7 +1013,6 @@
 
             await updateDoc(doc(db, "missions", docId), updatePayload);
 
-            // Telegram poszt frissítése KIZÁRÓLAG akkor, ha a nyilvános fő adatok változtak!
             if (mainChanged && tgId) {
                 const tgMsg = `🌱 <b>A FEJ // KÜLDETÉS ${escapeTg(code)} (MÓDOSÍTVA)</b>\n\n<b>${escapeTg(newTitle).toUpperCase()}</b>\nKategória: ${newCat}\nJutalom: +${newXp} XP\n\n${escapeTg(newDesc)}`;
                 await callBackend("/api/telegram-edit", { messageId: tgId, text: tgMsg });
@@ -937,7 +1020,7 @@
 
             document.getElementById('editMissionModal').classList.add('hidden');
             alert(mainChanged 
-                ? "✓ Küldetés és Telegram poszt sikeresen frissítve!" 
+                ? "✓ Küldetés és Telegram poszt frissítve!" 
                 : "✓ Belső operatív eligazítás frissítve (a Telegram poszt változatlan maradt).");
         });
 
@@ -1152,52 +1235,7 @@
             }, (err) => console.warn('XP claim figyelő hiba:', err.code));
         }
 
-        // AUTH & TAGOK
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                if (user.email !== "zoldsejt@gmail.com") {
-                    document.getElementById('loginErrorMsg').textContent = "Hozzáférés megtagadva.";
-                    signOut(auth);
-                    return;
-                }
-
-                document.getElementById('loginView').classList.add('hidden');
-                document.getElementById('dashboardView').classList.remove('hidden');
-                
-                loadWorkerSettings();
-
-                onSnapshot(doc(db, "settings", "evolution"), (snap) => {
-                    if (snap.exists() && snap.data().ranks) {
-                        activeRanks = snap.data().ranks.map(r => ({
-                            ...r,
-                            hidden: r.hidden ?? ['X', 'Y', 'Z', '???', 'A FEJ'].includes(r.code) || ['???', 'A FEJ', 'AZ ARC', 'HOMLOKLEBENY'].includes(r.name)
-                        }));
-                    }
-                    renderEvoTable();
-                }, (err) => console.warn('Evo figyelő hiba:', err.code));
-
-                loadCandidates();
-                loadMissions();
-                loadTools();
-                loadToolRequests();
-                loadXpClaims();
-            } else {
-                document.getElementById('loginView').classList.remove('hidden');
-                document.getElementById('dashboardView').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value.trim(), document.getElementById('adminPass').value);
-            } catch (err) {
-                document.getElementById('loginErrorMsg').textContent = "Sikertelen azonosítás: " + err.message;
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
+        // TAGLISTA ÉS ÉRTESÍTŐ SZÁMLÁLÓK
         function loadCandidates() {
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
@@ -1352,7 +1390,6 @@
                     });
                 });
 
-                // Utasítás küldése és naplózása
                 document.querySelectorAll('.send-msg-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
@@ -1376,7 +1413,6 @@
                     });
                 });
 
-                // Jóváhagyás
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const b = e.target.dataset;
