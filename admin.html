@@ -25,17 +25,39 @@
     </style>
 </head>
 <body class="p-4 md:p-8 max-w-7xl mx-auto">
+
+    <!-- HIBAÜZENET ÉS DIAGNOSZTIKAI SÁV -->
+    <div id="runtimeCrashBox" class="hidden mb-4 p-4 bg-red-950 border border-red-600 text-red-200 text-xs font-mono"></div>
     
     <!-- LOGIN SZEKCIÓ -->
     <div id="loginView" class="max-w-md mx-auto my-20 p-6 bg-[#101912] border border-[#1E2F22] space-y-4">
-        <div class="text-xs uppercase tracking-widest text-[#7A9E48] font-bold text-center">// HÁTTÉR RENDSZER</div>
+        <div class="flex justify-between items-center text-[10px] uppercase tracking-widest font-mono">
+            <span class="text-[#7A9E48] font-bold">// HÁTTÉR RENDSZER</span>
+            <span id="jsStatus" class="text-amber-400">● JS betöltés...</span>
+        </div>
+        
         <h1 class="text-lg font-bold text-white uppercase tracking-wider text-center">A FEJ // AZONOSÍTÁS</h1>
+        
         <form id="loginForm" class="space-y-3" autocomplete="off">
-            <input type="email" id="adminEmail" placeholder="admin e-mail cím" required autocomplete="off" class="w-full">
-            <input type="password" id="adminPass" placeholder="Jelszó" required autocomplete="current-password" class="w-full">
-            <button type="submit" id="loginBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">Belépés</button>
+            <div>
+                <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Admin E-mail</label>
+                <input type="email" id="adminEmail" placeholder="zoldsejt@gmail.com" required autocomplete="off" class="w-full">
+            </div>
+            <div>
+                <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Jelszó</label>
+                <input type="password" id="adminPass" placeholder="••••••••" required autocomplete="current-password" class="w-full">
+            </div>
+            <button type="submit" id="loginBtn" class="w-full py-2.5 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">
+                Belépés
+            </button>
         </form>
+        
         <div id="loginErrorMsg" class="text-xs text-red-400 font-mono text-center min-h-[16px] leading-relaxed"></div>
+        <div id="wrongUserBox" class="hidden text-center pt-2 border-t border-[#1E2F22]">
+            <button id="forceLogoutBtn" type="button" class="text-[11px] text-amber-400 hover:underline">
+                Kijelentkezés a hibás fiókból
+            </button>
+        </div>
     </div>
 
     <!-- ADMIN IRÁNYÍTÓPULT -->
@@ -70,13 +92,11 @@
         <!-- 1. FÜL: TAGOK -->
         <div id="membersTab" class="space-y-6">
             
-            <!-- Függőben lévő XP kérelmek -->
             <div id="claimsSection" class="hidden bg-[#101912] border border-amber-800/60 p-4 space-y-3">
                 <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">// Beérkezett Küldetés-Jóváhagyási Kérelmek („Ott voltam”)</h3>
                 <div id="claimsList" class="space-y-2"></div>
             </div>
 
-            <!-- Fő Tagtáblázat -->
             <div class="overflow-x-auto border border-[#1E2F22]">
                 <table class="w-full text-left text-xs bg-[#101912]">
                     <thead class="bg-[#0B130D] text-[#5C735E] border-b border-[#1E2F22]">
@@ -96,7 +116,6 @@
                 </table>
             </div>
 
-            <!-- Archivált irattár és ranglétra tisztító -->
             <div class="flex flex-wrap justify-between items-center pt-2 gap-2">
                 <button id="toggleArchiveBtn" class="text-[11px] text-[#5C735E] hover:text-[#7A9E48] underline flex items-center space-x-1">
                     <span>📁 Archivált jelentkezések megtekintése (Irattár)</span>
@@ -124,7 +143,6 @@
 
         <!-- 2. FÜL: KÜLDETÉSEK & INFÓK -->
         <div id="missionsTab" class="hidden space-y-6">
-            
             <div class="bg-[#101912] border border-[#1E2F22] p-4 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-bold text-[#7A9E48] uppercase tracking-wider">📢 Hírös Hírnök // Szabad Telegram Közlemény</h3>
@@ -240,7 +258,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: EVOLÚCIÓS XP (X, Y, Z Titkos Szintekkel) -->
+        <!-- 4. FÜL: EVOLÚCIÓS XP -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
@@ -347,11 +365,11 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Nyilvános Leírás</label>
+                    <label class="block text-[10px] text-[#5C735E] uppercase mb-1">Nyilvános Leírás (Telegramon is módosul, ha megváltozik)</label>
                     <textarea id="editMDesc" rows="2" autocomplete="off" class="w-full"></textarea>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás</label>
+                    <label class="block text-[10px] text-amber-400 uppercase mb-1">🔒 Titkos Operatív Eligazítás (Csak a jóváhagyott Sejteknek)</label>
                     <textarea id="editMOperative" rows="3" autocomplete="off" class="w-full border-amber-900/60"></textarea>
                 </div>
             </div>
@@ -375,11 +393,32 @@
         </div>
     </div>
 
+    <!-- HIBAFOGÓ SZKRIPT (AZONNALI VISSZAJELZÉS BÁRMILYEN HIBA ESETÉN) -->
+    <script>
+        window.addEventListener('error', function(e) {
+            var box = document.getElementById('runtimeCrashBox');
+            if (box) {
+                box.classList.remove('hidden');
+                box.innerHTML = '<b>KRITIKUS BETÖLTÉSI HIBA:</b> ' + e.message + ' (' + e.filename + ':' + e.lineno + ')';
+            }
+        });
+        if (window.location.protocol === 'file:') {
+            alert('FIGYELEM: A fájlt közvetlenül a merevlemezről nyitottad meg (file://)!\nA böngészők a helyi fájloknál biztonsági okból blokkolják a Firebase-t.\nKérjük, a GitHub Pages címeden nyisd meg: https://<felhasznaloneved>.github.io/<repo>/admin.html !');
+        }
+    </script>
+
     <!-- Firebase SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, getDocs, writeBatch, runTransaction, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        // JS állapot jelzése a fejlécben
+        const jsStatusEl = document.getElementById('jsStatus');
+        if (jsStatusEl) {
+            jsStatusEl.textContent = "● Rendszer kész (JS aktív)";
+            jsStatusEl.className = "text-emerald-400 font-bold";
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYXkyLiFLCzHwXjaouQFd4VQS-MURlyhg",
@@ -416,7 +455,7 @@
                     WORKER_URL = snap.data().workerUrl || "";
                     ADMIN_SECRET = snap.data().adminSecret || "";
                 }
-            } catch (e) { console.warn(e); }
+            } catch (e) { console.warn("Worker settings load info:", e); }
         }
 
         async function callBackend(endpoint, payload) {
@@ -445,33 +484,62 @@
             }
         }
 
-        // BEJELENTKEZÉS KEZELŐ (Azonnal az elején definiálva!)
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            const errBox = document.getElementById('loginErrorMsg');
+        // ==========================================
+        // BEJELENTKEZÉS KEZELŐ (KŐKEMÉNY, HIBABIZTOS)
+        // ==========================================
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errBox = document.getElementById('loginErrorMsg');
+
+        async function handleAdminLogin(e) {
+            if (e) e.preventDefault();
             errBox.textContent = "";
 
-            const email = document.getElementById('adminEmail').value.trim().toLowerCase();
-            const pass = document.getElementById('adminPass').value;
+            const emailInput = document.getElementById('adminEmail');
+            const passInput = document.getElementById('adminPass');
+
+            const email = (emailInput.value || '').trim().toLowerCase();
+            const pass = passInput.value || '';
 
             if (!email || !pass) {
                 errBox.textContent = "Kérjük, add meg az e-mailt és a jelszót!";
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerText = "AZONOSÍTÁS...";
+            loginBtn.disabled = true;
+            loginBtn.innerText = "AZONOSÍTÁS FOLYAMATBAN...";
 
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
+                // Sikeres belépéskor az onAuthStateChanged átváltja a felületet!
             } catch (err) {
                 console.error("Belépési hiba:", err);
-                errBox.textContent = "Sikertelen azonosítás: Hibás e-mail vagy jelszó!";
-                btn.disabled = false;
-                btn.innerText = "Belépés";
+                let huMsg = "Sikertelen azonosítás: ";
+                if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+                    huMsg += "Hibás e-mail cím vagy jelszó!";
+                } else if (err.code === 'auth/too-many-requests') {
+                    huMsg += "Túl sok próbálkozás. Kérjük, várj pár percet!";
+                } else {
+                    huMsg += err.message;
+                }
+                errBox.textContent = huMsg;
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Belépés";
             }
-        });
+        }
+
+        if (loginForm) loginForm.addEventListener('submit', handleAdminLogin);
+        if (loginBtn) loginBtn.addEventListener('click', handleAdminLogin);
+
+        // Kijelentkezés kényszerítése
+        const forceLogoutBtn = document.getElementById('forceLogoutBtn');
+        if (forceLogoutBtn) {
+            forceLogoutBtn.addEventListener('click', () => {
+                signOut(auth);
+                document.getElementById('wrongUserBox').classList.add('hidden');
+                errBox.textContent = "Kijelentkezve. Most add meg a zoldsejt@gmail.com címet!";
+            });
+        }
 
         // TELEGRAM TESZT
         document.getElementById('testTelegramBtn').addEventListener('click', async () => {
@@ -522,7 +590,6 @@
             { code: "23", name: "Ökoszisztéma", cat: "Ökoszisztéma", xp: 3850, desc: "Városi hatás" },
             { code: "24", name: "Biodiverzitás", cat: "Ökoszisztéma", xp: 4350, desc: "Fajmentő mentor" },
             { code: "25", name: "Bioszféra", cat: "Ökoszisztéma", xp: 5000, desc: "Legmagasabb rang" },
-            // TITKOS FUNKCIONÁLIS SZINTEK
             { code: "Z", name: "AZ ARC", cat: "Operatív", xp: 9999, desc: "A Sejt operatív megjelenése és kapcsolattartója.", hidden: true },
             { code: "Y", name: "HOMLOKLEBENY", cat: "Stratégia", xp: 99999, desc: "A háttérben tervező stratégiai mag.", hidden: true },
             { code: "X", name: "A FEJ", cat: "Központ", xp: 999999, desc: "A koordinációs mag. Funkció, nem rang.", hidden: true }
@@ -774,7 +841,7 @@
             finally { btn.disabled = false; btn.innerText = "⚡ Publikálás Firestore-ba & Telegramra"; }
         });
 
-        // KÜLDETÉSEK LISTÁZÁSA + JELENTKEZÉSEK JÓVÁHAGYÁSA
+        // KÜLDETÉSEK LISTÁZÁSA
         function loadMissions() {
             onSnapshot(query(collection(db, "missions"), orderBy("createdAt", "desc")), (snap) => {
                 const tbody = document.getElementById('missionsTableBody');
@@ -913,7 +980,7 @@
             }, (err) => console.warn('Küldetés figyelő hiba:', err.code));
         }
 
-        // Küldetés Módosítás Mentése (Csak akkor posztol Telegramra ha a fő adatok változtak!)
+        // Küldetés Módosítás Mentése
         document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
             const docId = document.getElementById('editMissionDocId').value;
             const tgId = document.getElementById('editMissionTgId').value;
@@ -1175,12 +1242,14 @@
         // AUTH & TAGOK
         onAuthStateChanged(auth, user => {
             if (user) {
-                if (user.email !== "zoldsejt@gmail.com") {
-                    document.getElementById('loginErrorMsg').textContent = "Hozzáférés megtagadva. Csak A FEJ jogosult a belépésre.";
-                    signOut(auth);
+                const userEmail = (user.email || '').toLowerCase();
+                if (userEmail !== "zoldsejt@gmail.com") {
+                    document.getElementById('loginErrorMsg').innerHTML = "Hozzáférés megtagadva!<br>Ezzel a fiókkal vagy bent: <b>" + escapeHtml(userEmail) + "</b>.<br>Az adminisztrációhoz a <b>zoldsejt@gmail.com</b> fiók szükséges.";
+                    document.getElementById('wrongUserBox').classList.remove('hidden');
                     return;
                 }
 
+                document.getElementById('wrongUserBox').classList.add('hidden');
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dashboardView').classList.remove('hidden');
                 
@@ -1204,9 +1273,8 @@
             } else {
                 document.getElementById('loginView').classList.remove('hidden');
                 document.getElementById('dashboardView').classList.add('hidden');
-                const btn = document.getElementById('loginBtn');
-                btn.disabled = false;
-                btn.innerText = "Belépés";
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Belépés";
             }
         });
 
