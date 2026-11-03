@@ -393,7 +393,7 @@
         </div>
     </div>
 
-    <!-- HIBAFOGÓ SZKRIPT (AZONNALI VISSZAJELZÉS BÁRMILYEN HIBA ESETÉN) -->
+    <!-- DIAGNOSZTIKAI HIBAFOGÓ -->
     <script>
         window.addEventListener('error', function(e) {
             var box = document.getElementById('runtimeCrashBox');
@@ -413,7 +413,7 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, getDocs, writeBatch, runTransaction, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // JS állapot jelzése a fejlécben
+        // JS állapot jelzése
         const jsStatusEl = document.getElementById('jsStatus');
         if (jsStatusEl) {
             jsStatusEl.textContent = "● Rendszer kész (JS aktív)";
@@ -484,9 +484,7 @@
             }
         }
 
-        // ==========================================
-        // BEJELENTKEZÉS KEZELŐ (KŐKEMÉNY, HIBABIZTOS)
-        // ==========================================
+        // BEJELENTKEZÉS KEZELŐ
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
         const errBox = document.getElementById('loginErrorMsg');
@@ -511,7 +509,6 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
-                // Sikeres belépéskor az onAuthStateChanged átváltja a felületet!
             } catch (err) {
                 console.error("Belépési hiba:", err);
                 let huMsg = "Sikertelen azonosítás: ";
@@ -531,7 +528,6 @@
         if (loginForm) loginForm.addEventListener('submit', handleAdminLogin);
         if (loginBtn) loginBtn.addEventListener('click', handleAdminLogin);
 
-        // Kijelentkezés kényszerítése
         const forceLogoutBtn = document.getElementById('forceLogoutBtn');
         if (forceLogoutBtn) {
             forceLogoutBtn.addEventListener('click', () => {
@@ -563,7 +559,7 @@
             }
         });
 
-        // TITKOS SZINTEK (Z, Y, X)
+        // TITKOS SZINTEK
         const DEFAULT_RANKS = [
             { code: "01", name: "Spóra", cat: "Kezdeti állapot", xp: 0, desc: "Csatlakozási kérelem rögzítve" },
             { code: "02", name: "Zöldszemes ostoros", cat: "Kezdeti állapot", xp: 20, desc: "Első mikro-küldetés után" },
@@ -1255,11 +1251,15 @@
                 
                 loadWorkerSettings();
 
+                // 1. JAVÍTÁS: Szintek betöltése zárójelezett szintaxissal (SyntaxError javítva!)
                 onSnapshot(doc(db, "settings", "evolution"), (snap) => {
                     if (snap.exists() && snap.data().ranks) {
                         activeRanks = snap.data().ranks.map(r => ({
                             ...r,
-                            hidden: r.hidden ?? ['X', 'Y', 'Z', '???', 'A FEJ'].includes(r.code) || ['???', 'A FEJ', 'AZ ARC', 'HOMLOKLEBENY'].includes(r.name)
+                            hidden: (typeof r.hidden === 'boolean') ? r.hidden : (
+                                ['X', 'Y', 'Z', '???', 'A FEJ'].includes(r.code) || 
+                                ['???', 'A FEJ', 'AZ ARC', 'HOMLOKLEBENY'].includes(r.name)
+                            )
                         }));
                     }
                     renderEvoTable();
