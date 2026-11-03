@@ -26,11 +26,11 @@
 </head>
 <body class="p-4 md:p-8 max-w-7xl mx-auto">
     
-    <!-- LOGIN SZEKCIÓ (Fizikai újratöltés elleni védelemmel) -->
+    <!-- LOGIN SZEKCIÓ -->
     <div id="loginView" class="max-w-md mx-auto my-20 p-6 bg-[#101912] border border-[#1E2F22] space-y-4">
         <div class="text-xs uppercase tracking-widest text-[#7A9E48] font-bold text-center">// HÁTTÉR RENDSZER</div>
         <h1 class="text-lg font-bold text-white uppercase tracking-wider text-center">A FEJ // AZONOSÍTÁS</h1>
-        <form id="loginForm" onsubmit="event.preventDefault(); return false;" class="space-y-3" autocomplete="off">
+        <form id="loginForm" class="space-y-3" autocomplete="off">
             <input type="email" id="adminEmail" placeholder="admin e-mail cím" required autocomplete="off" class="w-full">
             <input type="password" id="adminPass" placeholder="Jelszó" required autocomplete="current-password" class="w-full">
             <button type="submit" id="loginBtn" class="w-full py-2 bg-[#5A7736] hover:bg-[#7A9E48] text-white text-xs uppercase font-bold tracking-widest transition">Belépés</button>
@@ -240,7 +240,7 @@
             </div>
         </div>
 
-        <!-- 4. FÜL: EVOLÚCIÓS XP -->
+        <!-- 4. FÜL: EVOLÚCIÓS XP (X, Y, Z Titkos Szintekkel) -->
         <div id="evoTab" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#101912] p-4 border border-[#1E2F22] gap-3">
                 <div>
@@ -297,10 +297,6 @@
                     <div class="flex justify-between items-center">
                         <span class="text-[#5C735E]">HÍRVIVŐ BOT:</span>
                         <span class="text-white">Hírös Hírnök</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-[#5C735E]">WORKER STÁTUSZ:</span>
-                        <span id="workerStatusIndicator" class="text-emerald-400 font-bold">✓ AKTÍV</span>
                     </div>
                 </div>
 
@@ -399,94 +395,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 1. BEJELENTKEZÉS KEZELŐJE AZONNAL A LEGELSŐ HELYEN
-        const loginForm = document.getElementById('loginForm');
-        const adminEmailInput = document.getElementById('adminEmail');
-        const adminPassInput = document.getElementById('adminPass');
-        const loginErrorMsg = document.getElementById('loginErrorMsg');
-        const loginBtn = document.getElementById('loginBtn');
-
-        async function handleAdminLogin(e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            const email = adminEmailInput.value.trim().toLowerCase();
-            const pass = adminPassInput.value;
-
-            if (!email || !pass) {
-                loginErrorMsg.className = "text-xs text-red-400 font-mono text-center min-h-[16px]";
-                loginErrorMsg.textContent = "Kérjük töltsd ki mindkét mezőt!";
-                return;
-            }
-
-            loginErrorMsg.className = "text-xs text-amber-400 font-mono text-center min-h-[16px]";
-            loginErrorMsg.textContent = "Azonosítás folyamatban...";
-            if (loginBtn) {
-                loginBtn.disabled = true;
-                loginBtn.innerText = "ELLENŐRZÉS...";
-            }
-
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } catch (err) {
-                loginErrorMsg.className = "text-xs text-red-400 font-mono text-center min-h-[16px]";
-                loginErrorMsg.textContent = "Sikertelen azonosítás: " + err.message;
-                if (loginBtn) {
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "Belépés";
-                }
-            }
-        }
-
-        if (loginForm) {
-            loginForm.addEventListener('submit', handleAdminLogin);
-        }
-
-        // 2. AUTH FIGYELŐ
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                const userEmail = (user.email || '').toLowerCase();
-                if (userEmail !== "zoldsejt@gmail.com") {
-                    loginErrorMsg.className = "text-xs text-red-400 font-mono text-center min-h-[16px]";
-                    loginErrorMsg.textContent = `Hozzáférés megtagadva. (${userEmail} nem admin fiók)`;
-                    signOut(auth);
-                    return;
-                }
-
-                document.getElementById('loginView').classList.add('hidden');
-                document.getElementById('dashboardView').classList.remove('hidden');
-                
-                loadWorkerSettings();
-
-                onSnapshot(doc(db, "settings", "evolution"), (snap) => {
-                    if (snap.exists() && snap.data().ranks) {
-                        activeRanks = snap.data().ranks.map(r => ({
-                            ...r,
-                            hidden: r.hidden ?? ['X', 'Y', 'Z', '???', 'A FEJ'].includes(r.code) || ['???', 'A FEJ', 'AZ ARC', 'HOMLOKLEBENY'].includes(r.name)
-                        }));
-                    }
-                    renderEvoTable();
-                }, (err) => console.warn('Evo figyelő hiba:', err.code));
-
-                loadCandidates();
-                loadMissions();
-                loadTools();
-                loadToolRequests();
-                loadXpClaims();
-            } else {
-                document.getElementById('loginView').classList.remove('hidden');
-                document.getElementById('dashboardView').classList.add('hidden');
-                if (loginBtn) {
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "Belépés";
-                }
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -537,6 +445,34 @@
             }
         }
 
+        // BEJELENTKEZÉS KEZELŐ (Azonnal az elején definiálva!)
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errBox = document.getElementById('loginErrorMsg');
+            errBox.textContent = "";
+
+            const email = document.getElementById('adminEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('adminPass').value;
+
+            if (!email || !pass) {
+                errBox.textContent = "Kérjük, add meg az e-mailt és a jelszót!";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "AZONOSÍTÁS...";
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                console.error("Belépési hiba:", err);
+                errBox.textContent = "Sikertelen azonosítás: Hibás e-mail vagy jelszó!";
+                btn.disabled = false;
+                btn.innerText = "Belépés";
+            }
+        });
+
         // TELEGRAM TESZT
         document.getElementById('testTelegramBtn').addEventListener('click', async () => {
             const btn = document.getElementById('testTelegramBtn');
@@ -585,7 +521,8 @@
             { code: "22", name: "Élőhely", cat: "Ökoszisztéma", xp: 3400, desc: "Komplex projektek" },
             { code: "23", name: "Ökoszisztéma", cat: "Ökoszisztéma", xp: 3850, desc: "Városi hatás" },
             { code: "24", name: "Biodiverzitás", cat: "Ökoszisztéma", xp: 4350, desc: "Fajmentő mentor" },
-            { code: "25", name: "Bioszféra", cat: "Ökoszisztéma", xp: 5000, desc: "Legmagasabb elérhető rang" },
+            { code: "25", name: "Bioszféra", cat: "Ökoszisztéma", xp: 5000, desc: "Legmagasabb rang" },
+            // TITKOS FUNKCIONÁLIS SZINTEK
             { code: "Z", name: "AZ ARC", cat: "Operatív", xp: 9999, desc: "A Sejt operatív megjelenése és kapcsolattartója.", hidden: true },
             { code: "Y", name: "HOMLOKLEBENY", cat: "Stratégia", xp: 99999, desc: "A háttérben tervező stratégiai mag.", hidden: true },
             { code: "X", name: "A FEJ", cat: "Központ", xp: 999999, desc: "A koordinációs mag. Funkció, nem rang.", hidden: true }
@@ -976,7 +913,7 @@
             }, (err) => console.warn('Küldetés figyelő hiba:', err.code));
         }
 
-        // Küldetés Módosítás Mentése
+        // Küldetés Módosítás Mentése (Csak akkor posztol Telegramra ha a fő adatok változtak!)
         document.getElementById('saveEditMissionBtn').addEventListener('click', async () => {
             const docId = document.getElementById('editMissionDocId').value;
             const tgId = document.getElementById('editMissionTgId').value;
@@ -1020,7 +957,7 @@
 
             document.getElementById('editMissionModal').classList.add('hidden');
             alert(mainChanged 
-                ? "✓ Küldetés és Telegram poszt frissítve!" 
+                ? "✓ Küldetés és Telegram poszt sikeresen frissítve!" 
                 : "✓ Belső operatív eligazítás frissítve (a Telegram poszt változatlan maradt).");
         });
 
@@ -1235,7 +1172,46 @@
             }, (err) => console.warn('XP claim figyelő hiba:', err.code));
         }
 
-        // TAGLISTA ÉS ÉRTESÍTŐ SZÁMLÁLÓK
+        // AUTH & TAGOK
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                if (user.email !== "zoldsejt@gmail.com") {
+                    document.getElementById('loginErrorMsg').textContent = "Hozzáférés megtagadva. Csak A FEJ jogosult a belépésre.";
+                    signOut(auth);
+                    return;
+                }
+
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('dashboardView').classList.remove('hidden');
+                
+                loadWorkerSettings();
+
+                onSnapshot(doc(db, "settings", "evolution"), (snap) => {
+                    if (snap.exists() && snap.data().ranks) {
+                        activeRanks = snap.data().ranks.map(r => ({
+                            ...r,
+                            hidden: r.hidden ?? ['X', 'Y', 'Z', '???', 'A FEJ'].includes(r.code) || ['???', 'A FEJ', 'AZ ARC', 'HOMLOKLEBENY'].includes(r.name)
+                        }));
+                    }
+                    renderEvoTable();
+                }, (err) => console.warn('Evo figyelő hiba:', err.code));
+
+                loadCandidates();
+                loadMissions();
+                loadTools();
+                loadToolRequests();
+                loadXpClaims();
+            } else {
+                document.getElementById('loginView').classList.remove('hidden');
+                document.getElementById('dashboardView').classList.add('hidden');
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = false;
+                btn.innerText = "Belépés";
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
         function loadCandidates() {
             onSnapshot(query(collection(db, "candidates"), orderBy("createdAt", "desc")), (snapshot) => {
                 const tbody = document.getElementById('candidatesTable');
